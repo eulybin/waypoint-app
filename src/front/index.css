@@ -10,3 +10,11 @@ body {
 .bg-orange {
   background-color: #ff7a00;
 }
+
+.text-green {
+  color: #3fa34d;
+}
+
+.bg-green {
+  background-color: #3fa34d;
+}
