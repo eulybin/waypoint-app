@@ -11,6 +11,10 @@ body {
   background-color: #ff7a00;
 }
 
+.bg-orange:hover {
+  background-color: #e66a00;
+}
+
 .text-green {
   color: #3fa34d;
 }
