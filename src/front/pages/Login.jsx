@@ -45,13 +45,15 @@ const Login = () => {
                     <div className="flex-grow-1 border-top"></div>
                 </div>
 
-
-
-                <div className="text-center medium">
-                    <Link to="/register" className="text-orange text-decoration-none">
+                <p className="text-center small text-muted">
+                    Don't have an account? &nbsp;
+                    <Link
+                        to="/register"
+                        className="text-orange fw-semibold text-decoration-none"
+                    >
                         Sign up
                     </Link>
-                </div>
+                </p>
             </div>
         </div>
     );
