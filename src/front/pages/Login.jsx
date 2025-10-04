@@ -1,39 +1,54 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Mail, Lock } from "lucide-react";
 
 const Login = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="card shadow-lg p-4" style={{ width: "400px" }}>
-                <h2 className="fw-bold text-green mb-4">Log in</h2>
+            <div className="card shadow-lg p-5 rounded-4" style={{ width: "450px" }}>
+                <h1 className="fw-bold text-green mb-4">Log in</h1>
 
                 <form>
                     <div className="mb-3">
                         <label className="form-label">Email or username</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter your email"
-                        />
+                        <div className="position-relative">
+                            <Mail
+                                className="position-absolute text-muted"
+                                size={20}
+                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                            />
+                            <input
+                                type="text"
+                                className="form-control ps-5 py-2"
+                                placeholder="Enter your email"
+                            />
+                        </div>
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">Password</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            placeholder="Enter your password"
-                        />
+                        <div className="position-relative">
+                            <Lock
+                                className="position-absolute text-muted"
+                                size={20}
+                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                            />
+                            <input
+                                type="password"
+                                className="form-control ps-5 py-2"
+                                placeholder="Enter your password"
+                            />
+                        </div>
                         <div className="text-end mt-1">
-                            <a href="#" className="small text-green">
+                            <Link to="reset-password" className="small text-green text-decoration-none fw-semibold">
                                 Forgot password?
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
                     <button
                         type="submit"
-                        className="btn bg-orange w-100 text-white fw-semibold"
+                        className="btn bg-orange w-100 text-white fw-semibold p-2"
                     >
                         Log in
                     </button>
@@ -59,4 +74,4 @@ const Login = () => {
     );
 }
 
-export default Login
+export default Login;
