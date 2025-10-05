@@ -1,43 +1,65 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { User, Mail, Lock } from "lucide-react";
 
 const Register = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="card shadow-lg p-4" style={{ width: "400px" }}>
-                <h2 className="fw-bold text-green mb-4">Sign up</h2>
+            <div className="card shadow-lg p-5 rounded-4" style={{ width: "450px" }}>
+                <h1 className="fw-bold text-green mb-4">Sign up</h1>
 
                 <form>
                     <div className="mb-3">
-                        <label className="form-label">Name</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter your name"
-                        />
+                        <label className="form-label">Full Name</label>
+                        <div className="position-relative">
+                            <User
+                                className="position-absolute text-muted"
+                                size={20}
+                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                            />
+                            <input
+                                type="text"
+                                className="form-control ps-5 py-2"
+                                placeholder="Enter your name"
+                            />
+                        </div>
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">Email</label>
-                        <input
-                            type="email"
-                            className="form-control"
-                            placeholder="Enter your email"
-                        />
+                        <div className="position-relative">
+                            <Mail
+                                className="position-absolute text-muted"
+                                size={20}
+                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                            />
+                            <input
+                                type="email"
+                                className="form-control ps-5 py-2"
+                                placeholder="Enter your email"
+                            />
+                        </div>
                     </div>
 
-                    <div className="mb-3">
+                    <div className="mb-4">
                         <label className="form-label">Password</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            placeholder="Create a password"
-                        />
+                        <div className="position-relative">
+                            <Lock
+                                className="position-absolute text-muted"
+                                size={20}
+                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                            />
+                            <input
+                                type="password"
+                                className="form-control ps-5 py-2"
+                                placeholder="Create a password"
+                            />
+                        </div>
                     </div>
 
                     <button
                         type="submit"
-                        className="btn bg-orange w-100 text-white fw-semibold"
+                        className="btn bg-orange w-100 text-white fw-semibold p-2"
                     >
                         Sign up
                     </button>
