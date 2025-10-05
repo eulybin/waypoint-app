@@ -40,7 +40,7 @@ const Login = () => {
                             />
                         </div>
                         <div className="text-end mt-1">
-                            <Link to="reset-password" className="small text-green text-decoration-none fw-semibold">
+                            <Link to="/reset-password" className="small text-green text-decoration-none fw-semibold">
                                 Forgot password?
                             </Link>
                         </div>
