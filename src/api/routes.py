@@ -3,11 +3,10 @@ Este módulo maneja todos los endpoints de la API
 Siguiendo tu metodología: lógica en routes, modelos simples
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Route, Vote, UserRole
+from api.models import db, User, Route, Vote, UserRole, bcrypt
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-import bcrypt
 import requests
 import os
 from datetime import datetime
@@ -25,35 +24,51 @@ CORS(api)
 @api.route('/register', methods=['POST'])
 def register():
     try:
+        print("=== INICIO REGISTRO ===")
         data = request.get_json()
+        print(f"Data recibida: {data}")
         
         # Validación básica
         if not data or not data.get('name') or not data.get('email') or not data.get('password'):
+            print("Error: Faltan datos")
             return jsonify({"message": "Faltan datos: name, email, password"}), 400
         
         email = data.get('email')
         password = data.get('password')
         name = data.get('name')
+        print(f"Datos extraídos - Name: {name}, Email: {email}")
 
-        if User.query.filter_by(email=email).first():
+        # Verificar si el usuario ya existe
+        existing_user = User.query.filter_by(email=email).first()
+        print(f"Usuario existente: {existing_user}")
+        if existing_user:
             return jsonify({"message": "El usuario ya existe"}), 400
 
-        # Hashear la password con bcrypt - TU METODOLOGÍA
-        salt = bcrypt.gensalt()
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+        print("Hasheando password...")
+        # Hashear la password con Flask-Bcrypt
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        print("Password hasheada correctamente")
 
+        print("Creando usuario...")
         user = User(
             name=name,
             email=email, 
-            password_hash=hashed_password.decode('utf-8'), 
+            password_hash=hashed_password, 
             role=UserRole.USER,
             is_active=True
         )
+        print("Usuario creado en memoria")
+        
+        print("Agregando a la sesión...")
         db.session.add(user)
+        print("Haciendo commit...")
         db.session.commit()
+        print("Commit exitoso")
 
         # Crear token
+        print("Creando token...")
         token = create_access_token(identity=user.id)
+        print("Token creado")
         
         return jsonify({
             "message": "Usuario registrado exitosamente",
@@ -62,7 +77,11 @@ def register():
         }), 201
         
     except Exception as e:
-        return jsonify({"message": "Error interno del servidor"}), 500
+        print(f"ERROR EN REGISTRO: {str(e)}")
+        print(f"TIPO DE ERROR: {type(e)}")
+        import traceback
+        print(f"TRACEBACK: {traceback.format_exc()}")
+        return jsonify({"message": f"Error interno del servidor: {str(e)}"}), 500
 
 @api.route('/login', methods=['POST'])
 def login():
@@ -78,8 +97,8 @@ def login():
         if not user:
             return jsonify({"message": "Credenciales invalidas"}), 401
 
-        # Verificar la password con bcrypt - TU METODOLOGÍA
-        if not bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        # Verificar la password con Flask-Bcrypt
+        if not bcrypt.check_password_hash(user.password_hash, password):
             return jsonify({"message": "Credenciales invalidas"}), 401
 
         if not user.is_active:
@@ -94,11 +113,24 @@ def login():
 @api.route('/private', methods=['GET'])
 @jwt_required()
 def get_current_user():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    if not user or not user.is_active:
-        return jsonify({"message": "Usuario no encontrado o inactivo"}), 404
-    return jsonify(user.serialize()), 200
+    try:
+        print("=== ENDPOINT PRIVADO ===")
+        user_id = get_jwt_identity()
+        print(f"User ID del token: {user_id}")
+        
+        user = User.query.get(user_id)
+        print(f"Usuario encontrado: {user}")
+        
+        if not user or not user.is_active:
+            print("Usuario no encontrado o inactivo")
+            return jsonify({"message": "Usuario no encontrado o inactivo"}), 404
+            
+        print("Usuario válido, devolviendo datos")
+        return jsonify(user.serialize()), 200
+        
+    except Exception as e:
+        print(f"Error en endpoint privado: {str(e)}")
+        return jsonify({"message": f"Error: {str(e)}"}), 500
 
 
 # RUTAS TURÍSTICAS 

@@ -48,6 +48,13 @@ jwt = JWTManager(app)  # Inicializar JWT
 # CONFIGURAR CORS
 # ============================================================================
 CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # ============================================================================
 # REGISTRAR BLUEPRINTS Y COMANDOS
@@ -59,6 +66,15 @@ app.register_blueprint(api, url_prefix='/api')
 # ============================================================================
 # MANEJO DE ERRORES
 # ============================================================================
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
+
+
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
