@@ -33,9 +33,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # ============================================================================
 # CONFIGURACIÓN JWT - IMPORTANTE PARA AUTENTICACIÓN
 # ============================================================================
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret-key-change-in-production')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # Token no expira (puedes cambiarlo)
-
+# app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret-key-change-in-production')
+# app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # Token no expira (puedes cambiarlo)
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+jwt = JWTManager(app)
 # ============================================================================
 # INICIALIZAR EXTENSIONES
 # ============================================================================
@@ -50,7 +51,7 @@ jwt = JWTManager(app)  # Inicializar JWT
 CORS(app)
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000", "http://127.0.0.1:5000"],
+        "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5001", "http://127.0.0.1:5001"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
     }

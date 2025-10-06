@@ -104,7 +104,7 @@ def login():
         if not user.is_active:
             return jsonify({"message": "Usuario inactivo"}), 401
 
-        token = create_access_token(identity=user.id)
+        token = create_access_token(identity=str(user.id))
         return jsonify({"token": token, "user": user.serialize()}), 200
         
     except Exception as e:
