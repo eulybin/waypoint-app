@@ -344,51 +344,51 @@ def get_user_votes(user_id):
 # APIs EXTERNAS
 
 
-@api.route('/external/weather/<string:city>', methods=['GET'])
-def get_weather(city):
-    # Obtener clima de una ciudad 
-    try:
-        # OpenWeatherMap API (necesitas registrarte gratis en openweathermap.org)
-        api_key = os.getenv('WEATHER_API_KEY')
-        if not api_key:
-            # Datos de ejemplo si no hay API key
-            return jsonify({
-                "city": city,
-                "temperature": 22,
-                "description": "Soleado",
-                "humidity": 65,
-                "message": "Datos de ejemplo - configura WEATHER_API_KEY para datos reales"
-            }), 200
+# @api.route('/external/weather/<string:city>', methods=['GET'])
+# def get_weather(city):
+#     # Obtener clima de una ciudad 
+#     try:
+#         # OpenWeatherMap API (necesitas registrarte gratis en openweathermap.org)
+#         api_key = os.getenv('WEATHER_API_KEY')
+#         if not api_key:
+#             # Datos de ejemplo si no hay API key
+#             return jsonify({
+#                 "city": city,
+#                 "temperature": 22,
+#                 "description": "Soleado",
+#                 "humidity": 65,
+#                 "message": "Datos de ejemplo - configura WEATHER_API_KEY para datos reales"
+#             }), 200
         
-        url = "http://api.openweathermap.org/data/2.5/weather"
-        params = {
-            'q': city,
-            'appid': api_key,
-            'units': 'metric',
-            'lang': 'es'
-        }
+#         url = "http://api.openweathermap.org/data/2.5/weather"
+#         params = {
+#             'q': city,
+#             'appid': api_key,
+#             'units': 'metric',
+#             'lang': 'es'
+#         }
         
-        response = requests.get(url, params=params, timeout=10)
+#         response = requests.get(url, params=params, timeout=10)
         
-        if response.status_code == 200:
-            data = response.json()
-            weather_data = {
-                'city': data['name'],
-                'country': data['sys']['country'],
-                'temperature': data['main']['temp'],
-                'description': data['weather'][0]['description'],
-                'icon': data['weather'][0]['icon'],
-                'humidity': data['main']['humidity'],
-                'wind_speed': data['wind']['speed']
-            }
-            return jsonify(weather_data), 200
-        else:
-            return jsonify({"message": "Ciudad no encontrada"}), 404
+#         if response.status_code == 200:
+#             data = response.json()
+#             weather_data = {
+#                 'city': data['name'],
+#                 'country': data['sys']['country'],
+#                 'temperature': data['main']['temp'],
+#                 'description': data['weather'][0]['description'],
+#                 'icon': data['weather'][0]['icon'],
+#                 'humidity': data['main']['humidity'],
+#                 'wind_speed': data['wind']['speed']
+#             }
+#             return jsonify(weather_data), 200
+#         else:
+#             return jsonify({"message": "Ciudad no encontrada"}), 404
             
-    except requests.RequestException:
-        return jsonify({"message": "Error de conexión con API de clima"}), 500
-    except Exception as e:
-        return jsonify({"message": "Error al obtener clima"}), 500
+#     except requests.RequestException:
+#         return jsonify({"message": "Error de conexión con API de clima"}), 500
+#     except Exception as e:
+#         return jsonify({"message": "Error al obtener clima"}), 500
 
 @api.route('/external/geocode/<string:location>', methods=['GET'])
 def geocode_location(location):
@@ -453,7 +453,7 @@ def admin_get_users():
 @api.route('/admin/routes', methods=['GET'])
 @jwt_required()
 def admin_get_routes():
-    """Obtener todas las rutas con info de admin - solo admin"""
+    # Obtener todas las rutas con info de admin 
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -470,7 +470,7 @@ def admin_get_routes():
 @api.route('/admin/stats', methods=['GET'])
 @jwt_required()
 def admin_get_stats():
-    """Obtener estadísticas generales - solo admin"""
+    #Obtener estadísticas generales 
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
@@ -493,4 +493,16 @@ def admin_get_stats():
     except Exception as e:
         return jsonify({"message": "Error al obtener estadísticas"}), 500
 
-
+@api.route('/hello', methods=['POST', 'GET'])
+def handle_hello():
+    response_body = {
+        "message": "Hello! Travel Routes API is working correctly",
+        "endpoints": {
+            "auth": ["/register", "/login", "/private"],
+            "routes": ["/routes", "/routes/<id>", "/routes/city/<city>", "/routes/top"],
+            "votes": ["/votes", "/votes/route/<id>"],
+            "external": ["/external/weather/<city>", "/external/geocode/<location>"],
+            "admin": ["/admin/users", "/admin/routes", "/admin/stats"]
+        }
+    }
+    return jsonify(response_body), 200
