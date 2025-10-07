@@ -1,7 +1,4 @@
-"""
-Este módulo maneja todos los endpoints de la API
-Siguiendo tu metodología: lógica en routes, modelos simples
-"""
+
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Route, Vote, UserRole, bcrypt
 from api.utils import generate_sitemap, APIException
