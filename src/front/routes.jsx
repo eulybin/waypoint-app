@@ -8,6 +8,11 @@ import { Home } from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
+import Explore from "./pages/Explore"
+import Trending from "./pages/Trending"
+import Popular from "./pages/Popular"
+import Profile from "./pages/Profile"
+import CreateRoute from "./pages/CreateRoute"
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -16,6 +21,12 @@ export const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/explore" element={<Explore />} />
+      <Route path="/trending" element={<Trending />} />
+      <Route path="/popular" element={<Popular />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/create-route" element={<CreateRoute />} />
+
 
     </Route>
   )

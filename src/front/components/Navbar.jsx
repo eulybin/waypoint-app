@@ -22,7 +22,7 @@ const Navbar = () => {
 		// { icon: PlusCircle, label: "Create Route", path: "/create-route" },
 		{ icon: Compass, label: "Explore", path: "/explore" },
 		{ icon: TrendingUp, label: "Trending", path: "/trending" },
-		{ icon: Star, label: "Popular", path: "/top" },
+		{ icon: Star, label: "Popular", path: "/popular" },
 		{ icon: User, label: "Profile", path: "/profile" },
 	];
 
