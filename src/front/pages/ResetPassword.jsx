@@ -1,16 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, UserLock } from "lucide-react";
-import { STANDARD_ICON_SIZE, RESET_PASSWORD_HEADER_ICON_SIZE } from "../utils/constants";
+import { STANDARD_ICON_SIZE, RESET_PASSWORD_HEADER_ICON_SIZE, AUTH_FORM_WIDTH } from "../utils/constants";
 
 const ResetPassword = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="card shadow-lg p-5 rounded-4" style={{ width: "450px" }}>
+            <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
                 <div className="text-center mb-4">
-                    <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3 border-dark"
+                    <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3 border-body"
                         style={{ width: "80px", height: "80px" }}>
-                        <UserLock size={RESET_PASSWORD_HEADER_ICON_SIZE} className="text-dark" />
+                        <UserLock size={RESET_PASSWORD_HEADER_ICON_SIZE} className="text-body" />
                     </div>
                 </div>
 
@@ -52,7 +52,7 @@ const ResetPassword = () => {
                 <div className="pt-2 text-center">
                     <Link
                         to="/login"
-                        className="text-dark fw-semibold text-decoration-none"
+                        className="text-body fw-semibold text-decoration-none"
                     >
                         Back to Login
                     </Link>

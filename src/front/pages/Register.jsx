@@ -1,12 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { User, Mail, Lock } from "lucide-react";
-import { STANDARD_ICON_SIZE } from "../utils/constants";
+import { STANDARD_ICON_SIZE, AUTH_FORM_WIDTH } from "../utils/constants";
 
 const Register = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="card shadow-lg p-5 rounded-4" style={{ width: "450px" }}>
+            <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
                 <h1 className="fw-bold text-green mb-4">Sign up</h1>
 
                 <form>
