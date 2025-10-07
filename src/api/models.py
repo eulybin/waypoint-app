@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from sqlalchemy import String, Boolean, Integer, DateTime, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy import String, Boolean, Integer, Text, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-import datetime 
+from datetime import datetime 
 import enum
 import json
 
@@ -22,7 +22,7 @@ class User(db.Model):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.FREE, nullable=False)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow) 
     
@@ -73,6 +73,47 @@ class Route(db.Model):
                 "total_votes": self.get_total_votes(),
                 "created_at": self.created_at.isoformat() if self.created_at else None
             }
+
+    # Utilities for serialization and stats
+    def get_points_of_interest_list(self):
+        """Devuelve points_of_interest como lista (convierte desde JSON si es necesario)."""
+        try:
+            if not self.points_of_interest:
+                return []
+            if isinstance(self.points_of_interest, list):
+                return self.points_of_interest
+            return json.loads(self.points_of_interest)
+        except Exception:
+            # Si no es JSON válido, devolver el valor tal cual o una lista vacía
+            return []
+
+    def get_coordinates_dict(self):
+        """Devuelve coordinates como dict (convierte desde JSON si es necesario)."""
+        try:
+            if not self.coordinates:
+                return None
+            if isinstance(self.coordinates, dict):
+                return self.coordinates
+            return json.loads(self.coordinates)
+        except Exception:
+            return None
+
+    def get_average_rating(self):
+        """Calcula el rating promedio a partir de los objetos Vote relacionados."""
+        try:
+            if not self.votes or len(self.votes) == 0:
+                return 0.0
+            total = sum([v.rating for v in self.votes if v and v.rating is not None])
+            count = len([v for v in self.votes if v and v.rating is not None])
+            return (total / count) if count > 0 else 0.0
+        except Exception:
+            return 0.0
+
+    def get_total_votes(self):
+        try:
+            return len(self.votes) if self.votes else 0
+        except Exception:
+            return 0
 
 class Vote(db.Model):
   #Permite votar de una a 5 estrellas
