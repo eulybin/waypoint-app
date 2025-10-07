@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
+import { STANDARD_ICON_SIZE } from "../utils/constants";
 
 const Login = () => {
     return (
@@ -14,7 +15,7 @@ const Login = () => {
                         <div className="position-relative">
                             <Mail
                                 className="position-absolute text-muted"
-                                size={20}
+                                size={STANDARD_ICON_SIZE}
                                 style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
                             />
                             <input
@@ -30,7 +31,7 @@ const Login = () => {
                         <div className="position-relative">
                             <Lock
                                 className="position-absolute text-muted"
-                                size={20}
+                                size={STANDARD_ICON_SIZE}
                                 style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
                             />
                             <input
