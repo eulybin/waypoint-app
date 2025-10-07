@@ -1,15 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, UserLock } from "lucide-react";
-import { STANDARD_ICON_SIZE, RESET_PASSWORD_HEADER_ICON_SIZE, AUTH_FORM_WIDTH } from "../utils/constants";
+import { STANDARD_ICON_SIZE, RESET_PASSWORD_HEADER_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION, RESET_PASSWORD_HEADER_ICON_DIV_SIZE } from "../utils/constants";
 
 const ResetPassword = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
             <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
                 <div className="text-center mb-4">
-                    <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3 border-body"
-                        style={{ width: "80px", height: "80px" }}>
+                    <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3"
+                        style={RESET_PASSWORD_HEADER_ICON_DIV_SIZE}>
                         <UserLock size={RESET_PASSWORD_HEADER_ICON_SIZE} className="text-body" />
                     </div>
                 </div>
@@ -25,7 +25,7 @@ const ResetPassword = () => {
                             <Mail
                                 className="position-absolute text-muted"
                                 size={STANDARD_ICON_SIZE}
-                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                style={INPUT_ICON_POSITION}
                             />
                             <input
                                 type="email"
@@ -58,7 +58,7 @@ const ResetPassword = () => {
                     </Link>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

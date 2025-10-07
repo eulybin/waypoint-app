@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
-import { STANDARD_ICON_SIZE, AUTH_FORM_WIDTH } from "../utils/constants";
+import { STANDARD_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION } from "../utils/constants";
 
 const Login = () => {
     return (
@@ -16,7 +16,7 @@ const Login = () => {
                             <Mail
                                 className="position-absolute text-muted"
                                 size={STANDARD_ICON_SIZE}
-                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                style={INPUT_ICON_POSITION}
                             />
                             <input
                                 type="text"
@@ -32,7 +32,7 @@ const Login = () => {
                             <Lock
                                 className="position-absolute text-muted"
                                 size={STANDARD_ICON_SIZE}
-                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                style={INPUT_ICON_POSITION}
                             />
                             <input
                                 type="password"
