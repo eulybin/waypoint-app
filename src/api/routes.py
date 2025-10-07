@@ -104,6 +104,7 @@ def login():
         if not user.is_active:
             return jsonify({"message": "Usuario inactivo"}), 401
 
+        # Usar id como entero para mantener consistencia con el modelo
         token = create_access_token(identity=str(user.id))
         return jsonify({"token": token, "user": user.serialize()}), 200
         
@@ -115,7 +116,8 @@ def login():
 def get_current_user():
     try:
         print("=== ENDPOINT PRIVADO ===")
-        user_id = get_jwt_identity()
+        # Normalizar a entero: el identity debe ser el id del usuario
+        user_id = int(get_jwt_identity())
         print(f"User ID del token: {user_id}")
         
         user = User.query.get(user_id)
@@ -150,7 +152,8 @@ def get_all_routes():
 def create_route():
     # Crear nueva ruta
     try:
-        user_id = get_jwt_identity()
+        # Asegurarse de que user_id sea entero
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         # Validación
@@ -176,7 +179,13 @@ def create_route():
         }), 201
         
     except Exception as e:
-        return jsonify({"message": "Error al crear ruta"}), 500
+        # Log detallado para depuración
+        import traceback
+        tb = traceback.format_exc()
+        print("ERROR al crear ruta:", str(e))
+        print(tb)
+        # En entorno de desarrollo puede ser útil devolver la traza
+        return jsonify({"message": "Error al crear ruta", "error": str(e), "traceback": tb}), 500
 
 @api.route('/routes/<int:route_id>', methods=['GET'])
 def get_route_detail(route_id):
@@ -194,7 +203,7 @@ def get_route_detail(route_id):
 def update_route(route_id):
     """Actualizar ruta - solo el autor"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         route = Route.query.get(route_id)
         
         if not route:
@@ -233,7 +242,7 @@ def update_route(route_id):
 def delete_route(route_id):
     """Eliminar ruta - solo autor o admin"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         route = Route.query.get(route_id)
         
@@ -304,7 +313,7 @@ def get_top_routes():
 def vote_route():
     #Votar por una ruta (1-5 estrellas)
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         data = request.get_json()
         
         if not data or not data.get('route_id') or not data.get('rating'):
@@ -359,7 +368,7 @@ def get_route_votes(route_id):
 def get_user_votes(user_id):
     #Obtener votos de un usuario - solo el propio usuario o admin
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         current_user = User.query.get(current_user_id)
         
         # Verificar permisos
@@ -470,7 +479,7 @@ def geocode_location(location):
 def admin_get_users():
     """Obtener todos los usuarios - solo admin"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user or user.role != UserRole.ADMIN:
@@ -487,7 +496,7 @@ def admin_get_users():
 def admin_get_routes():
     # Obtener todas las rutas con info de admin 
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user or user.role != UserRole.ADMIN:
@@ -504,7 +513,7 @@ def admin_get_routes():
 def admin_get_stats():
     #Obtener estadísticas generales 
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get(user_id)
         
         if not user or user.role != UserRole.ADMIN:
