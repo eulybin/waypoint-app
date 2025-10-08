@@ -26,6 +26,16 @@ const Navbar = () => {
 		{ icon: User, label: "Profile", path: "/profile" },
 	];
 
+	const handleRenderNavbarItems = (item, index) => {
+		const NavbarIcon = item.icon;
+		return (
+			<Link key={index} to={item.path} className="d-flex align-items-center gap-3 text-decoration-none text-body p-3 rounded-3 mb-2 sidebar-item">
+				<NavbarIcon size={NAVBAR_ICON_SIZE} />
+				<span className="semi-bold">{item.label}</span>
+			</Link>
+		);
+	}
+
 	const handleShowAppearance = () => {
 		setShowAppearance(prevState => !prevState)
 		setShowMoreMenu(false)
@@ -87,19 +97,9 @@ const Navbar = () => {
 					<h3 className="fw-bold text-body mt-4 ms-2">Waypoint</h3>
 				</Link>
 			</div>
-
 			<nav className="flex-grow-1 p-3">
-				{navbarItems.map((item, index) => (
-					<Link
-						key={index}
-						to={item.path}
-						className="d-flex align-items-center gap-3 text-decoration-none text-body p-3 rounded-3 mb-2 sidebar-item"
-					>
-						<item.icon size={NAVBAR_ICON_SIZE} />
-						<span className="fw-semibold">{item.label}</span>
-					</Link>
-				))}
-
+				{/* MAP THROUGH THE NAVBAR ITEMS */}
+				{navbarItems.map(handleRenderNavbarItems)}
 				<div className="position-relative rounded-3">
 					<button
 						onClick={() => setShowMoreMenu(prevState => !prevState)}
