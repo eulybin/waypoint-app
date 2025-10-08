@@ -24,7 +24,7 @@ export const AUTH_FORM_WIDTH = '450px';
 
 //----------- FONT SIZES -----------
 
-export const CREATE_ROUTE_FONT_SIZE = '1.2rem';
+export const CREATE_ROUTE_FONT_SIZE = '1.1rem';
 
 //----------- BACKGROUNDS -----------
 
