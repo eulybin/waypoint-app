@@ -1,12 +1,8 @@
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import ReportProblemModal from "../components/Modals/ReportModal.jsx";
+import { useState, useRef } from "react";
 
 export const Home = () => {
-
-	const { store, dispatch } = useGlobalReducer()
-
 	return (
-		<div className="text-center mt-5">
-			<h1>Home</h1>
-		</div>
+		<h1 className="text-center pt-5">Home Component</h1>
 	);
 }; 

@@ -1,11 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { User, Mail, Lock } from "lucide-react";
+import { STANDARD_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION } from "../utils/constants";
 
 const Register = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="card shadow-lg p-5 rounded-4" style={{ width: "450px" }}>
+            <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
                 <h1 className="fw-bold text-green mb-4">Sign up</h1>
 
                 <form>
@@ -14,8 +15,8 @@ const Register = () => {
                         <div className="position-relative">
                             <User
                                 className="position-absolute text-muted"
-                                size={20}
-                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                size={STANDARD_ICON_SIZE}
+                                style={INPUT_ICON_POSITION}
                             />
                             <input
                                 type="text"
@@ -30,8 +31,8 @@ const Register = () => {
                         <div className="position-relative">
                             <Mail
                                 className="position-absolute text-muted"
-                                size={20}
-                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                size={STANDARD_ICON_SIZE}
+                                style={INPUT_ICON_POSITION}
                             />
                             <input
                                 type="email"
@@ -46,8 +47,8 @@ const Register = () => {
                         <div className="position-relative">
                             <Lock
                                 className="position-absolute text-muted"
-                                size={20}
-                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                size={STANDARD_ICON_SIZE}
+                                style={INPUT_ICON_POSITION}
                             />
                             <input
                                 type="password"

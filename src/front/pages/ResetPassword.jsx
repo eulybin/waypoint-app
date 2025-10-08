@@ -1,15 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, UserLock } from "lucide-react";
+import { STANDARD_ICON_SIZE, RESET_PASSWORD_HEADER_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION, RESET_PASSWORD_HEADER_ICON_DIV_SIZE } from "../utils/constants";
 
 const ResetPassword = () => {
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="card shadow-lg p-5 rounded-4" style={{ width: "450px" }}>
+            <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
                 <div className="text-center mb-4">
-                    <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3 border-dark"
-                        style={{ width: "80px", height: "80px" }}>
-                        <UserLock size={40} className="text-dark" />
+                    <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3"
+                        style={RESET_PASSWORD_HEADER_ICON_DIV_SIZE}>
+                        <UserLock size={RESET_PASSWORD_HEADER_ICON_SIZE} className="text-body" />
                     </div>
                 </div>
 
@@ -23,8 +24,8 @@ const ResetPassword = () => {
                         <div className="position-relative">
                             <Mail
                                 className="position-absolute text-muted"
-                                size={20}
-                                style={{ left: "12px", top: "50%", transform: "translateY(-50%)" }}
+                                size={STANDARD_ICON_SIZE}
+                                style={INPUT_ICON_POSITION}
                             />
                             <input
                                 type="email"
@@ -44,20 +45,20 @@ const ResetPassword = () => {
 
                 <div className="d-flex align-items-center my-3">
                     <div className="flex-grow-1 border-top"></div>
-                    <span className="mx-3 text-muted small fw-semibold">OR</span>
+                    <span className="mx-3 text-muted small">or</span>
                     <div className="flex-grow-1 border-top"></div>
                 </div>
 
                 <div className="pt-2 text-center">
                     <Link
                         to="/login"
-                        className="text-dark fw-semibold text-decoration-none"
+                        className="text-body fw-semibold text-decoration-none"
                     >
                         Back to Login
                     </Link>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

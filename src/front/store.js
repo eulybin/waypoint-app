@@ -1,9 +1,20 @@
+export const actionTypes = {
+  TOGGLE_DARK_MODE: 'TOGGLE_DARK_MODE',
+};
+
 export const initialStore = () => {
-  return {};
+  const localStorageDarkMode = localStorage.getItem('isDarkMode');
+
+  return {
+    isDarkMode: localStorageDarkMode ? JSON.parse(localStorageDarkMode) : false,
+  };
 };
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
+    case actionTypes.TOGGLE_DARK_MODE:
+      return { ...store, isDarkMode: !store.isDarkMode };
+
     default:
       throw Error('Unknown action.');
   }

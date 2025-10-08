@@ -1,3 +1,17 @@
+:root[data-bs-theme='dark'] {
+  --bs-body-bg: #121212;
+  --bs-body-color: #e0e0e0;
+  --bs-border-color: #969696;
+}
+
+:root {
+  --app-border-accent: #212529 !important;
+}
+
+:root[data-bs-theme='dark'] {
+  --app-border-accent: #969696 !important;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
@@ -21,4 +35,20 @@ body {
 
 .bg-green {
   background-color: #3fa34d;
+}
+
+.bg-green:hover {
+  background-color: #349040;
+}
+
+[data-bs-theme='light'] .sidebar-item:hover {
+  background-color: #dadada !important;
+}
+
+[data-bs-theme='dark'] .sidebar-item:hover {
+  background-color: #3d3d3d !important;
+}
+
+.logout-item:hover {
+  background-color: #ff5858 !important;
 }
