@@ -111,7 +111,7 @@ const Navbar = () => {
 
 					<Link
 						to="/create-route"
-						className="btn bg-green text-white rounded-3 w-100 fw-bold py-3 mt-3 d-flex align-items-center justify-content-center gap-2"
+						className="btn bg-orange text-white rounded-3 w-100 fw-bold py-3 mt-3 d-flex align-items-center justify-content-center gap-2"
 						style={{ fontSize: CREATE_ROUTE_FONT_SIZE }}
 					>
 						<MapPinPlus size={NAVBAR_ICON_SIZE} />
