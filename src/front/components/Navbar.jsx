@@ -52,6 +52,14 @@ const Navbar = () => {
 		setAttachedFile(null)
 	}
 
+	const handleAttachFileOnChange = (e) => {
+		const file = e.target.files[0];
+		if (file) {
+			setAttachedFile(file);
+		}
+
+	}
+
 	const handleSubmitReport = async () => {
 		const formData = new FormData()
 		formData.append("description", description)
@@ -202,12 +210,7 @@ const Navbar = () => {
 												accept="image/*,application/pdf"
 												style={{ display: "none" }}
 												ref={attachFileInputRef}
-												onChange={(e) => {
-													const file = e.target.files[0];
-													if (file) {
-														setAttachedFile(file);
-													}
-												}}
+												onChange={(e) => handleAttachFileOnChange(e)}
 											/>
 											<button
 												type="button"
