@@ -1,17 +1,13 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Home, Compass, User, TrendingUp, Star, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning, CircleCheck } from "lucide-react";
+import { Home, Compass, User, TrendingUp, Star, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning } from "lucide-react";
 import useGlobalReducer from "../hooks/useGlobalReducer"
 import { actionTypes } from "../store";
-import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE, MODAL_BACKGROUND, HEADER_ICON_SIZE } from "../utils/constants";
-import ReportProblemModal from "./Modals/ReportModal";
+import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE } from "../utils/constants";
+import ReportProblemModal from "./Modals/ReportProblemModal";
 import ThankYouModal from "./Modals/ThankYouModal";
 
 const Navbar = () => {
-
-	// ------------------------------
-	// -------- NAVBAR LOGIC --------
-	// ------------------------------
 
 	const { store, dispatch } = useGlobalReducer()
 
@@ -46,48 +42,11 @@ const Navbar = () => {
 		setShowMoreMenu(false)
 	}
 
-	// ------------------------------
-	// ----- REPORT MODAL LOGIC -----
-	// ------------------------------
 
-	const attachFileInputRef = useRef(null);
+	// -------- MODAL LOGIC --------
 
 	const [showReportModal, setShowReportModal] = useState(false)
-	const [description, setDescription] = useState("")
-	const [attachedFile, setAttachedFile] = useState(null)
-
-	const handleCloseReportModal = () => {
-		setShowReportModal(false)
-		setDescription("")
-		setAttachedFile(null)
-	}
-
-	const handleAttachFileOnChange = (e) => {
-		const file = e.target.files[0];
-		if (file) {
-			setAttachedFile(file);
-		}
-
-	}
-
-	const handleSubmitReport = async () => {
-		const formData = new FormData()
-		formData.append("description", description)
-		if (attachedFile) {
-			formData.append("attachedFile", attachedFile)
-		}
-		// --- NEED TO WRITE THIS SERVICE ---
-		// EXAMPLE: await sendProblemReport()
-		handleCloseReportModal()
-		setShowThankYouModal(true)
-	}
-
-	// -------------------------------
-	// ---- THANK YOU MODAL LOGIC ----
-	// -------------------------------
-
 	const [showThankYouModal, setShowThankYouModal] = useState(false)
-
 
 	return (
 		<div className="d-flex flex-column bg-body border-end vh-100 position-fixed" style={{ width: NAVBAR_WIDTH, zIndex: 1000 }}>
@@ -172,104 +131,18 @@ const Navbar = () => {
 							</div>
 						</div>
 					)}
-
-					<ReportProblemModal>
-						{showReportModal && (
-							<div className="modal d-block" style={{ backgroundColor: MODAL_BACKGROUND }}>
-								<div className="modal-dialog modal-dialog-centered">
-									<div className="modal-content rounded-4">
-										<div className="modal-header border-0 pb-0">
-											<h5 className="modal-title fw-bold">Report a problem</h5>
-											<button
-												type="button"
-												className="btn-close"
-												onClick={handleCloseReportModal}
-											></button>
-										</div>
-
-										<div className="modal-body">
-											<div className="mb-3">
-												<label className="form-label fw-semibold">Description</label>
-												<textarea
-													onChange={(e) => setDescription(e.target.value)}
-													value={description}
-													className="form-control"
-													rows="4"
-													placeholder="Please describe the problem..."
-												></textarea>
-											</div>
-											{attachedFile && (
-												<div className="small text-body mt-2 ms-1">
-													<strong>Attached:</strong> {attachedFile.name}
-												</div>
-											)}
-										</div>
-
-										<div className="modal-footer border-0 d-flex align-items-center justify-content-between">
-											<button
-												type="button"
-												className="btn btn-secondary"
-												onClick={() => attachFileInputRef.current.click()}
-											>
-												Attach file
-											</button>
-											<input
-												type="file"
-												accept="image/*,application/pdf"
-												style={{ display: "none" }}
-												ref={attachFileInputRef}
-												onChange={(e) => handleAttachFileOnChange(e)}
-											/>
-											<button
-												type="button"
-												className="btn bg-green text-white"
-												onClick={handleSubmitReport}
-											>
-												Submit
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-						)}
-					</ReportProblemModal>
-					<ThankYouModal>
-						{showThankYouModal && (
-							<div className="modal d-block" style={{ backgroundColor: MODAL_BACKGROUND }}>
-								<div className="modal-dialog modal-dialog-centered">
-									<div className="modal-content rounded-4">
-										<div className="modal-header border-0 pb-2">
-											<button
-												type="button"
-												className="btn-close ms-auto"
-												onClick={() => setShowThankYouModal(false)}
-											></button>
-										</div>
-
-										<div className="modal-body text-center py-4">
-											<CircleCheck size={HEADER_ICON_SIZE} color="#3fa34d" />
-											<h2 className="fw-bold mb-3 display-6 mt-3">Thank you!</h2>
-											<p className="text-muted mb-0">
-												Your report has been submitted successfully. We'll get back to you soon.
-											</p>
-										</div>
-
-										<div className="modal-footer border-0 justify-content-center pb-4">
-											<button
-												type="button"
-												className="btn btn-secondary text-white px-4"
-												onClick={() => setShowThankYouModal(false)}
-											>
-												Close
-											</button>
-										</div>
-									</div>
-								</div>
-							</div>
-						)}
-					</ThankYouModal>
 				</div>
 			</nav >
+			{showReportModal && (
+				<ReportProblemModal
+					onClose={() => setShowReportModal(false)}
+					onSuccess={() => {
+						setShowReportModal(false);
+						setShowThankYouModal(true);
+					}}
+				/>
+			)}
+			{showThankYouModal && <ThankYouModal onClose={() => setShowThankYouModal(false)} />}
 		</div >
 	);
 };
