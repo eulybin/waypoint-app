@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Home, PlusCircle, Compass, User, TrendingUp, Star, Menu, Sun, Moon, Flag, LogOut, MapPinPlus } from "lucide-react";
+import { Home, Compass, User, TrendingUp, Star, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning } from "lucide-react";
 import useGlobalReducer from "../hooks/useGlobalReducer"
 import { actionTypes } from "../store";
 import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE, MODAL_BACKGROUND } from "../utils/constants";
@@ -108,7 +108,7 @@ const Navbar = () => {
 								onClick={handleShowAppearance}
 								className="d-flex align-items-center gap-3 text-body p-3 border-bottom w-100 border-0 bg-transparent text-start sidebar-item rounded-top-3"
 							>
-								<Sun size={STANDARD_ICON_SIZE} />
+								<Moon size={STANDARD_ICON_SIZE} />
 								<span>Appearance</span>
 							</button>
 							<button
@@ -116,7 +116,7 @@ const Navbar = () => {
 								className="d-flex align-items-center gap-3 text-body p-3 border-bottom w-100 border-0 bg-transparent text-start sidebar-item"
 
 							>
-								<Flag size={STANDARD_ICON_SIZE} />
+								<MessageSquareWarning size={STANDARD_ICON_SIZE} />
 								<span>Report a Problem</span>
 							</button>
 							<button
