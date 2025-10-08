@@ -1,5 +1,7 @@
 //----------- ICONS -----------
 
+export const NAVBAR_LOGO_SIZE = '48';
+
 export const NAVBAR_ICON_SIZE = 24;
 
 export const STANDARD_ICON_SIZE = 20;
