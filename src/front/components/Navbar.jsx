@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Home, Compass, User, TrendingUp, Star, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning } from "lucide-react";
+import { Home, Compass, User, TrendingUp, Star, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning, CircleCheck } from "lucide-react";
 import useGlobalReducer from "../hooks/useGlobalReducer"
 import { actionTypes } from "../store";
-import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE, MODAL_BACKGROUND } from "../utils/constants";
+import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE, MODAL_BACKGROUND, HEADER_ICON_SIZE } from "../utils/constants";
 import ReportProblemModal from "./Modals/ReportModal";
+import ThankYouModal from "./Modals/ThankYouModal";
 
 const Navbar = () => {
 
@@ -19,7 +20,6 @@ const Navbar = () => {
 
 	const navbarItems = [
 		{ icon: Home, label: "Home", path: "/" },
-		// { icon: PlusCircle, label: "Create Route", path: "/create-route" },
 		{ icon: Compass, label: "Explore", path: "/explore" },
 		{ icon: TrendingUp, label: "Trending", path: "/trending" },
 		{ icon: Star, label: "Popular", path: "/popular" },
@@ -61,7 +61,15 @@ const Navbar = () => {
 		// --- NEED TO WRITE THIS SERVICE ---
 		// EXAMPLE: await sendProblemReport()
 		handleCloseReportModal()
+		setShowThankYouModal(true)
 	}
+
+	// -------------------------------
+	// ---- THANK YOU MODAL LOGIC ----
+	// -------------------------------
+
+	const [showThankYouModal, setShowThankYouModal] = useState(false)
+
 
 	return (
 		<div className="d-flex flex-column bg-body border-end vh-100 position-fixed" style={{ width: NAVBAR_WIDTH, zIndex: 1000 }}>
@@ -221,9 +229,42 @@ const Navbar = () => {
 								</div>
 							</div>
 						)}
-
-
 					</ReportProblemModal>
+					<ThankYouModal>
+						{showThankYouModal && (
+							<div className="modal d-block" style={{ backgroundColor: MODAL_BACKGROUND }}>
+								<div className="modal-dialog modal-dialog-centered">
+									<div className="modal-content rounded-4">
+										<div className="modal-header border-0 pb-2">
+											<button
+												type="button"
+												className="btn-close ms-auto"
+												onClick={() => setShowThankYouModal(false)}
+											></button>
+										</div>
+
+										<div className="modal-body text-center py-4">
+											<CircleCheck size={HEADER_ICON_SIZE} color="#3fa34d" />
+											<h2 className="fw-bold mb-3 display-6 mt-3">Thank you!</h2>
+											<p className="text-muted mb-0">
+												Your report has been submitted successfully. We'll get back to you soon.
+											</p>
+										</div>
+
+										<div className="modal-footer border-0 justify-content-center pb-4">
+											<button
+												type="button"
+												className="btn btn-secondary text-white px-4"
+												onClick={() => setShowThankYouModal(false)}
+											>
+												Close
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						)}
+					</ThankYouModal>
 				</div>
 			</nav >
 		</div >
