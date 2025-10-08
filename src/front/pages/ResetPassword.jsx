@@ -5,7 +5,7 @@ import { STANDARD_ICON_SIZE, HEADER_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSIT
 
 const ResetPassword = () => {
     return (
-        <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+        <div className="d-flex justify-content-center align-items-center vh-100 bg-body">
             <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
                 <div className="text-center mb-4">
                     <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3"
