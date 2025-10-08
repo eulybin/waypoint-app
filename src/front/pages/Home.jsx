@@ -1,5 +1,4 @@
-import ReportProblemModal from "../components/Modals/ReportModal.jsx";
-import { useState, useRef } from "react";
+import React from "react"
 
 export const Home = () => {
 	return (
