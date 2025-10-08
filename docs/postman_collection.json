@@ -2,7 +2,7 @@
   "info": {
     "name": "TravelRoutes API - Local",
     "_postman_id": "d0a1c6d2-0000-4000-8000-000000000000",
-    "description": "Colección para probar endpoints: register, login, private y routes (localhost:3001)",
+    "description": "Colección para probar endpoints: register, login, profile y routes (localhost:3001)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -32,9 +32,7 @@
         },
         "url": {
           "raw": "{{baseUrl}}/register",
-          "host": [
-            "{{baseUrl}}/register"
-          ]
+          "host": ["{{baseUrl}}/register"]
         }
       },
       "response": []
@@ -55,9 +53,7 @@
         },
         "url": {
           "raw": "{{baseUrl}}/login",
-          "host": [
-            "{{baseUrl}}/login"
-          ]
+          "host": ["{{baseUrl}}/login"]
         }
       },
       "event": [
@@ -85,7 +81,7 @@
       "response": []
     },
     {
-      "name": "Private (GET /private)",
+      "name": "profile (GET /profile)",
       "request": {
         "method": "GET",
         "header": [
@@ -95,10 +91,8 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/private",
-          "host": [
-            "{{baseUrl}}/private"
-          ]
+          "raw": "{{baseUrl}}/profile",
+          "host": ["{{baseUrl}}/profile"]
         }
       },
       "response": []
@@ -110,9 +104,7 @@
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/routes",
-          "host": [
-            "{{baseUrl}}/routes"
-          ]
+          "host": ["{{baseUrl}}/routes"]
         }
       },
       "response": []

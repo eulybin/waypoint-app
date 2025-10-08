@@ -11,8 +11,6 @@ import json
 
 # AUTENTICACIÓN Y USUARIOS
 
-
-
 def register():
     try:
         print("=== INICIO REGISTRO ===")
@@ -61,16 +59,11 @@ def register():
         db.session.commit()
         print("Commit exitoso")
 
-        # Crear token
-        print("Creando token...")
-        token = create_access_token(identity=user.id)
-        print("Token creado")
 
         return (
             jsonify(
                 {
                     "message": "Usuario registrado exitosamente",
-                    "token": token,
                     "user": user.serialize(),
                 }
             ),
@@ -99,14 +92,12 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if not user:
-            return jsonify({"message": "Credenciales invalidas"}), 401
+            return jsonify({"message": "Email no encontrado"}), 401
 
         # Verificar la password con Flask-Bcrypt
         if not bcrypt.check_password_hash(user.password_hash, password):
-            return jsonify({"message": "Credenciales invalidas"}), 401
+            return jsonify({"message": "Contraseña incorrecta"}), 401
 
-        if not user.is_active:
-            return jsonify({"message": "Usuario inactivo"}), 401
 
         # Usar id como entero para mantener consistencia con el modelo
         token = create_access_token(identity=str(user.id))
