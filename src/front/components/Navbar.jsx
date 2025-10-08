@@ -19,12 +19,21 @@ const Navbar = () => {
 
 	const navbarItems = [
 		{ icon: Home, label: "Home", path: "/" },
-		// { icon: PlusCircle, label: "Create Route", path: "/create-route" },
 		{ icon: Compass, label: "Explore", path: "/explore" },
 		{ icon: TrendingUp, label: "Trending", path: "/trending" },
 		{ icon: Star, label: "Popular", path: "/popular" },
 		{ icon: User, label: "Profile", path: "/profile" },
 	];
+
+	const handleRenderNavbarItems = (item, index) => {
+		const NavbarIcon = item.icon;
+		return (
+			<Link key={index} to={item.path} className="d-flex align-items-center gap-3 text-decoration-none text-body p-3 rounded-3 mb-2 sidebar-item">
+				<NavbarIcon size={NAVBAR_ICON_SIZE} />
+				<span className="semi-bold">{item.label}</span>
+			</Link>
+		);
+	}
 
 	const handleShowAppearance = () => {
 		setShowAppearance(prevState => !prevState)
@@ -52,6 +61,14 @@ const Navbar = () => {
 		setAttachedFile(null)
 	}
 
+	const handleAttachFileOnChange = (e) => {
+		const file = e.target.files[0];
+		if (file) {
+			setAttachedFile(file);
+		}
+
+	}
+
 	const handleSubmitReport = async () => {
 		const formData = new FormData()
 		formData.append("description", description)
@@ -71,19 +88,9 @@ const Navbar = () => {
 					<h3 className="fw-bold text-body mt-4 ms-2">Waypoint</h3>
 				</Link>
 			</div>
-
 			<nav className="flex-grow-1 p-3">
-				{navbarItems.map((item, index) => (
-					<Link
-						key={index}
-						to={item.path}
-						className="d-flex align-items-center gap-3 text-decoration-none text-body p-3 rounded-3 mb-2 sidebar-item"
-					>
-						<item.icon size={NAVBAR_ICON_SIZE} />
-						<span className="fw-semibold">{item.label}</span>
-					</Link>
-				))}
-
+				{/* MAP THROUGH THE NAVBAR ITEMS */}
+				{navbarItems.map(handleRenderNavbarItems)}
 				<div className="position-relative rounded-3">
 					<button
 						onClick={() => setShowMoreMenu(prevState => !prevState)}
@@ -95,7 +102,7 @@ const Navbar = () => {
 
 					<Link
 						to="/create-route"
-						className="btn bg-green text-white w-100 rounded-3 fw-bold py-3 mt-3 d-flex align-items-center justify-content-center gap-2"
+						className="btn bg-green text-white rounded-3 w-100 fw-bold py-3 mt-3 d-flex align-items-center justify-content-center gap-2"
 						style={{ fontSize: CREATE_ROUTE_FONT_SIZE }}
 					>
 						<MapPinPlus size={NAVBAR_ICON_SIZE} />
@@ -202,12 +209,7 @@ const Navbar = () => {
 												accept="image/*,application/pdf"
 												style={{ display: "none" }}
 												ref={attachFileInputRef}
-												onChange={(e) => {
-													const file = e.target.files[0];
-													if (file) {
-														setAttachedFile(file);
-													}
-												}}
+												onChange={(e) => handleAttachFileOnChange(e)}
 											/>
 											<button
 												type="button"
