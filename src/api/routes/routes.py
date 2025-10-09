@@ -69,54 +69,18 @@ def delete_route(route_id):
 
 @api.route("/routes/city/<string:city>", methods=["GET"])
 def get_routes_by_city(city):
-    # Obtener rutas por ciudad
-    try:
-        routes = (
-            Route.query.filter_by(city=city).order_by(Route.created_at.desc()).all()
-        )
-        return jsonify([route.serialize() for route in routes]), 200
-    except Exception as e:
-        return jsonify({"message": "Error al obtener rutas por ciudad"}), 500
-
+ # Obtener rutas por ciudad
+   return api_map.get_routes_by_city(city)
 
 @api.route("/routes/user/<int:user_id>", methods=["GET"])
 def get_routes_by_user(user_id):
     # Obtener rutas de un usuario específico
-    try:
-        routes = (
-            Route.query.filter_by(user_id=user_id)
-            .order_by(Route.created_at.desc())
-            .all()
-        )
-        return jsonify([route.serialize() for route in routes]), 200
-    except Exception as e:
-        return jsonify({"message": "Error al obtener rutas del usuario"}), 500
-
+    return api_map.get_routes_by_user(user_id)
 
 @api.route("/routes/top", methods=["GET"])
 def get_top_routes():
     # Obtener top rutas por rating
-    try:
-        routes = Route.query.all()
-
-        # Calcular rating y ordenar
-        routes_with_rating = []
-        for route in routes:
-            avg_rating = route.get_average_rating()
-            total_votes = route.get_total_votes()
-            if total_votes > 0:  # Solo rutas con votos
-                routes_with_rating.append((route, avg_rating, total_votes))
-
-        # Ordenar por rating promedio y número de votos
-        routes_with_rating.sort(key=lambda x: (x[1], x[2]), reverse=True)
-
-        # Tomar top 10
-        top_routes = [route[0].serialize() for route in routes_with_rating[:10]]
-
-        return jsonify(top_routes), 200
-
-    except Exception as e:
-        return jsonify({"message": "Error al obtener top rutas"}), 500
+    return api_map.get_top_routes()
 
 
 # SISTEMA DE VOTACIÓN
