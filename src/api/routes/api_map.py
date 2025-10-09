@@ -154,3 +154,6 @@ def delete_route(route_id):
 
     except Exception as e:
         return jsonify({"message": "Error al eliminar ruta"}), 500
+
+
+
