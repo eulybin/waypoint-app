@@ -3,18 +3,23 @@
 ## ⚙️ Configuración Inicial
 
 ### Variables de Postman
+
 Crea estas variables en tu colección:
+
 - `baseUrl` = `http://localhost:3001/api`
 - `token` = (se llenará automáticamente)
 - `adminToken` = (se llenará automáticamente)
 
 ### Configuración de Headers
+
 Para todos los requests con Body JSON:
+
 ```
 Content-Type: application/json
 ```
 
 Para requests protegidos:
+
 ```
 Authorization: Bearer {{token}}
 ```
@@ -26,6 +31,7 @@ Authorization: Bearer {{token}}
 ### 📝 Registrar Usuario Normal
 
 **Endpoint:** `POST /api/register`
+
 ```http
 POST {{baseUrl}}/register
 Content-Type: application/json
@@ -38,6 +44,7 @@ Content-Type: application/json
 ```
 
 **Respuesta esperada (201):**
+
 ```json
 {
   "message": "Usuario registrado exitosamente",
@@ -55,6 +62,7 @@ Content-Type: application/json
 ### 👑 Crear Usuario Administrador
 
 **Endpoint:** `POST /api/create-admin`
+
 ```http
 POST {{baseUrl}}/create-admin
 Content-Type: application/json
@@ -67,12 +75,13 @@ Content-Type: application/json
 ```
 
 **Respuesta esperada (201):**
+
 ```json
 {
   "message": "Usuario ADMIN creado exitosamente",
   "user": {
     "id": 2,
-    "name": "Admin Sistema", 
+    "name": "Admin Sistema",
     "email": "admin@test.com",
     "role": "admin",
     "is_active": true,
@@ -84,6 +93,7 @@ Content-Type: application/json
 ### 🚪 Login (Usuarios y Admins)
 
 **Endpoint:** `POST /api/login`
+
 ```http
 POST {{baseUrl}}/login
 Content-Type: application/json
@@ -95,30 +105,33 @@ Content-Type: application/json
 ```
 
 **Script de Test (pestaña Tests):**
+
 ```javascript
 if (pm.response.code === 200) {
-    const body = pm.response.json();
-    if (body.token) {
-        pm.collectionVariables.set('token', body.token);
-        console.log('Token guardado exitosamente');
-    }
+  const body = pm.response.json();
+  if (body.token) {
+    pm.collectionVariables.set("token", body.token);
+    console.log("Token guardado exitosamente");
+  }
 }
 ```
 
 **Para Admin, guarda en variable separada:**
+
 ```javascript
 if (pm.response.code === 200) {
-    const body = pm.response.json();
-    if (body.token) {
-        pm.collectionVariables.set('adminToken', body.token);
-        console.log('Token de admin guardado');
-    }
+  const body = pm.response.json();
+  if (body.token) {
+    pm.collectionVariables.set("adminToken", body.token);
+    console.log("Token de admin guardado");
+  }
 }
 ```
 
 ### 👤 Ver Perfil
 
 **Endpoint:** `GET /api/profile`
+
 ```http
 GET {{baseUrl}}/profile
 Authorization: Bearer {{token}}
@@ -243,6 +256,7 @@ Content-Type: application/json
 ```
 
 **Validaciones automáticas:**
+
 - ✅ Rating debe ser entre 1 y 5
 - ✅ No puedes votar tu propia ruta
 - ✅ Solo puedes votar una vez (o actualizar tu voto)
@@ -299,6 +313,7 @@ Authorization: Bearer {{adminToken}}
 ```
 
 **Respuesta esperada:**
+
 ```json
 {
   "total_users": 5,
@@ -348,12 +363,14 @@ description=Problema de prueba para testing
 ### ✅ Casos Válidos
 
 #### Registro y Login Exitoso
+
 1. Crear usuario normal con `/register`
-2. Crear admin con `/create-admin` 
+2. Crear admin con `/create-admin`
 3. Login de ambos usuarios
 4. Verificar roles en `/profile`
 
 #### Sistema de Votación
+
 1. Usuario A crea ruta
 2. Usuario B vota la ruta (rating: 1-5)
 3. Verificar voto en `/votes/route/ID`
@@ -363,6 +380,7 @@ description=Problema de prueba para testing
 ### ❌ Casos de Error
 
 #### Votación - Rating Inválido
+
 ```http
 POST {{baseUrl}}/votes
 Authorization: Bearer {{token}}
@@ -373,9 +391,11 @@ Content-Type: application/json
   "rating": 0
 }
 ```
+
 **Error esperado:** `400 - "Rating debe ser entre 1 y 5"`
 
 #### Votación - Sin Rating
+
 ```http
 POST {{baseUrl}}/votes
 Authorization: Bearer {{token}}
@@ -385,18 +405,22 @@ Content-Type: application/json
   "route_id": 1
 }
 ```
+
 **Error esperado:** `400 - "route_id y rating son requeridos"`
 
 #### Votación - Propia Ruta
+
 1. Usuario crea ruta
 2. Mismo usuario intenta votar su ruta
-**Error esperado:** `400 - "No puedes votar por tu propia ruta"`
+   **Error esperado:** `400 - "No puedes votar por tu propia ruta"`
 
 #### Admin - Usuario Normal sin Permisos
+
 ```http
 GET {{baseUrl}}/admin/stats
 Authorization: Bearer {{token}}
 ```
+
 **Error esperado:** `403 - "Acceso denegado"`
 
 ---
@@ -404,17 +428,20 @@ Authorization: Bearer {{token}}
 ## 🎯 8. FLUJO COMPLETO DE PRUEBAS
 
 ### Paso 1: Configuración Inicial
+
 1. ✅ Verificar servidor: `GET /hello`
 2. ✅ Crear admin: `POST /create-admin`
 3. ✅ Login admin: `POST /login` (guardar como adminToken)
 
-### Paso 2: Usuarios y Rutas  
+### Paso 2: Usuarios y Rutas
+
 4. ✅ Crear usuario normal: `POST /register`
 5. ✅ Login usuario: `POST /login` (guardar como token)
 6. ✅ Usuario crea ruta: `POST /routes`
 7. ✅ Verificar ruta: `GET /routes`
 
 ### Paso 3: Sistema de Votación
+
 8. ✅ Crear segundo usuario: `POST /register`
 9. ✅ Login segundo usuario: `POST /login`
 10. ✅ Usuario 2 vota ruta: `POST /votes` (rating: 5)
@@ -423,11 +450,13 @@ Authorization: Bearer {{token}}
 13. ✅ Verificar cambio: `GET /votes/route/1`
 
 ### Paso 4: Funciones Admin
+
 14. ✅ Admin ve stats: `GET /admin/stats`
 15. ✅ Admin ve usuarios: `GET /admin/users`
 16. ✅ Admin ve rutas: `GET /admin/routes`
 
 ### Paso 5: Validaciones de Error
+
 17. ❌ Usuario vota propia ruta (debe fallar)
 18. ❌ Rating inválido: 0, 6, -1 (debe fallar)
 19. ❌ Usuario normal accede admin (debe fallar)
@@ -437,18 +466,21 @@ Authorization: Bearer {{token}}
 ## 📋 9. CONFIGURACIÓN POSTMAN PASO A PASO
 
 ### Headers Configuration
+
 1. Abre Postman
 2. Ve a Headers tab
 3. Agrega: `Content-Type: application/json`
 4. Para requests protegidos: `Authorization: Bearer {{token}}`
 
 ### Body Configuration
+
 1. Selecciona "Body" tab
 2. Marca "raw"
 3. En dropdown selecciona "JSON"
 4. Pega el JSON del ejemplo
 
 ### Variables Setup
+
 1. Ve a Variables tab de tu collection
 2. Crea variables:
    - `baseUrl`: `http://localhost:3001/api`
@@ -456,25 +488,28 @@ Authorization: Bearer {{token}}
    - `adminToken`: (vacío inicialmente)
 
 ### Test Scripts
+
 Para automatizar el guardado de tokens, usa estos scripts en la pestaña "Tests":
 
 **Para login normal:**
+
 ```javascript
 if (pm.response.code === 200) {
-    const body = pm.response.json();
-    if (body.token) {
-        pm.collectionVariables.set('token', body.token);
-    }
+  const body = pm.response.json();
+  if (body.token) {
+    pm.collectionVariables.set("token", body.token);
+  }
 }
 ```
 
 **Para login admin:**
+
 ```javascript
 if (pm.response.code === 200) {
-    const body = pm.response.json();
-    if (body.token) {
-        pm.collectionVariables.set('adminToken', body.token);
-    }
+  const body = pm.response.json();
+  if (body.token) {
+    pm.collectionVariables.set("adminToken", body.token);
+  }
 }
 ```
 
@@ -483,22 +518,26 @@ if (pm.response.code === 200) {
 ## ⚠️ 10. NOTAS IMPORTANTES
 
 ### Diferencias Clave
+
 - 📝 **`/register`:** Solo usuarios normales (`role: "user"`)
 - 👑 **`/create-admin`:** Solo administradores (`role: "admin"`)
 - 🔐 **`/login`:** Mismo endpoint para ambos tipos
 
 ### Headers Críticos
+
 - ✅ Siempre incluir `Content-Type: application/json`
 - ✅ Tokens en formato `Bearer {{variable}}`
 - ✅ Verificar que headers estén activados (checkbox)
 
 ### Troubleshooting
+
 - **Error 415:** Falta `Content-Type: application/json`
 - **Error 401:** Token faltante o inválido
 - **Error 403:** Usuario sin permisos (no admin)
 - **Error 500:** Problema de servidor (revisar logs)
 
 ### Orden Recomendado
+
 1. Crear admin PRIMERO
 2. Probar funciones admin
 3. Crear usuarios normales
@@ -510,6 +549,7 @@ if (pm.response.code === 200) {
 ## 🚀 11. COMANDOS RÁPIDOS
 
 ### Crear Admin
+
 ```http
 POST http://localhost:3001/api/create-admin
 Content-Type: application/json
@@ -518,6 +558,7 @@ Content-Type: application/json
 ```
 
 ### Crear Usuario
+
 ```http
 POST http://localhost:3001/api/register
 Content-Type: application/json
@@ -526,6 +567,7 @@ Content-Type: application/json
 ```
 
 ### Login
+
 ```http
 POST http://localhost:3001/api/login
 Content-Type: application/json
@@ -534,6 +576,7 @@ Content-Type: application/json
 ```
 
 ### Votar
+
 ```http
 POST http://localhost:3001/api/votes
 Authorization: Bearer TOKEN
