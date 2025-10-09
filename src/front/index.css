@@ -52,3 +52,7 @@ body {
 .logout-item:hover {
   background-color: #ff5858 !important;
 }
+
+.search-input:hover {
+  background-color: var(--bs-secondary-bg);
+}
