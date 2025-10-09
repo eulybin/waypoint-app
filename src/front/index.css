@@ -18,15 +18,15 @@ body {
 }
 
 .text-orange {
-  color: #ff7a00;
+  color: #f36011;
 }
 
 .bg-orange {
-  background-color: #ff7a00;
+  background-color: #f36011;
 }
 
 .bg-orange:hover {
-  background-color: #e66a00;
+  background-color: #dc5208;
 }
 
 .text-green {
