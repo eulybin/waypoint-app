@@ -1,10 +1,14 @@
-// (POST) Send Report a Problem Form Data to Backend
-export const reportProblem = async (formDataObj, signal) => {
+// (POST) register a new user
+export const registerUser = async (newUserObject, signal) => {
   const requestOptions = {
     method: 'POST',
-    body: formDataObj,
+    body: JSON.stringify(newUserObject),
+    headers: {
+      'Content-Type': 'application/json',
+    },
     signal,
   };
+
   try {
     const response = await fetch('url', requestOptions);
     let data;
@@ -14,14 +18,14 @@ export const reportProblem = async (formDataObj, signal) => {
       data = { message: 'Server returned invalid JSON.' };
     }
     if (!response.ok) {
-      throw new Error(data.message || 'Could not send the form data from Report a Problem modal.');
+      throw new Error(data.message || 'Could not register the user.');
     }
     return data;
   } catch (error) {
     if (error.name === 'AbortError') {
       console.warn('The request was aborted by the user or it timed out.');
     }
-    console.error('Error in reportProblem:', error);
+    console.error('Error in registerUser:', error);
     throw error;
   }
 };
