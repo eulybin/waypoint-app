@@ -24,6 +24,8 @@ export const NAVBAR_CHILD_DIV_WIDTH = '220px';
 
 export const AUTH_FORM_WIDTH = '450px';
 
+export const SEARCH_BAR_MAX_WIDTH = '600px';
+
 //----------- FONT SIZES -----------
 
 export const CREATE_ROUTE_FONT_SIZE = '1.1rem';
@@ -31,3 +33,7 @@ export const CREATE_ROUTE_FONT_SIZE = '1.1rem';
 //----------- BACKGROUNDS -----------
 
 export const MODAL_BACKGROUND = 'rgba(0,0,0,0.5)';
+
+//----------- IMAGES ----------------
+
+export const BRAND_NAME_SVG_HEIGHT = '90';
