@@ -6,6 +6,8 @@ export const NAVBAR_ICON_SIZE = 24;
 
 export const STANDARD_ICON_SIZE = 20;
 
+export const HIDE_OR_SHOW_PASSWORD_ICON_SIZE = 18;
+
 export const HEADER_ICON_SIZE = 40;
 
 export const RESET_PASSWORD_HEADER_ICON_DIV_SIZE = {
