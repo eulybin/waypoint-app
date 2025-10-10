@@ -1,12 +1,7 @@
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Route, Vote, UserRole, bcrypt
-from api.utils import generate_sitemap, APIException
-from flask_cors import CORS
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-import requests
-import os
-from datetime import datetime
-import json
+from flask import Flask, request, jsonify
+from api.models import db, User, Route, Vote, UserRole
+from flask_jwt_extended import get_jwt_identity
+
 
 def vote_route():
     # Votar por una ruta (1-5 estrellas)

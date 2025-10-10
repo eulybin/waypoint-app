@@ -7,7 +7,7 @@ import requests
 import os
 from datetime import datetime
 import json
-from api.routes import register_login, profile, api_map, votes, coordinates
+from api.routes import register_login, profile, api_map, votes, coordinates, admin_user
 
 api = Blueprint("api", __name__)
 
@@ -89,6 +89,11 @@ def get_top_routes():
 
 # SISTEMA DE VOTACIÓN
 
+@api.route("/external/geocode/<string:location>", methods=["GET"])
+def geocode_location(location):
+    # Obtener coordenadas de una ubicación
+    return coordinates.geocode_location(location)
+
 
 @api.route("/votes", methods=["POST"])
 @jwt_required()
@@ -108,6 +113,9 @@ def get_route_votes(route_id):
 def get_user_votes(user_id):
     # Obtener votos de un usuario - solo el propio usuario o admin
     return votes.get_user_votes(user_id)
+
+
+
 
 # APIs EXTERNAS
 
@@ -159,10 +167,6 @@ def get_user_votes(user_id):
 #         return jsonify({"message": "Error al obtener clima"}), 500
 
 
-@api.route("/external/geocode/<string:location>", methods=["GET"])
-def geocode_location(location):
-    # Obtener coordenadas de una ubicación
-    return coordinates.geocode_location(location)
 
 
 # ADMINISTRACIÓN - Solo para admins
@@ -172,68 +176,21 @@ def geocode_location(location):
 @jwt_required()
 def admin_get_users():
     """Obtener todos los usuarios - solo admin"""
-    try:
-        user_id = int(get_jwt_identity())
-        user = User.query.get(user_id)
-
-        if not user or user.role != UserRole.ADMIN:
-            return jsonify({"message": "Acceso denegado"}), 403
-
-        users = User.query.order_by(User.created_at.desc()).all()
-        return jsonify([user.serialize() for user in users]), 200
-
-    except Exception as e:
-        return jsonify({"message": "Error al obtener usuarios"}), 500
+    return admin_user.admin_get_users()
 
 
 @api.route("/admin/routes", methods=["GET"])
 @jwt_required()
 def admin_get_routes():
     # Obtener todas las rutas con info de admin
-    try:
-        user_id = int(get_jwt_identity())
-        user = User.query.get(user_id)
-
-        if not user or user.role != UserRole.ADMIN:
-            return jsonify({"message": "Acceso denegado"}), 403
-
-        routes = Route.query.order_by(Route.created_at.desc()).all()
-        return jsonify([route.serialize() for route in routes]), 200
-
-    except Exception as e:
-        return jsonify({"message": "Error al obtener rutas"}), 500
+    return admin_user.admin_get_routes()
 
 
 @api.route("/admin/stats", methods=["GET"])
 @jwt_required()
 def admin_get_stats():
     # Obtener estadísticas generales
-    try:
-        user_id = int(get_jwt_identity())
-        user = User.query.get(user_id)
-
-        if not user or user.role != UserRole.ADMIN:
-            return jsonify({"message": "Acceso denegado"}), 403
-
-        total_users = User.query.count()
-        total_routes = Route.query.count()
-        total_votes = Vote.query.count()
-        active_users = User.query.filter_by(is_active=True).count()
-
-        return (
-            jsonify(
-                {
-                    "total_users": total_users,
-                    "total_routes": total_routes,
-                    "total_votes": total_votes,
-                    "active_users": active_users,
-                }
-            ),
-            200,
-        )
-
-    except Exception as e:
-        return jsonify({"message": "Error al obtener estadísticas"}), 500
+    return admin_user.admin_get_stats()
 
 
 @api.route("/hello", methods=["POST", "GET"])
