@@ -7,7 +7,7 @@ import requests
 import os
 from datetime import datetime
 import json
-from api.routes import register_login, profile, api_map, votes, coordinates, admin_user
+from api.routes import register_login, profile, api_map, route_report_problem, votes, coordinates, admin_user
 
 api = Blueprint("api", __name__)
 
@@ -193,6 +193,13 @@ def admin_get_stats():
     return admin_user.admin_get_stats()
 
 
+@api.route("/admin/users/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+def delete_user(user_id):
+    '''Éliminar usuario - solo admin'''
+    return admin_user.delete_user(user_id)
+
+
 @api.route("/hello", methods=["POST", "GET"])
 def handle_hello():
     response_body = {
@@ -208,23 +215,8 @@ def handle_hello():
     return jsonify(response_body), 200
 
 
-# ROUTE FOR REPORT PROBLEM MODAL
+
 @api.route("/report", methods=["POST"])
 def report_problem():
-    try:
-        description = request.form.get("description")
-        attached_file = request.files.get("attachedFile")
-
-        if not description:
-            return jsonify({"error": "Description is required"}), 400
-
-        # build the email with smtplib library here:
-        pass
-
-        # attach the file if it is present
-        if attached_file:
-            pass
-
-    except Exception as e:
-        print("There was an error in /report route:", e)
-        return jsonify({"error": "Failed to send the report."}), 500
+    """Reportar un problema o enviar feedback"""
+    return route_report_problem.report_problem()
