@@ -36,4 +36,4 @@ export const MODAL_BACKGROUND = 'rgba(0,0,0,0.5)';
 
 //----------- IMAGES ----------------
 
-export const BRAND_NAME_SVG_HEIGHT = '90';
+// export const BRAND_NAME_SVG_HEIGHT = '90';

@@ -8,7 +8,7 @@ export const initialStore = () => {
   return {
     isDarkMode: localStorageDarkMode ? JSON.parse(localStorageDarkMode) : false,
     // TEMPORARY SOLUTION to component render based on whether a user has logged in or not
-    userIsLoggedIn: true,
+    userIsLoggedIn: false,
   };
 };
 

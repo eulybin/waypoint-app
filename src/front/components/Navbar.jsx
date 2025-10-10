@@ -6,6 +6,8 @@ import { actionTypes } from "../store";
 import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE } from "../utils/constants";
 import ReportProblemModal from "./Modals/ReportProblemModal";
 import ThankYouModal from "./Modals/ThankYouModal";
+import brandNameLight from "../assets/brand-name-light.svg"
+import brandNameDark from "../assets/brand-name-dark.svg"
 
 const Navbar = () => {
 
@@ -27,7 +29,7 @@ const Navbar = () => {
 		return (
 			<Link key={index} to={item.path} className="d-flex align-items-center gap-3 text-decoration-none text-body p-3 rounded-3 mb-2 sidebar-item">
 				<NavbarIcon size={NAVBAR_ICON_SIZE} />
-				<span className="semi-bold">{item.label}</span>
+				<span className="fw-semibold">{item.label}</span>
 			</Link>
 		);
 	}
@@ -52,8 +54,20 @@ const Navbar = () => {
 		<div className="d-flex flex-column bg-body border-end vh-100 position-fixed" style={{ width: NAVBAR_WIDTH, zIndex: 1000 }}>
 
 			<div className="p-4">
-				<Link to="/" className="text-decoration-none">
-					<h3 className="fw-bold text-body mt-4 ms-2">Waypoint</h3>
+				<Link to="/" className="text-decoration-none d-inline-block mt-3">
+					{store.isDarkMode ? (
+						<img
+							src={brandNameDark}
+							alt="Waypoint Brand Name"
+							className="img-fluid"
+						/>
+					) : (
+						<img
+							src={brandNameLight}
+							alt="Waypoint Brand Name"
+							className="img-fluid"
+						/>
+					)}
 				</Link>
 			</div>
 			<nav className="flex-grow-1 p-3">
