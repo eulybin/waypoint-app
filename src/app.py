@@ -9,7 +9,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from api.utils import APIException, generate_sitemap
 from api.models import db, bcrypt
-from api.routes import api
+from api.routes.routes import api
 # from api.admin import setup_admin  # TODO: Crear este archivo
 # from api.commands import setup_commands  # TODO: Crear este archivo
 
