@@ -32,7 +32,8 @@ const Register = () => {
     const handleRegisterUser = async (e) => {
         e.preventDefault()
 
-        //SET-UP INPUT VALIDATION HERE...
+        //SET-UP INPUT VALIDATION HERE:
+        //.......
 
         if (abortControllerRef.current) {
             abortControllerRef.current.abort()
