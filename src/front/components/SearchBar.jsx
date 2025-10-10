@@ -2,7 +2,7 @@ import brandNameLight from "../assets/brand-name-light.svg"
 import brandNameDark from "../assets/brand-name-dark.svg"
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { Search } from "lucide-react";
-import { STANDARD_ICON_SIZE, INPUT_ICON_POSITION, BRAND_NAME_SVG_HEIGHT, SEARCH_BAR_MAX_WIDTH } from "../utils/constants";
+import { STANDARD_ICON_SIZE, INPUT_ICON_POSITION, SEARCH_BAR_MAX_WIDTH } from "../utils/constants";
 
 const SearchBar = () => {
 
@@ -15,14 +15,12 @@ const SearchBar = () => {
                     <img
                         src={brandNameDark}
                         alt="Waypoint Brand Name"
-                        height={BRAND_NAME_SVG_HEIGHT}
                         className="img-fluid"
                     />
                 ) : (
                     <img
                         src={brandNameLight}
                         alt="Waypoint Brand Name"
-                        height={BRAND_NAME_SVG_HEIGHT}
                         className="img-fluid"
                     />
                 )}
@@ -35,7 +33,7 @@ const SearchBar = () => {
                 />
                 <input
                     type="text"
-                    className="form-control ps-5 py-2 rounded-pill shadow-sm border search-input"
+                    className="form-control ps-5 py-2 rounded-pill shadow-sm border-2 search-input"
                     placeholder="Search for a city"
                 />
             </div>

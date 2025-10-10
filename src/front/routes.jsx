@@ -26,8 +26,6 @@ export const router = createBrowserRouter(
       <Route path="/popular" element={<Popular />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/create-route" element={<CreateRoute />} />
-
-
     </Route>
   )
 );
