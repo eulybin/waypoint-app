@@ -1,7 +1,14 @@
 import React from "react"
+import SearchBar from "../components/SearchBar";
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const Home = () => {
+
+	const { store } = useGlobalReducer()
+
 	return (
-		<h1 className="text-center pt-5">Home Component</h1>
+		<>
+			{store.userIsLoggedIn ? <div className="text-center pt-5 display-1">Home Component</div> : <SearchBar />}
+		</>
 	);
 }; 
