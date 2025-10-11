@@ -33,7 +33,7 @@ const SearchBar = () => {
                 />
                 <input
                     type="text"
-                    className="form-control ps-5 py-2 rounded-pill shadow-sm border-2 search-input"
+                    className="form-control ps-5 py-2 rounded-pill shadow-sm border search-input"
                     placeholder="Search for a city"
                 />
             </div>

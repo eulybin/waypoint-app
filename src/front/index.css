@@ -56,3 +56,17 @@ body {
 .search-input:hover {
   background-color: var(--bs-secondary-bg);
 }
+
+.btn.bg-orange:disabled {
+  background-color: #f36011 !important;
+  border-color: #f36011 !important;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.btn.bg-green:disabled {
+  background-color: #3fa34d !important;
+  border-color: #3fa34d !important;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
