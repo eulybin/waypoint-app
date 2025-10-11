@@ -63,3 +63,10 @@ body {
   opacity: 0.75;
   cursor: not-allowed;
 }
+
+.btn.bg-green:disabled {
+  background-color: #3fa34d !important;
+  border-color: #3fa34d !important;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
