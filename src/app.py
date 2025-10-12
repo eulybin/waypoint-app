@@ -2,6 +2,7 @@
 This file is the entry point of your application
 """
 import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
@@ -10,6 +11,9 @@ from flask_jwt_extended import JWTManager
 from api.utils import APIException, generate_sitemap
 from api.models import db, bcrypt
 from api.routes.routes import api
+
+# Cargar variables de entorno desde .env
+load_dotenv()
 # from api.admin import setup_admin  # TODO: Crear este archivo
 # from api.commands import setup_commands  # TODO: Crear este archivo
 
