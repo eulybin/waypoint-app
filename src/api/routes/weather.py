@@ -1,12 +1,7 @@
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Route, Vote, UserRole, bcrypt
-from api.utils import generate_sitemap, APIException
-from flask_cors import CORS
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask import jsonify
 import requests
-import os
 from datetime import datetime
-import json
+
 
 def get_weather(city):
     """Obtener información del clima usando wttr.in API (100% gratuita, sin API key)"""
