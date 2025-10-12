@@ -29,6 +29,12 @@ body {
   background-color: #dc5208;
 }
 
+.bg-orange:focus-visible {
+  background-color: #f36011;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 4px rgb(198, 221, 254);
+}
+
 .text-green {
   color: #3fa34d;
 }
