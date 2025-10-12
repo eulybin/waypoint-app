@@ -7,7 +7,7 @@ import requests
 import os
 from datetime import datetime
 import json
-from api.routes import register_login, profile, api_map, votes, coordinates, admin_user
+from api.routes import register_login, profile, api_map, route_report_problem, votes, coordinates, admin_user, weather
 
 api = Blueprint("api", __name__)
 
@@ -114,61 +114,6 @@ def get_user_votes(user_id):
     # Obtener votos de un usuario - solo el propio usuario o admin
     return votes.get_user_votes(user_id)
 
-
-
-
-# APIs EXTERNAS
-
-
-# @api.route('/external/weather/<string:city>', methods=['GET'])
-# def get_weather(city):
-#     # Obtener clima de una ciudad
-#     try:
-#         # OpenWeatherMap API (necesitas registrarte gratis en openweathermap.org)
-#         api_key = os.getenv('WEATHER_API_KEY')
-#         if not api_key:
-#             # Datos de ejemplo si no hay API key
-#             return jsonify({
-#                 "city": city,
-#                 "temperature": 22,
-#                 "description": "Soleado",
-#                 "humidity": 65,
-#                 "message": "Datos de ejemplo - configura WEATHER_API_KEY para datos reales"
-#             }), 200
-
-#         url = "http://api.openweathermap.org/data/2.5/weather"
-#         params = {
-#             'q': city,
-#             'appid': api_key,
-#             'units': 'metric',
-#             'lang': 'es'
-#         }
-
-#         response = requests.get(url, params=params, timeout=10)
-
-#         if response.status_code == 200:
-#             data = response.json()
-#             weather_data = {
-#                 'city': data['name'],
-#                 'country': data['sys']['country'],
-#                 'temperature': data['main']['temp'],
-#                 'description': data['weather'][0]['description'],
-#                 'icon': data['weather'][0]['icon'],
-#                 'humidity': data['main']['humidity'],
-#                 'wind_speed': data['wind']['speed']
-#             }
-#             return jsonify(weather_data), 200
-#         else:
-#             return jsonify({"message": "Ciudad no encontrada"}), 404
-
-#     except requests.RequestException:
-#         return jsonify({"message": "Error de conexión con API de clima"}), 500
-#     except Exception as e:
-#         return jsonify({"message": "Error al obtener clima"}), 500
-
-
-
-
 # ADMINISTRACIÓN - Solo para admins
 
 
@@ -193,6 +138,20 @@ def admin_get_stats():
     return admin_user.admin_get_stats()
 
 
+@api.route("/admin/users/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+def delete_user(user_id):
+    '''Éliminar usuario - solo admin'''
+    return admin_user.delete_user(user_id)
+
+# REPORTES
+@api.route("/report", methods=["POST"])
+def report_problem():
+    """Reportar un problema o enviar feedback"""
+    return route_report_problem.report_problem()
+
+
+
 @api.route("/hello", methods=["POST", "GET"])
 def handle_hello():
     response_body = {
@@ -208,23 +167,10 @@ def handle_hello():
     return jsonify(response_body), 200
 
 
-# ROUTE FOR REPORT PROBLEM MODAL
-@api.route("/report", methods=["POST"])
-def report_problem():
-    try:
-        description = request.form.get("description")
-        attached_file = request.files.get("attachedFile")
+# APIS EXTERNAS
+@api.route('/external/weather/<string:city>', methods=['GET'])
+def get_weather(city):
+    """Obtener información del clima usando wttr.in API (100% gratuita, sin API key)"""
+    return weather.get_weather(city)
 
-        if not description:
-            return jsonify({"error": "Description is required"}), 400
 
-        # build the email with smtplib library here:
-        pass
-
-        # attach the file if it is present
-        if attached_file:
-            pass
-
-    except Exception as e:
-        print("There was an error in /report route:", e)
-        return jsonify({"error": "Failed to send the report."}), 500

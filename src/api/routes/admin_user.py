@@ -62,3 +62,24 @@ def admin_get_stats():
 
     except Exception as e:
         return jsonify({"message": "Error al obtener estadísticas"}), 500
+
+def delete_user(user_id):
+    # Eliminar un usuario por ID - solo admin
+    try:
+        admin_id = int(get_jwt_identity())
+        admin_user = User.query.get(admin_id)
+
+        if not admin_user or admin_user.role != UserRole.ADMIN:
+            return jsonify({"message": "Acceso denegado"}), 403
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": "Usuario eliminado exitosamente"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Error al eliminar usuario"}), 500
