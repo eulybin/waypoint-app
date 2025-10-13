@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from '../utils/apiConfig';
+
 // (POST) login user
 export const loginUser = async (userLoginData, signal) => {
   const requestOptions = {
@@ -10,7 +12,7 @@ export const loginUser = async (userLoginData, signal) => {
   };
 
   try {
-    const response = await fetch('url', requestOptions);
+    const response = await fetch(API_ENDPOINTS.LOGIN, requestOptions);
     let data;
     try {
       data = await response.json();
@@ -25,6 +27,7 @@ export const loginUser = async (userLoginData, signal) => {
     } else {
       console.warn('No token received from the backend.');
     }
+    localStorage.setItem('token', data.token);
     return data;
   } catch (error) {
     if (error.name === 'AbortError') {
