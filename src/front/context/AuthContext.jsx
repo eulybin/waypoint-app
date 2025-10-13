@@ -44,14 +44,14 @@ export const AuthProvider = ({ children }) => {
   // ========== FUNCIÓN: Verificar si hay token válido ==========
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
-    
+
     if (token) {
       try {
         // Hacer petición al backend para validar el token
         const response = await fetch(API_ENDPOINTS.PROFILE, {
           headers: getAuthHeaders(),
         });
-        
+
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
@@ -65,59 +65,81 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     }
-    
+
     setLoading(false); // Termina el loading inicial
   };
 
   // ========== FUNCIÓN: Login ==========
-  const login = async (email, password) => {
+  const loginUser = async (userLoginData, signal) => {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userLoginData),
+      ...(signal && { signal }),
+    };
+
     try {
-      const response = await fetch(API_ENDPOINTS.LOGIN, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
+      const response = await fetch(API_ENDPOINTS.LOGIN, requestOptions);
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
       if (!response.ok) {
-        throw new Error(data.message || 'Login falló');
+        throw new Error(data.message || `Login failed (HTTP ${response.status})`);
       }
-
-      if (data.token) {
-        // Guardar token en localStorage
-        localStorage.setItem('token', data.token);
-        setUser(data.user);
-        setIsAuthenticated(true);
-        return { success: true, user: data.user };
+      if (!data.token) {
+        throw new Error('Server did not return a valid authentication token.');
       }
+      localStorage.setItem('token', data.token);
+      setUser(data.user || null);
+      setIsAuthenticated(true);
+      return { success: true, user: data.user };
 
-      throw new Error('No se recibió token del servidor');
     } catch (error) {
-      console.error('Error en login:', error);
-      return { success: false, error: error.message };
+      if (error.name === 'AbortError') {
+        console.warn('Login request was aborted by user or component unmount.');
+        return { success: false, error: 'Request cancelled.' };
+      }
+      console.error('Error during login:', error);
+      return { success: false, error: error.message || 'Unexpected login error.' };
     }
   };
 
-  // ========== FUNCIÓN: Register ==========
-  const register = async (name, email, password) => {
+
+  // ========== REGISTER ==========
+  const registerUser = async (newUserObject, signal) => {
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(newUserObject),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ...(signal && { signal }),
+    };
+
     try {
-      const response = await fetch(API_ENDPOINTS.REGISTER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await response.json();
-
+      const response = await fetch(API_ENDPOINTS.REGISTER, requestOptions);
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = { message: 'Invalid JSON response from server.' };
+      }
       if (!response.ok) {
-        throw new Error(data.message || 'Registro falló');
+        throw new Error(data.message || 'User registration failed.');
+      }
+      return { success: true, data };
+
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.warn('Register request was aborted.');
+        return { success: false, error: 'Request was aborted.' };
       }
 
-      return { success: true, data };
-    } catch (error) {
-      console.error('Error en registro:', error);
-      return { success: false, error: error.message };
+      console.error('Error in register:', error);
+      return { success: false, error: error.message || 'Unexpected registration error.' };
     }
   };
 
