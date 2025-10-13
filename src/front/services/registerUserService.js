@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from '../utils/apiConfig';
+
 // (POST) register a new user
 export const registerUser = async (newUserObject, signal) => {
   const requestOptions = {
@@ -10,7 +12,7 @@ export const registerUser = async (newUserObject, signal) => {
   };
 
   try {
-    const response = await fetch('url', requestOptions);
+    const response = await fetch(API_ENDPOINTS.REGISTER, requestOptions);
     let data;
     try {
       data = await response.json();
