@@ -1,7 +1,6 @@
 // ============================================================================
 // CONTEXT DE AUTENTICACIÓN
 // ============================================================================
-// Este Context maneja TODO lo relacionado con autenticación:
 // - Login/Logout/Register
 // - Verificación de token al cargar la app
 // - Estado global del usuario autenticado
@@ -10,25 +9,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { API_ENDPOINTS, getAuthHeaders } from '../utils/apiConfig';
 
-// Crear el Context
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
-// ============================================================================
-// HOOK PERSONALIZADO: useAuth
-// ============================================================================
-// Usar este hook en cualquier componente para acceder a la autenticación:
-// const { user, isAuthenticated, login, logout } = useAuth();
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth debe usarse dentro de un AuthProvider');
-  }
-  return context;
-};
-
-// ============================================================================
-// PROVIDER: AuthProvider
-// ============================================================================
 export const AuthProvider = ({ children }) => {
   // ========== ESTADO ==========
   const [user, setUser] = useState(null); // Datos del usuario autenticado
@@ -58,18 +40,18 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true);
         } else {
           // Token inválido o expirado - hacer logout
-          logout();
+          logoutUser();
         }
       } catch (error) {
         console.error('Error verificando autenticación:', error);
-        logout();
+        logoutUser();
       }
     }
 
     setLoading(false); // Termina el loading inicial
   };
 
-  // ========== FUNCIÓN: Login ==========
+  // ========== LOGIN ==========
   const loginUser = async (userLoginData, signal) => {
     const requestOptions = {
       method: 'POST',
@@ -143,22 +125,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ========== FUNCIÓN: Logout ==========
-  const logout = () => {
+  // ========== LOGOUT ==========
+  const logoutUser = () => {
     localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);
   };
 
-  // ========== VALOR DEL CONTEXT ==========
-  // Todo lo que se expone a los componentes que usen useAuth()
+  // ========== AUTH CONTEXT VALUE OBJECT ==========
   const value = {
     user,              // Datos del usuario
     loading,           // Estado de carga inicial
     isAuthenticated,   // Boolean: ¿está autenticado?
-    login,             // Función para hacer login
-    register,          // Función para registrarse
-    logout,            // Función para hacer logout
+    loginUser,             // Función para hacer login
+    registerUser,          // Función para registrarse
+    logoutUser,            // Función para hacer logout
     checkAuth,         // Función para re-verificar autenticación
   };
 
