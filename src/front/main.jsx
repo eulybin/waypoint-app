@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
-import { StoreProvider } from "./hooks/useGlobalReducer";
+import { StoreProvider } from "./context/StoreContext"
 import { AuthProvider } from "./context/AuthContext"; // ← AGREGAR ESTE IMPORT
 
 const container = document.getElementById("root");
@@ -11,7 +11,6 @@ const root = ReactDOM.createRoot(container);
 
 const Main = () => (
     <React.StrictMode>
-        {/* AuthProvider DEBE envolver todo para que esté disponible en toda la app */}
         <AuthProvider>
             <StoreProvider>
                 <RouterProvider router={router} />

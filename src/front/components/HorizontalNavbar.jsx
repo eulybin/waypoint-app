@@ -17,7 +17,7 @@ const HorizontalNavbar = () => {
     return (
         <nav className="navbar navbar-expand bg-body sitcky-top border-bottom p-2">
             <div className="container-fluid">
-                <Link to="/" className="navbar-brand">
+                <Link to="/search" className="navbar-brand">
                     <img src={logo} alt="Waypoint Logo" height={NAVBAR_LOGO_SIZE} />
                 </Link>
                 <div className="d-flex align-items-center gap-2">

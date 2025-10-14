@@ -12,9 +12,9 @@ import { API_ENDPOINTS, getAuthHeaders } from '../utils/apiConfig';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Datos del usuario autenticado
-  const [loading, setLoading] = useState(true); // Loading inicial al verificar token
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ¿Está autenticado?
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Check token on initial render
   useEffect(() => {
