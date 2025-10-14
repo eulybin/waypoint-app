@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Home, Compass, User, TrendingUp, Star, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning } from "lucide-react";
 import useGlobalReducer from "../hooks/useGlobalReducer"
 import { actionTypes } from "../store";
@@ -9,12 +9,17 @@ import ThankYouModal from "./Modals/ThankYouModal";
 import brandNameLight from "../assets/brand-name-light.svg"
 import brandNameDark from "../assets/brand-name-dark.svg"
 
+import useAuth from "../hooks/useAuth"
+
 const Navbar = () => {
 
 	const { store, dispatch } = useGlobalReducer()
+	const { logoutUser } = useAuth()
 
 	const [showMoreMenu, setShowMoreMenu] = useState(false);
 	const [showAppearance, setShowAppearance] = useState(false)
+
+	const navigate = useNavigate()
 
 	const navbarItems = [
 		{ icon: Home, label: "Home", path: "/" },
@@ -41,6 +46,12 @@ const Navbar = () => {
 
 	const handleCloseAppearance = () => {
 		setShowAppearance(false)
+		setShowMoreMenu(false)
+	}
+
+	const handleLogout = () => {
+		logoutUser()
+		navigate("/search")
 		setShowMoreMenu(false)
 	}
 
@@ -110,7 +121,7 @@ const Navbar = () => {
 							</button>
 							<button
 								className="d-flex align-items-center gap-3 text-body p-3 w-100 border-0 bg-transparent text-start logout-item rounded-bottom-3"
-								onClick={() => {/* Add logout logic */ }}
+								onClick={handleLogout}
 							>
 								<LogOut size={STANDARD_ICON_SIZE} />
 								<span>Logout</span>
