@@ -13,6 +13,7 @@ import Trending from "./pages/Trending"
 import Popular from "./pages/Popular"
 import Profile from "./pages/Profile"
 import CreateRoute from "./pages/CreateRoute"
+import SearchBar from "./pages/Search"
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -21,6 +22,7 @@ export const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/search" element={<SearchBar />} />
       <Route path="/explore" element={<Explore />} />
       <Route path="/trending" element={<Trending />} />
       <Route path="/popular" element={<Popular />} />
