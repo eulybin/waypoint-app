@@ -1,23 +1,13 @@
-import { useEffect, useContext, useReducer, createContext } from "react";
-import storeReducer, { initialStore } from "../store"
+import { useContext } from "react";
+import { StoreContext } from "../context/StoreContext";
 
-const StoreContext = createContext()
-
-export function StoreProvider({ children }) {
-    const [store, dispatch] = useReducer(storeReducer, initialStore())
-
-    useEffect(() => {
-        const theme = store.isDarkMode ? "dark" : "light"
-        document.documentElement.setAttribute("data-bs-theme", theme)
-        localStorage.setItem("isDarkMode", JSON.stringify(store.isDarkMode))
-    }, [store.isDarkMode])
-
-    return <StoreContext.Provider value={{ store, dispatch }}>
-        {children}
-    </StoreContext.Provider>
+const useGlobalReducer = () => {
+    const ctx = useContext(StoreContext)
+    if (!ctx) {
+        throw new Error("useGlobalReducer is being used outside of StoreProvider context")
+    }
+    const { store, dispatch } = ctx;
+    return { store, dispatch }
 }
 
-export default function useGlobalReducer() {
-    const { dispatch, store } = useContext(StoreContext)
-    return { dispatch, store };
-}
+export default useGlobalReducer;
