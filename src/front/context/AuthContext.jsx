@@ -12,43 +12,43 @@ import { API_ENDPOINTS, getAuthHeaders } from '../utils/apiConfig';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // ========== ESTADO ==========
   const [user, setUser] = useState(null); // Datos del usuario autenticado
   const [loading, setLoading] = useState(true); // Loading inicial al verificar token
   const [isAuthenticated, setIsAuthenticated] = useState(false); // ¿Está autenticado?
 
-  // ========== EFECTO: Verificar autenticación al montar ==========
-  // Se ejecuta UNA VEZ al cargar la app
+  // Check token on initial render
   useEffect(() => {
     checkAuth();
   }, []);
 
-  // ========== FUNCIÓN: Verificar si hay token válido ==========
+  // ========== VERIFY TOKEN ==========
   const checkAuth = async () => {
     const token = localStorage.getItem('token');
 
-    if (token) {
-      try {
-        // Hacer petición al backend para validar el token
-        const response = await fetch(API_ENDPOINTS.PROFILE, {
-          headers: getAuthHeaders(),
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else {
-          // Token inválido o expirado - hacer logout
-          logoutUser();
-        }
-      } catch (error) {
-        console.error('Error verificando autenticación:', error);
-        logoutUser();
-      }
+    if (!token) {
+      logoutUser()
+      setLoading(false)
+      return;
     }
 
-    setLoading(false); // Termina el loading inicial
+    try {
+      const response = await fetch(API_ENDPOINTS.PROFILE, {
+        headers: getAuthHeaders(),
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        logoutUser();
+      }
+    } catch (error) {
+      console.error('Error verifying authentication:', error);
+      logoutUser();
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ========== LOGIN ==========

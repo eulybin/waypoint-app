@@ -51,9 +51,12 @@ export const API_ENDPOINTS = {
 // Automáticamente agrega el token JWT del localStorage a los headers
 export const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
-  return {
+  const headers = {
     'Content-Type': 'application/json',
-    // Spread operator: solo agrega Authorization si hay token
-    ...(token && { Authorization: `Bearer ${token}` }),
   };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
 };
