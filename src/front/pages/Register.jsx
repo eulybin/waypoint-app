@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Eye, EyeClosed } from "lucide-react";
 import { STANDARD_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION, HIDE_OR_SHOW_PASSWORD_ICON_SIZE } from "../utils/constants";
-import { registerUser } from "../services/registerUserService";
+import useAuth from "../hooks/useAuth"
 
 const initialSignUpFormState = {
     name: "",
@@ -12,6 +12,8 @@ const initialSignUpFormState = {
 }
 
 const Register = () => {
+
+    const { registerUser } = useAuth()
 
     const [signUpData, setSignUpData] = useState(initialSignUpFormState);
     const [showPassword, setShowPassword] = useState(false)
@@ -45,9 +47,13 @@ const Register = () => {
         setIsSubmitting(true)
 
         try {
-            await registerUser(signUpData, controller.signal)
-            setSignUpData(initialSignUpFormState)
-            navigate("/login")
+            const result = await registerUser(signUpData, controller.signal)
+            if (result?.success) {
+                setSignUpData(initialSignUpFormState)
+                navigate("/login")
+            } else {
+                setErrorMessage(result?.error || "Failed to sign up, please try again.")
+            }
         } catch (error) {
             if (error.name !== "AbortError") {
                 console.error("Registration failed: ", error)

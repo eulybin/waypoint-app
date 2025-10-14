@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeClosed } from "lucide-react";
 import { STANDARD_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION, HIDE_OR_SHOW_PASSWORD_ICON_SIZE } from "../utils/constants";
-import { loginUser } from "../services/loginUserService";
+import useAuth from "../hooks/useAuth";
 
 const initialLoginFormState = {
     email: "",
@@ -10,6 +10,8 @@ const initialLoginFormState = {
 }
 
 const Login = () => {
+
+    const { loginUser } = useAuth()
 
     const [loginData, setLoginData] = useState(initialLoginFormState)
     const [showPassword, setShowPassword] = useState(false)
@@ -43,12 +45,15 @@ const Login = () => {
         setIsSubmitting(true)
 
         try {
-            await loginUser(loginData, controller.signal)
-            setLoginData(initialLoginFormState)
-            navigate("/")
+            const result = await loginUser(loginData, controller.signal)
+            if (result?.success) {
+                setLoginData(initialLoginFormState)
+                navigate("/")
+            } else {
+                setErrorMessage(result?.error || "Failed to log in, please try again.")
+            }
         } catch (error) {
             if (error.name !== "AbortError") {
-                console.error("Login failed: ", error)
                 setErrorMessage("Failed to log in, please try again.")
             }
         } finally {
