@@ -1,147 +1,133 @@
-// ============================================================================
-// CONTEXT DE AUTENTICACIÓN
-// ============================================================================
-// - Login/Logout/Register
-// - Verificación de token al cargar la app
-// - Estado global del usuario autenticado
-// - Protección de rutas
-
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { API_ENDPOINTS, getAuthHeaders } from '../utils/apiConfig';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check token on initial render
-  useEffect(() => {
-    checkAuth();
-  }, []);
+    useEffect(() => {
+        checkAuth();
+    }, []);
 
-  // ========== VERIFY TOKEN ==========
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
+    // ========== REGISTER ==========
+    const registerUser = async (newUserObject, signal) => {
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newUserObject),
+            signal,
+        };
 
-    if (!token) {
-      logoutUser()
-      setLoading(false)
-      return;
-    }
+        try {
+            const response = await fetch(API_ENDPOINTS.REGISTER, requestOptions);
+            const data = await response.json();
 
-    try {
-      const response = await fetch(API_ENDPOINTS.PROFILE, {
-        headers: getAuthHeaders(),
-      });
+            if (!response.ok) {
+                throw new Error(data.message || "User registration failed.");
+            }
 
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        setIsAuthenticated(true);
-      } else {
-        logoutUser();
-      }
-    } catch (error) {
-      console.error('Error verifying authentication:', error);
-      logoutUser();
-    } finally {
-      setLoading(false);
-    }
-  };
+            return { success: true, data };
 
-  // ========== LOGIN ==========
-  const loginUser = async (userLoginData, signal) => {
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userLoginData),
-      ...(signal && { signal }),
+        } catch (error) {
+            const isAborted = error.name === "AbortError";
+            const errorMessage = isAborted
+                ? "Request was aborted."
+                : error.message || "Unexpected registration error.";
+
+            console.error(`Registration error: ${errorMessage}`);
+
+            return { success: false, error: errorMessage };
+        }
     };
 
-    try {
-      const response = await fetch(API_ENDPOINTS.LOGIN, requestOptions);
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        data = {};
-      }
-      if (!response.ok) {
-        throw new Error(data.message || `Login failed (HTTP ${response.status})`);
-      }
-      if (!data.token) {
-        throw new Error('Server did not return a valid authentication token.');
-      }
-      localStorage.setItem('token', data.token);
-      setUser(data.user || null);
-      setIsAuthenticated(true);
-      return { success: true, user: data.user };
+    // ========== LOGIN ==========
+    const loginUser = async (userLoginData, signal) => {
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userLoginData),
+            signal,
+        };
 
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.warn('Login request was aborted by user or component unmount.');
-        return { success: false, error: 'Request cancelled.' };
-      }
-      console.error('Error during login:', error);
-      return { success: false, error: error.message || 'Unexpected login error.' };
-    }
-  };
+        try {
+            const response = await fetch(API_ENDPOINTS.LOGIN, requestOptions);
+            const data = await response.json();
 
+            if (!response.ok) {
+                throw new Error(data.message || `Login failed (HTTP ${response.status})`);
+            }
 
-  // ========== REGISTER ==========
-  const registerUser = async (newUserObject, signal) => {
-    const requestOptions = {
-      method: 'POST',
-      body: JSON.stringify(newUserObject),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      ...(signal && { signal }),
+            if (!data.token) {
+                throw new Error("Server did not return a valid authentication token.");
+            }
+
+            localStorage.setItem("token", data.token);
+            setUser(data.user || null);
+            setIsAuthenticated(true);
+
+            return { success: true, user: data.user };
+
+        } catch (error) {
+            const isAborted = error.name === "AbortError";
+            const errorMessage = isAborted
+                ? "Request cancelled."
+                : error.message || "Unexpected login error.";
+
+            console.error(`Login error: ${errorMessage}`);
+
+            return { success: false, error: errorMessage };
+        }
     };
 
-    try {
-      const response = await fetch(API_ENDPOINTS.REGISTER, requestOptions);
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        data = { message: 'Invalid JSON response from server.' };
-      }
-      if (!response.ok) {
-        throw new Error(data.message || 'User registration failed.');
-      }
-      return { success: true, data };
+    // ========== LOGOUT ==========
+    const logoutUser = () => {
+        localStorage.removeItem('token');
+        setUser(null);
+        setIsAuthenticated(false);
+    };
 
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.warn('Register request was aborted.');
-        return { success: false, error: 'Request was aborted.' };
-      }
+    // ========== VERIFY TOKEN ==========
+    const checkAuth = async () => {
+        const token = localStorage.getItem('token');
 
-      console.error('Error in register:', error);
-      return { success: false, error: error.message || 'Unexpected registration error.' };
-    }
-  };
+        if (!token) {
+            logoutUser();
+            setLoading(false);
+            return;
+        }
 
-  // ========== LOGOUT ==========
-  const logoutUser = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+        try {
+            const response = await fetch(API_ENDPOINTS.PROFILE, {
+                headers: getAuthHeaders(),
+            });
 
-  // ========== AUTH CONTEXT VALUE OBJECT ==========
-  const value = {
-    user,              // Datos del usuario
-    loading,           // Estado de carga inicial
-    isAuthenticated,   // Boolean: ¿está autenticado?
-    loginUser,             // Función para hacer login
-    registerUser,          // Función para registrarse
-    logoutUser,            // Función para hacer logout
-    checkAuth,         // Función para re-verificar autenticación
-  };
+            if (response.ok) {
+                const userData = await response.json();
+                setUser(userData);
+                setIsAuthenticated(true);
+            } else {
+                logoutUser();
+            }
+        } catch (error) {
+            console.error('Error verifying authentication:', error);
+            logoutUser();
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    const value = {
+        user,
+        loading,
+        isAuthenticated,
+        loginUser,
+        registerUser,
+        logoutUser,
+        checkAuth,
+    };
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

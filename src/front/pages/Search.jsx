@@ -1,12 +1,12 @@
-import brandNameLight from "../assets/brand-name-light.svg"
-import brandNameDark from "../assets/brand-name-dark.svg"
+import brandNameLight from "../assets/brand-name-light.svg";
+import brandNameDark from "../assets/brand-name-dark.svg";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { Search } from "lucide-react";
 import { STANDARD_ICON_SIZE, INPUT_ICON_POSITION, SEARCH_BAR_MAX_WIDTH } from "../utils/constants";
 
 const SearchBar = () => {
 
-    const { store } = useGlobalReducer()
+    const { store } = useGlobalReducer();
 
     return (
         <div className="d-flex flex-column align-items-center vh-100 bg-body pt-5">
@@ -39,6 +39,6 @@ const SearchBar = () => {
             </div>
         </div>
     );
-}
+};
 
 export default SearchBar;

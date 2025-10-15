@@ -8,12 +8,12 @@ import { Home } from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
-import Explore from "./pages/Explore"
-import Trending from "./pages/Trending"
-import Popular from "./pages/Popular"
-import Profile from "./pages/Profile"
-import CreateRoute from "./pages/CreateRoute"
-import SearchBar from "./pages/Search"
+import Explore from "./pages/Explore";
+import Trending from "./pages/Trending";
+import Popular from "./pages/Popular";
+import Profile from "./pages/Profile";
+import CreateRoute from "./pages/CreateRoute";
+import SearchBar from "./pages/Search";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(

@@ -7,67 +7,67 @@ import useAuth from "../hooks/useAuth";
 const initialLoginFormState = {
     email: "",
     password: ""
-}
+};
 
 const Login = () => {
 
-    const { loginUser } = useAuth()
+    const { loginUser } = useAuth();
 
-    const [loginData, setLoginData] = useState(initialLoginFormState)
-    const [showPassword, setShowPassword] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [errorMessage, setErrorMessage] = useState("")
+    const [loginData, setLoginData] = useState(initialLoginFormState);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const abortControllerRef = useRef(null)
+    const abortControllerRef = useRef(null);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleInputOnChange = (e) => {
         setLoginData(prevState => {
-            return { ...prevState, [e.target.name]: e.target.value }
-        })
-        setErrorMessage("")
-    }
+            return { ...prevState, [e.target.name]: e.target.value };
+        });
+        setErrorMessage("");
+    };
 
     const handleLoginUser = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         //SET-UP INPUT VALIDATION HERE:
         //.......
 
         if (abortControllerRef.current) {
-            abortControllerRef.current.abort()
+            abortControllerRef.current.abort();
         }
 
-        const controller = new AbortController()
-        abortControllerRef.current = controller
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
 
-        setIsSubmitting(true)
+        setIsSubmitting(true);
 
         try {
-            const result = await loginUser(loginData, controller.signal)
+            const result = await loginUser(loginData, controller.signal);
             if (result?.success) {
-                setLoginData(initialLoginFormState)
-                navigate("/")
+                setLoginData(initialLoginFormState);
+                navigate("/");
             } else {
-                setErrorMessage(result?.error || "Failed to log in, please try again.")
+                setErrorMessage(result?.error || "Failed to log in, please try again.");
             }
         } catch (error) {
             if (error.name !== "AbortError") {
-                setErrorMessage("Failed to log in, please try again.")
+                setErrorMessage("Failed to log in, please try again.");
             }
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
-    }
+    };
 
     useEffect(() => {
         return () => {
             if (abortControllerRef.current) {
-                abortControllerRef.current.abort()
+                abortControllerRef.current.abort();
             }
-        }
-    }, [])
+        };
+    }, []);
 
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-body">
@@ -157,6 +157,6 @@ const Login = () => {
             </div>
         </div>
     );
-}
+};
 
 export default Login;

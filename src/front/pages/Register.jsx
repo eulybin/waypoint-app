@@ -2,75 +2,75 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Eye, EyeClosed } from "lucide-react";
 import { STANDARD_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION, HIDE_OR_SHOW_PASSWORD_ICON_SIZE } from "../utils/constants";
-import useAuth from "../hooks/useAuth"
+import useAuth from "../hooks/useAuth";
 
 const initialSignUpFormState = {
     name: "",
     email: "",
     password: ""
 
-}
+};
 
 const Register = () => {
 
-    const { registerUser } = useAuth()
+    const { registerUser } = useAuth();
 
     const [signUpData, setSignUpData] = useState(initialSignUpFormState);
-    const [showPassword, setShowPassword] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [errorMessage, setErrorMessage] = useState("")
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const abortControllerRef = useRef(null)
+    const abortControllerRef = useRef(null);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleInputOnChange = (e) => {
         setSignUpData(prevState => {
-            return { ...prevState, [e.target.name]: e.target.value }
-        })
-        setErrorMessage("")
-    }
+            return { ...prevState, [e.target.name]: e.target.value };
+        });
+        setErrorMessage("");
+    };
 
     const handleRegisterUser = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         //SET-UP INPUT VALIDATION HERE:
         //.......
 
         if (abortControllerRef.current) {
-            abortControllerRef.current.abort()
+            abortControllerRef.current.abort();
         }
 
-        const controller = new AbortController()
-        abortControllerRef.current = controller
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
 
-        setIsSubmitting(true)
+        setIsSubmitting(true);
 
         try {
-            const result = await registerUser(signUpData, controller.signal)
+            const result = await registerUser(signUpData, controller.signal);
             if (result?.success) {
-                setSignUpData(initialSignUpFormState)
-                navigate("/login")
+                setSignUpData(initialSignUpFormState);
+                navigate("/login");
             } else {
-                setErrorMessage(result?.error || "Failed to sign up, please try again.")
+                setErrorMessage(result?.error || "Failed to sign up, please try again.");
             }
         } catch (error) {
             if (error.name !== "AbortError") {
-                console.error("Registration failed: ", error)
-                setErrorMessage("Failed to sign up, please try again.")
+                console.error("Registration failed: ", error);
+                setErrorMessage("Failed to sign up, please try again.");
             }
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
-    }
+    };
 
     useEffect(() => {
         return () => {
             if (abortControllerRef.current) {
-                abortControllerRef.current.abort()
+                abortControllerRef.current.abort();
             }
-        }
-    }, [])
+        };
+    }, []);
 
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-body">
@@ -175,6 +175,6 @@ const Register = () => {
             </div>
         </div>
     );
-}
+};
 
 export default Register;

@@ -6,28 +6,28 @@ import { reportProblem } from "../../services/reportProblemService";
 const ReportProblemModal = ({ onClose, onSuccess }) => {
     const [description, setDescription] = useState("");
     const [attachedFile, setAttachedFile] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [errorMessage, setErrorMessage] = useState("")
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const fileInputRef = useRef(null);
-    const abortControllerRef = useRef(null)
+    const abortControllerRef = useRef(null);
 
     const handleAttachFileOnChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setAttachedFile(file);
         }
-    }
+    };
 
     const handleSubmitReport = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         if (abortControllerRef.current) {
-            abortControllerRef.current.abort()
+            abortControllerRef.current.abort();
         }
 
-        const controller = new AbortController()
-        abortControllerRef.current = controller
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
 
         const formData = new FormData();
         formData.append("description", description);
@@ -35,30 +35,30 @@ const ReportProblemModal = ({ onClose, onSuccess }) => {
             formData.append("attachedFile", attachedFile);
         }
 
-        setIsSubmitting(true)
-        setErrorMessage("")
+        setIsSubmitting(true);
+        setErrorMessage("");
         try {
-            await reportProblem(formData, controller.signal)
-            setDescription("")
-            setAttachedFile(null)
-            setErrorMessage("")
-            onSuccess()
+            await reportProblem(formData, controller.signal);
+            setDescription("");
+            setAttachedFile(null);
+            setErrorMessage("");
+            onSuccess();
         } catch (error) {
             if (error.name !== "AbortError") {
-                setErrorMessage("Failed to send report, please try again.")
+                setErrorMessage("Failed to send report, please try again.");
             }
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     };
 
     useEffect(() => {
         return () => {
             if (abortControllerRef.current) {
-                abortControllerRef.current.abort()
+                abortControllerRef.current.abort();
             }
-        }
-    }, [])
+        };
+    }, []);
 
     const portalRoot = document.getElementById("report-portal-root");
 

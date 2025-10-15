@@ -1,25 +1,25 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Home, Compass, User, TrendingUp, Star, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning } from "lucide-react";
-import useGlobalReducer from "../hooks/useGlobalReducer"
+import useGlobalReducer from "../hooks/useGlobalReducer";
 import { actionTypes } from "../store";
 import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE } from "../utils/constants";
 import ReportProblemModal from "./Modals/ReportProblemModal";
 import ThankYouModal from "./Modals/ThankYouModal";
-import brandNameLight from "../assets/brand-name-light.svg"
-import brandNameDark from "../assets/brand-name-dark.svg"
+import brandNameLight from "../assets/brand-name-light.svg";
+import brandNameDark from "../assets/brand-name-dark.svg";
 
-import useAuth from "../hooks/useAuth"
+import useAuth from "../hooks/useAuth";
 
 const Navbar = () => {
 
-	const { store, dispatch } = useGlobalReducer()
-	const { logoutUser } = useAuth()
+	const { store, dispatch } = useGlobalReducer();
+	const { logoutUser } = useAuth();
 
 	const [showMoreMenu, setShowMoreMenu] = useState(false);
-	const [showAppearance, setShowAppearance] = useState(false)
+	const [showAppearance, setShowAppearance] = useState(false);
 
-	const navigate = useNavigate()
+	const navigate = useNavigate();
 
 	const navbarItems = [
 		{ icon: Home, label: "Home", path: "/" },
@@ -37,29 +37,28 @@ const Navbar = () => {
 				<span className="fw-semibold">{item.label}</span>
 			</Link>
 		);
-	}
+	};
 
 	const handleShowAppearance = () => {
-		setShowAppearance(prevState => !prevState)
-		setShowMoreMenu(false)
-	}
+		setShowAppearance(prevState => !prevState);
+		setShowMoreMenu(false);
+	};
 
 	const handleCloseAppearance = () => {
-		setShowAppearance(false)
-		setShowMoreMenu(false)
-	}
+		setShowAppearance(false);
+		setShowMoreMenu(false);
+	};
 
 	const handleLogout = () => {
-		logoutUser()
-		navigate("/search")
-		setShowMoreMenu(false)
-	}
+		logoutUser();
+		navigate("/search");
+		setShowMoreMenu(false);
+	};
 
 
 	// -------- MODAL LOGIC --------
-
-	const [showReportModal, setShowReportModal] = useState(false)
-	const [showThankYouModal, setShowThankYouModal] = useState(false)
+	const [showReportModal, setShowReportModal] = useState(false);
+	const [showThankYouModal, setShowThankYouModal] = useState(false);
 
 	return (
 		<div className="d-flex flex-column bg-body border-end vh-100 position-fixed" style={{ width: NAVBAR_WIDTH, zIndex: 1000 }}>
