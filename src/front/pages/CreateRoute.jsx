@@ -1,13 +1,14 @@
 
-
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
+
+
 // ============================================================================
 // PÁGINA: CreateRoute - VERSIÓN PROFESIONAL 2025 ✨
 // ============================================================================
-// ✅ Al seleccionar país → Muestra TODAS las ciudades del país
-// ✅ Al seleccionar ciudad → Muestra TODAS las localidades de la ciudad
-// ✅ Al seleccionar categoría POI → Muestra TODOS los POIs disponibles
+// ✅ Al seleccionar país → Muestra ciudades Y localidades (Carmona, Utrera, etc.)
+// ✅ Al seleccionar ciudad/localidad → Muestra TODOS los POIs disponibles
 // ✅ Permite seleccionar MÚLTIPLES POIs para una ruta
+// ✅ Flujo simplificado: País → Ciudad/Localidad → POIs
 // ============================================================================
 
 import { useNavigate } from "react-router-dom";
@@ -25,7 +26,7 @@ import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import { NAVBAR_WIDTH } from "../utils/constants";
 
 // ============================================================================
-// REDUCER: Estado complejo con múltiples campos y lógica
+// REDUCER: Estado simplificado sin campo "locality"
 // ============================================================================
 const formReducer = (state, action) => {
   switch (action.type) {
@@ -38,7 +39,6 @@ const formReducer = (state, action) => {
         country: action.value,
         countryCode: action.countryCode,
         city: "",
-        locality: "",
         coordinates: null,
         points_of_interest: [],
       };
@@ -47,16 +47,8 @@ const formReducer = (state, action) => {
       return {
         ...state,
         city: action.value,
-        locality: "",
         coordinates: action.coordinates,
         points_of_interest: [],
-      };
-
-    case "SET_LOCALITY":
-      return {
-        ...state,
-        locality: action.value,
-        coordinates: action.coordinates,
       };
 
     case "ADD_POI":
@@ -89,7 +81,6 @@ const initialFormState = {
   country: "",
   countryCode: "",
   city: "",
-  locality: "",
   coordinates: null,
   points_of_interest: [],
 };
@@ -104,24 +95,20 @@ const CreateRoute = () => {
   // ========== ESTADOS AUXILIARES ==========
   const [countrySuggestions, setCountrySuggestions] = useState([]);
   const [citySuggestions, setCitySuggestions] = useState([]);
-  const [localitySuggestions, setLocalitySuggestions] = useState([]);
   const [poiSuggestions, setPoiSuggestions] = useState([]);
 
   const [loadingCountries, setLoadingCountries] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
-  const [loadingLocalities, setLoadingLocalities] = useState(false);
   const [loadingPOIs, setLoadingPOIs] = useState(false);
 
   const [countryQuery, setCountryQuery] = useState("");
   const [cityQuery, setCityQuery] = useState("");
-  const [localityQuery, setLocalityQuery] = useState("");
   const [poiQuery, setPoiQuery] = useState("");
   const [poiType, setPoiType] = useState("attraction");
 
   // Estados para controlar visibilidad de dropdowns
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [showLocalityDropdown, setShowLocalityDropdown] = useState(false);
   const [showPoiDropdown, setShowPoiDropdown] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,7 +117,6 @@ const CreateRoute = () => {
   // ========== REFS PARA DEBOUNCING ==========
   const countryDebounceRef = useRef(null);
   const cityDebounceRef = useRef(null);
-  const localityDebounceRef = useRef(null);
   const poiDebounceRef = useRef(null);
   const abortControllerRef = useRef(null);
 
@@ -180,23 +166,43 @@ const CreateRoute = () => {
   // ============================================================================
   // FUNCIÓN: Al seleccionar país → Cargar TODAS las ciudades automáticamente
   // ============================================================================
+  // ============================================================================
+  // FUNCIÓN: Cargar ciudades Y localidades de un país
+  // ESTRATEGIA: Muestra sugerencias iniciales + permite búsqueda manual
+  // ============================================================================
   const loadAllCitiesForCountry = useCallback(
     async (countryCode, countryName) => {
       setLoadingCities(true);
       setCitySuggestions([]);
 
       try {
-        // Estrategia: Buscar múltiples queries para obtener más ciudades
+        console.log(
+          `[loadAllCitiesForCountry] 🔍 Cargando sugerencias para ${countryName}...`
+        );
+
+        // Estrategia mejorada: Más queries específicas para capturar MÁS pueblos
         const queries = [
+          // Ciudades principales
           searchLocations("city", {
             countryCode: countryCode.toLowerCase(),
             limit: 50,
           }),
+          // Pueblos grandes
           searchLocations("town", {
             countryCode: countryCode.toLowerCase(),
             limit: 50,
           }),
-          // Búsqueda genérica por país
+          // Pueblos pequeños
+          searchLocations("village", {
+            countryCode: countryCode.toLowerCase(),
+            limit: 50,
+          }),
+          // Municipios
+          searchLocations("municipality", {
+            countryCode: countryCode.toLowerCase(),
+            limit: 50,
+          }),
+          // Búsqueda por nombre del país (captura más resultados)
           searchLocations(countryName, {
             countryCode: countryCode.toLowerCase(),
             limit: 50,
@@ -208,17 +214,26 @@ const CreateRoute = () => {
         const combinedResults = allResults.flat();
 
         console.log(
-          `[loadAllCitiesForCountry] Resultados para ${countryName}:`,
-          combinedResults.length
+          `[loadAllCitiesForCountry] 📊 Total resultados: ${combinedResults.length}`
         );
 
-        // Filtrar y formatear ciudades
-        const cities = combinedResults
+        // Filtrar y formatear ciudades + localidades
+        const citiesAndLocalities = combinedResults
           .filter(
             (r) =>
               r &&
-              (["city", "town", "village", "municipality"].includes(r.type) ||
+              ([
+                "city",
+                "town",
+                "village",
+                "municipality",
+                "locality",
+                "hamlet",
+              ].includes(r.type) ||
                 r.addresstype === "city" ||
+                r.addresstype === "town" ||
+                r.addresstype === "village" ||
+                r.addresstype === "municipality" ||
                 r.class === "place")
           )
           .map((r) => ({
@@ -227,32 +242,36 @@ const CreateRoute = () => {
               r.address?.city ||
               r.address?.town ||
               r.address?.village ||
-              r.address?.municipality,
+              r.address?.municipality ||
+              r.address?.locality ||
+              r.display_name?.split(",")[0],
             lat: parseFloat(r.lat),
             lon: parseFloat(r.lon),
             displayName: r.display_name,
+            type: r.type || r.addresstype,
           }))
-          .filter((city) => city.name) // Eliminar nulos
+          .filter((city) => city.name && city.lat && city.lon) // Eliminar inválidos
           .filter(
             (city, index, self) =>
               // Eliminar duplicados por nombre
               index === self.findIndex((c) => c.name === city.name)
           )
-          .sort((a, b) => a.name.localeCompare(b.name)); // Ordenar alfabéticamente
+          .sort((a, b) => a.name.localeCompare(b.name, "es"));
 
         console.log(
-          `[loadAllCitiesForCountry] Ciudades únicas: ${cities.length}`
+          `[loadAllCitiesForCountry] ✅ Lugares únicos: ${citiesAndLocalities.length}`
         );
-        setCitySuggestions(cities);
+        setCitySuggestions(citiesAndLocalities);
 
-        if (cities.length === 0) {
-          setError(
-            `No se encontraron ciudades para ${countryName}. Intenta buscar manualmente.`
+        // Mensaje informativo en lugar de error
+        if (citiesAndLocalities.length === 0) {
+          console.log(
+            `[loadAllCitiesForCountry] ℹ️ No hay sugerencias automáticas, pero puedes buscar manualmente`
           );
         }
       } catch (error) {
         console.error("Error loading cities:", error);
-        setError("Error al cargar las ciudades del país");
+        setError("Error al cargar sugerencias. Puedes buscar manualmente.");
       } finally {
         setLoadingCities(false);
       }
@@ -261,7 +280,7 @@ const CreateRoute = () => {
   );
 
   // ============================================================================
-  // FUNCIÓN: Filtrar ciudades mientras el usuario escribe
+  // FUNCIÓN: Filtrar ciudades/localidades mientras el usuario escribe
   // ============================================================================
   const handleSearchCities = useCallback((query, allCities) => {
     if (!query) {
@@ -269,75 +288,6 @@ const CreateRoute = () => {
     }
     return allCities.filter((city) =>
       city.name.toLowerCase().includes(query.toLowerCase())
-    );
-  }, []);
-
-  // ============================================================================
-  // FUNCIÓN: Al seleccionar ciudad → Cargar TODAS las localidades automáticamente
-  // ============================================================================
-  const loadAllLocalitiesForCity = useCallback(
-    async (cityName, countryCode) => {
-      setLoadingLocalities(true);
-      setLocalitySuggestions([]);
-
-      try {
-        // Buscar localidades/barrios de la ciudad
-        const results = await searchLocations(cityName, {
-          countryCode: countryCode.toLowerCase(),
-          limit: 100,
-        });
-
-        // Filtrar localidades/barrios
-        const localities = results
-          .filter(
-            (r) =>
-              [
-                "suburb",
-                "neighbourhood",
-                "quarter",
-                "hamlet",
-                "village",
-                "residential",
-              ].includes(r.type) || r.class === "place"
-          )
-          .map((r) => ({
-            name:
-              r.name ||
-              r.address?.suburb ||
-              r.address?.neighbourhood ||
-              r.address?.hamlet,
-            lat: parseFloat(r.lat),
-            lon: parseFloat(r.lon),
-            displayName: r.display_name,
-          }))
-          .filter(
-            (locality, index, self) =>
-              // Eliminar duplicados y valores nulos
-              locality.name &&
-              index === self.findIndex((l) => l.name === locality.name)
-          )
-          .sort((a, b) => a.name.localeCompare(b.name));
-
-        setLocalitySuggestions(localities);
-      } catch (error) {
-        console.error("Error loading localities:", error);
-        setError("Error al cargar las localidades de la ciudad");
-      } finally {
-        setLoadingLocalities(false);
-      }
-    },
-    []
-  );
-
-  // ============================================================================
-  // FUNCIÓN: Filtrar localidades mientras el usuario escribe
-  // ============================================================================
-  const handleSearchLocalities = useCallback((query, allLocalities) => {
-    if (!query) {
-      return allLocalities;
-    }
-    return allLocalities.filter((locality) =>
-      locality.name.toLowerCase().includes(query.toLowerCase())
     );
   }, []);
 
@@ -409,17 +359,19 @@ const CreateRoute = () => {
   }, [formState.country, formState.countryCode, loadAllCitiesForCountry]);
 
   // ============================================================================
-  // EFFECT: Búsqueda manual de ciudades si el usuario escribe
+  // EFFECT: Búsqueda MANUAL en tiempo real (para encontrar CUALQUIER pueblo)
+  // Si el usuario escribe, busca directamente sin depender de sugerencias
   // ============================================================================
   useEffect(() => {
-    // Solo buscar si el usuario está escribiendo y hay un país seleccionado
-    if (!cityQuery || !formState.countryCode || cityQuery.length < 2) {
+    // Solo buscar si el usuario está escribiendo activamente
+    if (!cityQuery || !formState.countryCode || cityQuery.length < 3) {
       return;
     }
 
-    // Si ya hay ciudades cargadas, no hacer búsqueda (filtrado local)
-    if (citySuggestions.length > 0) {
-      return;
+    // Si ya hay resultados que coinciden, usar filtrado local
+    const localMatches = handleSearchCities(cityQuery, citySuggestions);
+    if (localMatches.length > 0) {
+      return; // Ya hay resultados, no hacer nueva búsqueda
     }
 
     // Debouncing para búsqueda manual
@@ -428,55 +380,96 @@ const CreateRoute = () => {
     }
 
     cityDebounceRef.current = setTimeout(async () => {
+      console.log(
+        `[Búsqueda Manual] 🔎 Buscando: "${cityQuery}" en ${formState.countryCode}`
+      );
       setLoadingCities(true);
+
       try {
-        const results = await searchLocations(cityQuery, {
+        // BÚSQUEDA MÁS AMPLIA: Query directo con el nombre del pueblo
+        const searchQuery = `${cityQuery}, ${formState.country}`;
+
+        const results = await searchLocations(searchQuery, {
           countryCode: formState.countryCode.toLowerCase(),
-          limit: 20,
+          limit: 50, // Más resultados
         });
 
+        console.log(
+          `[Búsqueda Manual] 📊 Resultados encontrados: ${results.length}`
+        );
+
         const cities = results
-          .filter(
-            (r) =>
-              r &&
-              (["city", "town", "village", "municipality"].includes(r.type) ||
-                r.addresstype === "city")
-          )
+          .filter((r) => {
+            if (!r) return false;
+
+            // Aceptar MÁS tipos de lugares
+            const validTypes = [
+              "city",
+              "town",
+              "village",
+              "municipality",
+              "locality",
+              "hamlet",
+              "suburb",
+              "neighbourhood",
+            ];
+
+            const isValidType =
+              validTypes.includes(r.type) ||
+              validTypes.includes(r.addresstype) ||
+              r.class === "place";
+
+            // Verificar que esté en el país correcto
+            const isCorrectCountry =
+              r.address?.country_code?.toUpperCase() ===
+              formState.countryCode.toUpperCase();
+
+            return isValidType && isCorrectCountry;
+          })
           .map((r) => ({
             name:
               r.name ||
               r.address?.city ||
               r.address?.town ||
-              r.address?.village,
+              r.address?.village ||
+              r.address?.municipality ||
+              r.address?.hamlet ||
+              r.display_name?.split(",")[0],
             lat: parseFloat(r.lat),
             lon: parseFloat(r.lon),
             displayName: r.display_name,
+            type: r.type || r.addresstype,
           }))
-          .filter((city) => city.name);
+          .filter((city) => city.name && city.lat && city.lon) // Solo válidos
+          .filter(
+            (city, index, self) =>
+              index === self.findIndex((c) => c.name === city.name)
+          );
 
-        setCitySuggestions(cities);
+        console.log(`[Búsqueda Manual] ✅ Lugares únicos: ${cities.length}`);
+
+        if (cities.length > 0) {
+          setCitySuggestions(cities);
+          console.log(
+            `[Búsqueda Manual] 📍 Ejemplos:`,
+            cities.slice(0, 5).map((c) => c.name)
+          );
+        }
       } catch (error) {
-        console.error("Error searching cities manually:", error);
+        console.error("[Búsqueda Manual] ❌ Error:", error);
       } finally {
         setLoadingCities(false);
       }
     }, 500);
 
     return () => clearTimeout(cityDebounceRef.current);
-  }, [cityQuery, formState.countryCode, citySuggestions.length]);
-
-  // ============================================================================
-  // EFFECT: Al seleccionar ciudad → Cargar localidades automáticamente
-  // ============================================================================
-  useEffect(() => {
-    if (formState.city && formState.countryCode) {
-      loadAllLocalitiesForCity(formState.city, formState.countryCode);
-      setShowLocalityDropdown(true); // Abrir dropdown de localidades al cargar
-    } else {
-      setLocalitySuggestions([]);
-      setShowLocalityDropdown(false);
-    }
-  }, [formState.city, formState.countryCode, loadAllLocalitiesForCity]);
+  }, [
+    cityQuery,
+    formState.countryCode,
+    formState.country,
+    citySuggestions,
+    handleSearchCities,
+  ]);
 
   // ============================================================================
   // EFFECT: Al seleccionar categoría POI → Cargar POIs automáticamente
@@ -513,16 +506,6 @@ const CreateRoute = () => {
     });
     setCityQuery(city.name);
     setShowCityDropdown(false); // ✅ Cerrar dropdown
-  };
-
-  const handleSelectLocality = (locality) => {
-    dispatch({
-      type: "SET_LOCALITY",
-      value: locality.name,
-      coordinates: { lat: locality.lat, lon: locality.lon },
-    });
-    setLocalityQuery(locality.name);
-    setShowLocalityDropdown(false); // ✅ Cerrar dropdown
   };
 
   const handleAddPOI = (poi) => {
@@ -677,24 +660,24 @@ const CreateRoute = () => {
                   )}
                 </div>
 
-                {/* Ciudad con Autocompletado */}
+                {/* Ciudad/Localidad con Autocompletado */}
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
-                    Ciudad *{" "}
+                    Ciudad/Localidad *{" "}
                     {loadingCities && (
                       <span className="text-primary">
                         <Loader
                           className="d-inline-block animate-spin"
                           size={16}
                         />{" "}
-                        Cargando ciudades...
+                        Cargando ciudades y localidades...
                       </span>
                     )}
                     {!loadingCities &&
                       formState.country &&
                       citySuggestions.length > 0 && (
                         <span className="text-success small ms-2">
-                          ({citySuggestions.length} ciudades disponibles)
+                          ({citySuggestions.length} opciones disponibles)
                         </span>
                       )}
                   </label>
@@ -711,10 +694,10 @@ const CreateRoute = () => {
                         !formState.country
                           ? "Primero selecciona un país"
                           : loadingCities
-                          ? "Cargando ciudades..."
+                          ? "Buscando..."
                           : citySuggestions.length > 0
-                          ? "Buscar o seleccionar ciudad..."
-                          : "Escribe para buscar ciudades..."
+                          ? "Escribe para buscar más lugares..."
+                          : "Escribe el nombre del pueblo/ciudad (ej: Carmona)"
                       }
                       value={cityQuery}
                       onChange={(e) => setCityQuery(e.target.value)}
@@ -726,17 +709,46 @@ const CreateRoute = () => {
                     />
                   </div>
 
-                  {/* Mensaje informativo si no hay ciudades cargadas */}
+                  {/* Mensaje informativo mejorado */}
                   {formState.country &&
                     !loadingCities &&
                     citySuggestions.length === 0 &&
-                    !formState.city && (
+                    !formState.city &&
+                    cityQuery.length === 0 && (
                       <div className="alert alert-info mt-2 mb-0 py-2 small">
-                        💡 Escribe el nombre de una ciudad para buscar
+                        💡 <strong>Escribe el nombre</strong> del pueblo o
+                        ciudad que buscas
+                        <br />
+                        <span className="text-muted">
+                          Ejemplos: Carmona, Dos Hermanas, Utrera...
+                        </span>
                       </div>
                     )}
 
-                  {/* Lista de ciudades (filtrada localmente) */}
+                  {/* Mensaje mientras busca */}
+                  {formState.country &&
+                    loadingCities &&
+                    cityQuery.length >= 3 && (
+                      <div className="alert alert-primary mt-2 mb-0 py-2 small">
+                        🔍 Buscando "{cityQuery}" en {formState.country}...
+                      </div>
+                    )}
+
+                  {/* Mensaje si no encuentra resultados */}
+                  {formState.country &&
+                    !loadingCities &&
+                    citySuggestions.length === 0 &&
+                    cityQuery.length >= 3 && (
+                      <div className="alert alert-warning mt-2 mb-0 py-2 small">
+                        ⚠️ No se encontró "{cityQuery}".
+                        <br />
+                        <span className="text-muted">
+                          Intenta con otro nombre o verifica la ortografía.
+                        </span>
+                      </div>
+                    )}
+
+                  {/* Lista de ciudades y localidades (filtrada localmente) */}
                   {showCityDropdown &&
                     formState.country &&
                     citySuggestions.length > 0 && (
@@ -753,18 +765,41 @@ const CreateRoute = () => {
                           .map((city, idx) => (
                             <div
                               key={idx}
-                              className="p-3 border-bottom cursor-pointer hover-bg-light d-flex justify-content-between align-items-center"
+                              className="p-3 border-bottom cursor-pointer hover-bg-light d-flex justify-content-between align-items-start"
                               onClick={() => handleSelectCity(city)}
                               style={{ cursor: "pointer" }}
                             >
-                              <div>
-                                <div className="fw-semibold">{city.name}</div>
-                                <div className="small text-muted">
+                              <div className="flex-grow-1">
+                                <div className="fw-semibold d-flex align-items-center gap-2">
+                                  <MapPin size={16} className="text-primary" />
+                                  {city.name}
+                                  {city.type && (
+                                    <span className="badge bg-secondary text-white small">
+                                      {city.type === "city"
+                                        ? "Ciudad"
+                                        : city.type === "town"
+                                        ? "Pueblo"
+                                        : city.type === "village"
+                                        ? "Aldea"
+                                        : city.type === "municipality"
+                                        ? "Municipio"
+                                        : city.type}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="small text-muted mt-1">
                                   {city.displayName}
+                                </div>
+                                <div className="extra-small text-muted">
+                                  📍 {city.lat.toFixed(4)},{" "}
+                                  {city.lon.toFixed(4)}
                                 </div>
                               </div>
                               {formState.city === city.name && (
-                                <Check className="text-success" size={20} />
+                                <Check
+                                  className="text-success flex-shrink-0"
+                                  size={20}
+                                />
                               )}
                             </div>
                           ))}
@@ -775,95 +810,6 @@ const CreateRoute = () => {
                     <div className="mt-2">
                       <span className="badge bg-success fs-6 py-2">
                         ✓ {formState.city}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Localidad/Barrio (Opcional) */}
-                <div className="mb-3 position-relative">
-                  <label className="form-label fw-semibold">
-                    Localidad/Barrio (opcional){" "}
-                    {loadingLocalities && (
-                      <Loader
-                        className="d-inline-block animate-spin"
-                        size={16}
-                      />
-                    )}
-                    {formState.city && (
-                      <span className="text-muted small ms-2">
-                        ({localitySuggestions.length} localidades disponibles)
-                      </span>
-                    )}
-                  </label>
-                  <div className="position-relative">
-                    <Search
-                      className="position-absolute"
-                      size={20}
-                      style={{ left: 12, top: 12 }}
-                    />
-                    <input
-                      type="text"
-                      className="form-control ps-5"
-                      placeholder={
-                        formState.city
-                          ? "Buscar o seleccionar localidad..."
-                          : "Primero selecciona una ciudad"
-                      }
-                      value={localityQuery}
-                      onChange={(e) => setLocalityQuery(e.target.value)}
-                      disabled={!formState.city}
-                      onFocus={() => setShowLocalityDropdown(true)}
-                      onBlur={() =>
-                        setTimeout(() => setShowLocalityDropdown(false), 200)
-                      }
-                    />
-                  </div>
-
-                  {/* Lista de localidades (filtrada localmente) */}
-                  {showLocalityDropdown &&
-                    formState.city &&
-                    localitySuggestions.length > 0 && (
-                      <div
-                        className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
-                        style={{
-                          zIndex: 1000,
-                          maxHeight: "300px",
-                          overflowY: "auto",
-                        }}
-                      >
-                        {handleSearchLocalities(
-                          localityQuery,
-                          localitySuggestions
-                        )
-                          .slice(0, 50)
-                          .map((locality, idx) => (
-                            <div
-                              key={idx}
-                              className="p-3 border-bottom cursor-pointer hover-bg-light d-flex justify-content-between align-items-center"
-                              onClick={() => handleSelectLocality(locality)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              <div>
-                                <div className="fw-semibold">
-                                  {locality.name}
-                                </div>
-                                <div className="small text-muted">
-                                  {locality.displayName}
-                                </div>
-                              </div>
-                              {formState.locality === locality.name && (
-                                <Check className="text-success" size={20} />
-                              )}
-                            </div>
-                          ))}
-                      </div>
-                    )}
-
-                  {formState.locality && (
-                    <div className="mt-2">
-                      <span className="badge bg-success fs-6 py-2">
-                        ✓ {formState.locality}
                       </span>
                     </div>
                   )}
