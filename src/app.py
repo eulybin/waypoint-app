@@ -1,7 +1,3 @@
-"""
-This file is the entry point of your application
-"""
-
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, url_for, send_from_directory

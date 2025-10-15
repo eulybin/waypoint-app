@@ -76,3 +76,33 @@ body {
   opacity: 0.75;
   cursor: not-allowed;
 }
+
+.hover-bg-light:hover {
+  background-color: #f8f9fa !important;
+}
+
+[data-bs-theme='dark'] .hover-bg-light:hover {
+  background-color: #2d2d2d !important;
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mejorar z-index de dropdowns */
+.dropdown-suggestions {
+  z-index: 1050 !important;
+}
