@@ -1,6 +1,4 @@
-
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
-
 
 // ============================================================================
 // PÁGINA: CreateRoute - VERSIÓN PROFESIONAL 2025 ✨
@@ -20,10 +18,21 @@ import {
   Loader,
   AlertCircle,
   Check,
+  Compass,
+  Building2,
+  UtensilsCrossed,
+  Coffee,
+  Beer,
+  Trees,
+  Landmark,
+  Church,
+  Hotel,
+  Mountain,
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import { NAVBAR_WIDTH } from "../utils/constants";
+import { STANDARD_ICON_SIZE } from "../utils/constants";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -85,6 +94,12 @@ const initialFormState = {
   points_of_interest: [],
 };
 
+const loadingAll = {
+  countries: false,
+  cities: false,
+  pois: false,
+};
+
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
@@ -93,23 +108,26 @@ const CreateRoute = () => {
   const [formState, dispatch] = useReducer(formReducer, initialFormState);
 
   // ========== ESTADOS AUXILIARES ==========
+  const [loadingAll, setLoadingAll] = useState({
+    countries: false,
+    cities: false,
+    pois: false,
+  });
+
+  const [showDropdownAll, setShowDropdownAll] = useState({
+    countries: false,
+    cities: false,
+    pois: false,
+  });
+
   const [countrySuggestions, setCountrySuggestions] = useState([]);
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [poiSuggestions, setPoiSuggestions] = useState([]);
-
-  const [loadingCountries, setLoadingCountries] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [loadingPOIs, setLoadingPOIs] = useState(false);
 
   const [countryQuery, setCountryQuery] = useState("");
   const [cityQuery, setCityQuery] = useState("");
   const [poiQuery, setPoiQuery] = useState("");
   const [poiType, setPoiType] = useState("attraction");
-
-  // Estados para controlar visibilidad de dropdowns
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [showPoiDropdown, setShowPoiDropdown] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -131,7 +149,7 @@ const CreateRoute = () => {
       return;
     }
 
-    setLoadingCountries(true);
+    setLoadingAll(true);
 
     try {
       const results = await searchLocations(query, { type: "country" });
@@ -159,7 +177,7 @@ const CreateRoute = () => {
     } catch (error) {
       console.error("Error searching countries:", error);
     } finally {
-      setLoadingCountries(false);
+      setLoading(false);
     }
   }, []);
 
@@ -172,7 +190,7 @@ const CreateRoute = () => {
   // ============================================================================
   const loadAllCitiesForCountry = useCallback(
     async (countryCode, countryName) => {
-      setLoadingCities(true);
+      setLoadingAll(true);
       setCitySuggestions([]);
 
       try {
@@ -273,7 +291,7 @@ const CreateRoute = () => {
         console.error("Error loading cities:", error);
         setError("Error al cargar sugerencias. Puedes buscar manualmente.");
       } finally {
-        setLoadingCities(false);
+        setLoadingAll(false);
       }
     },
     []
@@ -297,7 +315,7 @@ const CreateRoute = () => {
   const loadAllPOIsForCategory = useCallback(async (category, coordinates) => {
     if (!coordinates) return;
 
-    setLoadingPOIs(true);
+    setLoadingAll(true);
     setPoiSuggestions([]);
 
     try {
@@ -314,7 +332,7 @@ const CreateRoute = () => {
       console.error("Error loading POIs:", error);
       setError("Error al cargar los puntos de interés");
     } finally {
-      setLoadingPOIs(false);
+      setLoadingAll(false);
     }
   }, []);
 
@@ -351,10 +369,10 @@ const CreateRoute = () => {
   useEffect(() => {
     if (formState.country && formState.countryCode) {
       loadAllCitiesForCountry(formState.countryCode, formState.country);
-      setShowCityDropdown(true); // Abrir dropdown de ciudades al cargar
+      setShowDropdownAll((prev) => ({ ...prev, cities: true })); // Abrir dropdown de ciudades al cargar
     } else {
       setCitySuggestions([]);
-      setShowCityDropdown(false);
+      setShowDropdownAll((prev) => ({ ...prev, cities: false }));
     }
   }, [formState.country, formState.countryCode, loadAllCitiesForCountry]);
 
@@ -383,7 +401,7 @@ const CreateRoute = () => {
       console.log(
         `[Búsqueda Manual] 🔎 Buscando: "${cityQuery}" en ${formState.countryCode}`
       );
-      setLoadingCities(true);
+      setLoadingAll(true);
 
       try {
         // BÚSQUEDA MÁS AMPLIA: Query directo con el nombre del pueblo
@@ -458,7 +476,7 @@ const CreateRoute = () => {
       } catch (error) {
         console.error("[Búsqueda Manual] ❌ Error:", error);
       } finally {
-        setLoadingCities(false);
+        setLoadingAll(false);
       }
     }, 500);
 
@@ -477,10 +495,10 @@ const CreateRoute = () => {
   useEffect(() => {
     if (poiType && formState.coordinates) {
       loadAllPOIsForCategory(poiType, formState.coordinates);
-      setShowPoiDropdown(true); // Abrir dropdown de POIs al cargar
+      setShowDropdownAll((prev) => ({ ...prev, pois: true })); // Abrir dropdown de POIs al cargar
     } else {
       setPoiSuggestions([]);
-      setShowPoiDropdown(false);
+      setShowDropdownAll((prev) => ({ ...prev, pois: false }));
     }
   }, [poiType, formState.coordinates, loadAllPOIsForCategory]);
 
@@ -495,7 +513,7 @@ const CreateRoute = () => {
     });
     setCountryQuery(country.name);
     setCountrySuggestions([]);
-    setShowCountryDropdown(false); // ✅ Cerrar dropdown
+    setShowDropdownAll((prev) => ({ ...prev, countries: false })); // ✅ Cerrar dropdown
   };
 
   const handleSelectCity = (city) => {
@@ -505,7 +523,7 @@ const CreateRoute = () => {
       coordinates: { lat: city.lat, lon: city.lon },
     });
     setCityQuery(city.name);
-    setShowCityDropdown(false); // ✅ Cerrar dropdown
+    setShowDropdownAll((prev) => ({ ...prev, cities: false })); // ✅ Cerrar dropdown
   };
 
   const handleAddPOI = (poi) => {
@@ -520,7 +538,7 @@ const CreateRoute = () => {
       },
     });
     setPoiQuery("");
-    setShowPoiDropdown(false); // ✅ Cerrar dropdown
+    setShowDropdownAll((prev) => ({ ...prev, pois: false })); // ✅ Cerrar dropdown
     // No cerramos el dropdown de POIs para permitir agregar múltiples
   };
 
@@ -610,13 +628,25 @@ const CreateRoute = () => {
                       placeholder="Buscar país... Ej: España"
                       value={countryQuery}
                       onChange={(e) => setCountryQuery(e.target.value)}
-                      onFocus={() => setShowCountryDropdown(true)}
+                      onFocus={() =>
+                        setShowDropdownAll((prev) => ({
+                          ...prev,
+                          countries: true,
+                        }))
+                      }
                       onBlur={() =>
-                        setTimeout(() => setShowCountryDropdown(false), 200)
+                        setTimeout(
+                          () =>
+                            setShowDropdownAll((prev) => ({
+                              ...prev,
+                              countries: false,
+                            })),
+                          200
+                        )
                       }
                       required
                     />
-                    {loadingCountries && (
+                    {loadingAll.countries && (
                       <Loader
                         className="position-absolute animate-spin"
                         size={20}
@@ -626,30 +656,31 @@ const CreateRoute = () => {
                   </div>
 
                   {/* Sugerencias de países */}
-                  {showCountryDropdown && countrySuggestions.length > 0 && (
-                    <div
-                      className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
-                      style={{
-                        zIndex: 1000,
-                        maxHeight: "300px",
-                        overflowY: "auto",
-                      }}
-                    >
-                      {countrySuggestions.map((country, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3 border-bottom cursor-pointer hover-bg-light"
-                          onClick={() => handleSelectCountry(country)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <div className="fw-semibold">{country.name}</div>
-                          <div className="small text-muted">
-                            {country.fullName}
+                  {showDropdownAll.countries &&
+                    countrySuggestions.length > 0 && (
+                      <div
+                        className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
+                        style={{
+                          zIndex: 1000,
+                          maxHeight: "300px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {countrySuggestions.map((country, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3 border-bottom cursor-pointer hover-bg-light"
+                            onClick={() => handleSelectCountry(country)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            <div className="fw-semibold">{country.name}</div>
+                            <div className="small text-muted">
+                              {country.fullName}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
 
                   {formState.country && (
                     <div className="mt-2">
@@ -664,7 +695,7 @@ const CreateRoute = () => {
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
                     Ciudad/Localidad *{" "}
-                    {loadingCities && (
+                    {loadingAll && (
                       <span className="text-primary">
                         <Loader
                           className="d-inline-block animate-spin"
@@ -673,7 +704,7 @@ const CreateRoute = () => {
                         Cargando ciudades y localidades...
                       </span>
                     )}
-                    {!loadingCities &&
+                    {!loadingAll &&
                       formState.country &&
                       citySuggestions.length > 0 && (
                         <span className="text-success small ms-2">
@@ -693,7 +724,7 @@ const CreateRoute = () => {
                       placeholder={
                         !formState.country
                           ? "Primero selecciona un país"
-                          : loadingCities
+                          : loadingAll
                           ? "Buscando..."
                           : citySuggestions.length > 0
                           ? "Escribe para buscar más lugares..."
@@ -702,16 +733,28 @@ const CreateRoute = () => {
                       value={cityQuery}
                       onChange={(e) => setCityQuery(e.target.value)}
                       disabled={!formState.country}
-                      onFocus={() => setShowCityDropdown(true)}
+                      onFocus={() =>
+                        setShowDropdownAll((prev) => ({
+                          ...prev,
+                          cities: true,
+                        }))
+                      }
                       onBlur={() =>
-                        setTimeout(() => setShowCityDropdown(false), 200)
+                        setTimeout(
+                          () =>
+                            setShowDropdownAll((prev) => ({
+                              ...prev,
+                              cities: false,
+                            })),
+                          200
+                        )
                       }
                     />
                   </div>
 
                   {/* Mensaje informativo mejorado */}
                   {formState.country &&
-                    !loadingCities &&
+                    !loadingAll &&
                     citySuggestions.length === 0 &&
                     !formState.city &&
                     cityQuery.length === 0 && (
@@ -726,17 +769,15 @@ const CreateRoute = () => {
                     )}
 
                   {/* Mensaje mientras busca */}
-                  {formState.country &&
-                    loadingCities &&
-                    cityQuery.length >= 3 && (
-                      <div className="alert alert-primary mt-2 mb-0 py-2 small">
-                        🔍 Buscando "{cityQuery}" en {formState.country}...
-                      </div>
-                    )}
+                  {formState.country && loadingAll && cityQuery.length >= 3 && (
+                    <div className="alert alert-primary mt-2 mb-0 py-2 small">
+                      🔍 Buscando "{cityQuery}" en {formState.country}...
+                    </div>
+                  )}
 
                   {/* Mensaje si no encuentra resultados */}
                   {formState.country &&
-                    !loadingCities &&
+                    !loadingAll &&
                     citySuggestions.length === 0 &&
                     cityQuery.length >= 3 && (
                       <div className="alert alert-warning mt-2 mb-0 py-2 small">
@@ -749,7 +790,7 @@ const CreateRoute = () => {
                     )}
 
                   {/* Lista de ciudades y localidades (filtrada localmente) */}
-                  {showCityDropdown &&
+                  {showDropdownAll.cities &&
                     formState.country &&
                     citySuggestions.length > 0 && (
                       <div
@@ -819,7 +860,7 @@ const CreateRoute = () => {
                 <div className="mb-3">
                   <label className="form-label fw-semibold">
                     Puntos de Interés *{" "}
-                    {loadingPOIs && (
+                    {loadingAll && (
                       <Loader
                         className="d-inline-block animate-spin"
                         size={16}
@@ -833,30 +874,99 @@ const CreateRoute = () => {
                     )}
                   </label>
 
-                  {/* Selector de categoría de POI */}
-                  <div className="mb-2">
-                    <label className="form-label small">
+                  {/* Selector de categoría de POI con Botones */}
+                  <div className="mb-3">
+                    <label className="form-label small fw-semibold">
                       Selecciona una categoría:
                     </label>
-                    <select
-                      className="form-select"
-                      value={poiType}
-                      onChange={(e) => setPoiType(e.target.value)}
-                      disabled={!formState.city}
-                    >
-                      <option value="attraction">
-                        🎯 Atracciones Turísticas
-                      </option>
-                      <option value="museum">🏛️ Museos</option>
-                      <option value="restaurant">🍽️ Restaurantes</option>
-                      <option value="cafe">☕ Cafés</option>
-                      <option value="bar">🍺 Bares</option>
-                      <option value="park">🌳 Parques</option>
-                      <option value="monument">🗿 Monumentos</option>
-                      <option value="church">⛪ Iglesias</option>
-                      <option value="hotel">🏨 Hoteles</option>
-                      <option value="viewpoint">🏞️ Miradores</option>
-                    </select>
+                    <div className="d-flex flex-wrap gap-2">
+                      {[
+                        {
+                          value: "attraction",
+                          icon: Compass,
+                          label: "Atracciones",
+                          color: "primary",
+                        },
+                        {
+                          value: "museum",
+                          icon: Building2,
+                          label: "Museos",
+                          color: "info",
+                        },
+                        {
+                          value: "restaurant",
+                          icon: UtensilsCrossed,
+                          label: "Restaurantes",
+                          color: "danger",
+                        },
+                        {
+                          value: "cafe",
+                          icon: Coffee,
+                          label: "Cafés",
+                          color: "warning",
+                        },
+                        {
+                          value: "bar",
+                          icon: Beer,
+                          label: "Bares",
+                          color: "success",
+                        },
+                        {
+                          value: "park",
+                          icon: Trees,
+                          label: "Parques",
+                          color: "success",
+                        },
+                        {
+                          value: "monument",
+                          icon: Landmark,
+                          label: "Monumentos",
+                          color: "secondary",
+                        },
+                        {
+                          value: "church",
+                          icon: Church,
+                          label: "Iglesias",
+                          color: "info",
+                        },
+                        {
+                          value: "hotel",
+                          icon: Hotel,
+                          label: "Hoteles",
+                          color: "primary",
+                        },
+                        {
+                          value: "viewpoint",
+                          icon: Mountain,
+                          label: "Miradores",
+                          color: "success",
+                        },
+                      ].map((category) => {
+                        const IconComponent = category.icon;
+                        return (
+                          <button
+                            key={category.value}
+                            type="button"
+                            className={`btn ${
+                              poiType === category.value
+                                ? `btn-${category.color}`
+                                : `btn-outline-${category.color}`
+                            } btn-sm d-flex align-items-center gap-2`}
+                            onClick={() => setPoiType(category.value)}
+                            disabled={!formState.city}
+                            style={{
+                              cursor: formState.city
+                                ? "pointer"
+                                : "not-allowed",
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            <IconComponent size={16} />
+                            {category.label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* POIs Seleccionados (Tags) */}
@@ -904,15 +1014,27 @@ const CreateRoute = () => {
                         value={poiQuery}
                         onChange={(e) => setPoiQuery(e.target.value)}
                         disabled={!formState.city}
-                        onFocus={() => setShowPoiDropdown(true)}
+                        onFocus={() =>
+                          setShowDropdownAll((prev) => ({
+                            ...prev,
+                            pois: true,
+                          }))
+                        }
                         onBlur={() =>
-                          setTimeout(() => setShowPoiDropdown(false), 200)
+                          setTimeout(
+                            () =>
+                              setShowDropdownAll((prev) => ({
+                                ...prev,
+                                pois: false,
+                              })),
+                            200
+                          )
                         }
                       />
                     </div>
 
                     {/* Lista de POIs (filtrada localmente) */}
-                    {showPoiDropdown &&
+                    {showDropdownAll.pois &&
                       formState.city &&
                       poiSuggestions.length > 0 && (
                         <div
