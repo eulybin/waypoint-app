@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
 // ============================================================================
@@ -7,6 +8,7 @@ import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 // ✅ Al seleccionar ciudad/localidad → Muestra TODOS los POIs disponibles
 // ✅ Permite seleccionar MÚLTIPLES POIs para una ruta
 // ✅ Flujo simplificado: País → Ciudad/Localidad → POIs
+// ✅ Sistema de CARDS con paginación (12 por página)
 // ============================================================================
 
 import { useNavigate } from "react-router-dom";
@@ -28,6 +30,8 @@ import {
   Church,
   Hotel,
   Mountain,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
@@ -101,6 +105,27 @@ const loadingAll = {
 };
 
 // ============================================================================
+// CONSTANTES PARA PAGINACIÓN
+// ============================================================================
+const ITEMS_PER_PAGE = 8;
+
+// ============================================================================
+// IMÁGENES POR DEFECTO SEGÚN TIPO DE POI
+// ============================================================================
+const DEFAULT_IMAGES = {
+  attraction: "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400&h=300&fit=crop",
+  museum: "https://images.unsplash.com/photo-1565626424178-c699f6601afd?w=400&h=300&fit=crop",
+  restaurant: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
+  cafe: "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&h=300&fit=crop",
+  bar: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop",
+  park: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
+  monument: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=300&fit=crop",
+  church: "https://images.unsplash.com/photo-1491677533189-49215d7e8c2e?w=400&h=300&fit=crop",
+  hotel: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
+  viewpoint: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+};
+
+// ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 const CreateRoute = () => {
@@ -120,17 +145,24 @@ const CreateRoute = () => {
     pois: false,
   });
 
-  const [countrySuggestions, setCountrySuggestions] = useState([]);
-  const [citySuggestions, setCitySuggestions] = useState([]);
-  const [poiSuggestions, setPoiSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState({
+    countries: [],
+    cities: [],
+    pois: [],
+  });
 
-  const [countryQuery, setCountryQuery] = useState("");
-  const [cityQuery, setCityQuery] = useState("");
-  const [poiQuery, setPoiQuery] = useState("");
-  const [poiType, setPoiType] = useState("attraction");
+  const [searchState, setSearchState] = useState({
+    countryQuery: "",
+    cityQuery: "",
+    poiQuery: "",
+    poiType: "attraction",
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  
+  // ========== ESTADO PARA PAGINACIÓN ==========
+  const [currentPage, setCurrentPage] = useState(1);
 
   // ========== REFS PARA DEBOUNCING ==========
   const countryDebounceRef = useRef(null);
@@ -145,11 +177,11 @@ const CreateRoute = () => {
   // ============================================================================
   const handleSearchCountries = useCallback(async (query) => {
     if (query.length < 2) {
-      setCountrySuggestions([]);
+      setSuggestions((prev) => ({ ...prev, countries: [] }));
       return;
     }
 
-    setLoadingAll(true);
+    setLoadingAll((prev) => ({ ...prev, countries: true }));
 
     try {
       const results = await searchLocations(query, { type: "country" });
@@ -173,11 +205,11 @@ const CreateRoute = () => {
         return acc;
       }, []);
 
-      setCountrySuggestions(uniqueCountries);
+      setSuggestions((prev) => ({ ...prev, countries: uniqueCountries }));
     } catch (error) {
       console.error("Error searching countries:", error);
     } finally {
-      setLoading(false);
+      setLoadingAll((prev) => ({ ...prev, countries: false }));
     }
   }, []);
 
@@ -190,8 +222,8 @@ const CreateRoute = () => {
   // ============================================================================
   const loadAllCitiesForCountry = useCallback(
     async (countryCode, countryName) => {
-      setLoadingAll(true);
-      setCitySuggestions([]);
+      setLoadingAll((prev) => ({ ...prev, cities: true }));
+      setSuggestions((prev) => ({ ...prev, cities: [] }));
 
       try {
         console.log(
@@ -279,7 +311,7 @@ const CreateRoute = () => {
         console.log(
           `[loadAllCitiesForCountry] ✅ Lugares únicos: ${citiesAndLocalities.length}`
         );
-        setCitySuggestions(citiesAndLocalities);
+        setSuggestions((prev) => ({ ...prev, cities: citiesAndLocalities }));
 
         // Mensaje informativo en lugar de error
         if (citiesAndLocalities.length === 0) {
@@ -291,7 +323,7 @@ const CreateRoute = () => {
         console.error("Error loading cities:", error);
         setError("Error al cargar sugerencias. Puedes buscar manualmente.");
       } finally {
-        setLoadingAll(false);
+        setLoadingAll((prev) => ({ ...prev, cities: false }));
       }
     },
     []
@@ -315,8 +347,8 @@ const CreateRoute = () => {
   const loadAllPOIsForCategory = useCallback(async (category, coordinates) => {
     if (!coordinates) return;
 
-    setLoadingAll(true);
-    setPoiSuggestions([]);
+    setLoadingAll((prev) => ({ ...prev, pois: true }));
+    setSuggestions((prev) => ({ ...prev, pois: [] }));
 
     try {
       // Buscar todos los POIs de la categoría en un radio de 10km
@@ -327,12 +359,12 @@ const CreateRoute = () => {
         10000 // 10km de radio
       );
 
-      setPoiSuggestions(pois);
+      setSuggestions((prev) => ({ ...prev, pois }));
     } catch (error) {
       console.error("Error loading POIs:", error);
       setError("Error al cargar los puntos de interés");
     } finally {
-      setLoadingAll(false);
+      setLoadingAll((prev) => ({ ...prev, pois: false }));
     }
   }, []);
 
@@ -357,11 +389,11 @@ const CreateRoute = () => {
     }
 
     countryDebounceRef.current = setTimeout(() => {
-      handleSearchCountries(countryQuery);
+      handleSearchCountries(searchState.countryQuery);
     }, 500);
 
     return () => clearTimeout(countryDebounceRef.current);
-  }, [countryQuery, handleSearchCountries]);
+  }, [searchState.countryQuery, handleSearchCountries]);
 
   // ============================================================================
   // EFFECT: Al seleccionar país → Cargar ciudades automáticamente
@@ -371,7 +403,7 @@ const CreateRoute = () => {
       loadAllCitiesForCountry(formState.countryCode, formState.country);
       setShowDropdownAll((prev) => ({ ...prev, cities: true })); // Abrir dropdown de ciudades al cargar
     } else {
-      setCitySuggestions([]);
+      setSuggestions((prev) => ({ ...prev, cities: [] }));
       setShowDropdownAll((prev) => ({ ...prev, cities: false }));
     }
   }, [formState.country, formState.countryCode, loadAllCitiesForCountry]);
@@ -382,12 +414,19 @@ const CreateRoute = () => {
   // ============================================================================
   useEffect(() => {
     // Solo buscar si el usuario está escribiendo activamente
-    if (!cityQuery || !formState.countryCode || cityQuery.length < 3) {
+    if (
+      !searchState.cityQuery ||
+      !formState.countryCode ||
+      searchState.cityQuery.length < 3
+    ) {
       return;
     }
 
     // Si ya hay resultados que coinciden, usar filtrado local
-    const localMatches = handleSearchCities(cityQuery, citySuggestions);
+    const localMatches = handleSearchCities(
+      searchState.cityQuery,
+      suggestions.cities
+    );
     if (localMatches.length > 0) {
       return; // Ya hay resultados, no hacer nueva búsqueda
     }
@@ -399,13 +438,13 @@ const CreateRoute = () => {
 
     cityDebounceRef.current = setTimeout(async () => {
       console.log(
-        `[Búsqueda Manual] 🔎 Buscando: "${cityQuery}" en ${formState.countryCode}`
+        `[Búsqueda Manual] 🔎 Buscando: "${searchState.cityQuery}" en ${formState.countryCode}`
       );
-      setLoadingAll(true);
+      setLoadingAll((prev) => ({ ...prev, cities: true }));
 
       try {
         // BÚSQUEDA MÁS AMPLIA: Query directo con el nombre del pueblo
-        const searchQuery = `${cityQuery}, ${formState.country}`;
+        const searchQuery = `${searchState.cityQuery}, ${formState.country}`;
 
         const results = await searchLocations(searchQuery, {
           countryCode: formState.countryCode.toLowerCase(),
@@ -467,7 +506,7 @@ const CreateRoute = () => {
         console.log(`[Búsqueda Manual] ✅ Lugares únicos: ${cities.length}`);
 
         if (cities.length > 0) {
-          setCitySuggestions(cities);
+          setSuggestions((prev) => ({ ...prev, cities: cities }));
           console.log(
             `[Búsqueda Manual] 📍 Ejemplos:`,
             cities.slice(0, 5).map((c) => c.name)
@@ -476,16 +515,16 @@ const CreateRoute = () => {
       } catch (error) {
         console.error("[Búsqueda Manual] ❌ Error:", error);
       } finally {
-        setLoadingAll(false);
+        setLoadingAll((prev) => ({ ...prev, cities: false }));
       }
     }, 500);
 
     return () => clearTimeout(cityDebounceRef.current);
   }, [
-    cityQuery,
+    searchState.cityQuery,
     formState.countryCode,
     formState.country,
-    citySuggestions,
+    suggestions.cities,
     handleSearchCities,
   ]);
 
@@ -493,14 +532,22 @@ const CreateRoute = () => {
   // EFFECT: Al seleccionar categoría POI → Cargar POIs automáticamente
   // ============================================================================
   useEffect(() => {
-    if (poiType && formState.coordinates) {
-      loadAllPOIsForCategory(poiType, formState.coordinates);
+    if (searchState.poiType && formState.coordinates) {
+      loadAllPOIsForCategory(searchState.poiType, formState.coordinates);
       setShowDropdownAll((prev) => ({ ...prev, pois: true })); // Abrir dropdown de POIs al cargar
+      setCurrentPage(1); // Reset página al cambiar categoría
     } else {
-      setPoiSuggestions([]);
+      setSuggestions((prev) => ({ ...prev, pois: [] }));
       setShowDropdownAll((prev) => ({ ...prev, pois: false }));
     }
-  }, [poiType, formState.coordinates, loadAllPOIsForCategory]);
+  }, [searchState.poiType, formState.coordinates, loadAllPOIsForCategory]);
+
+  // ============================================================================
+  // EFFECT: Reset página cuando cambia la búsqueda
+  // ============================================================================
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchState.poiQuery]);
 
   // ============================================================================
   // HANDLERS: Selección de sugerencias
@@ -511,8 +558,8 @@ const CreateRoute = () => {
       value: country.name,
       countryCode: country.code,
     });
-    setCountryQuery(country.name);
-    setCountrySuggestions([]);
+    setSearchState((prev) => ({ ...prev, countryQuery: country.name }));
+    setSuggestions((prev) => ({ ...prev, countries: [] }));
     setShowDropdownAll((prev) => ({ ...prev, countries: false })); // ✅ Cerrar dropdown
   };
 
@@ -522,7 +569,7 @@ const CreateRoute = () => {
       value: city.name,
       coordinates: { lat: city.lat, lon: city.lon },
     });
-    setCityQuery(city.name);
+    setSearchState((prev) => ({ ...prev, cityQuery: city.name }));
     setShowDropdownAll((prev) => ({ ...prev, cities: false })); // ✅ Cerrar dropdown
   };
 
@@ -537,9 +584,7 @@ const CreateRoute = () => {
         lon: poi.lon,
       },
     });
-    setPoiQuery("");
-    setShowDropdownAll((prev) => ({ ...prev, pois: false })); // ✅ Cerrar dropdown
-    // No cerramos el dropdown de POIs para permitir agregar múltiples
+    // No limpiamos el query ni cerramos para permitir agregar múltiples
   };
 
   const handleRemovePOI = (poiId) => {
@@ -590,6 +635,80 @@ const CreateRoute = () => {
   };
 
   // ============================================================================
+  // FUNCIONES AUXILIARES: Paginación y filtrado de POIs
+  // ============================================================================
+  const getFilteredPOIs = () => {
+    return handleSearchPOIs(searchState.poiQuery, suggestions.pois);
+  };
+
+  const getPaginatedPOIs = () => {
+    const filtered = getFilteredPOIs();
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filtered.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = () => {
+    const filtered = getFilteredPOIs();
+    return Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ============================================================================
+  // FUNCIÓN: Obtener icono según tipo de POI
+  // ============================================================================
+  const getPOIIcon = (type) => {
+    const iconMap = {
+      attraction: Compass,
+      museum: Building2,
+      restaurant: UtensilsCrossed,
+      cafe: Coffee,
+      bar: Beer,
+      park: Trees,
+      monument: Landmark,
+      church: Church,
+      hotel: Hotel,
+      viewpoint: Mountain,
+    };
+    return iconMap[type] || MapPin;
+  };
+
+  // ============================================================================
+  // FUNCIÓN: Obtener color según tipo de POI
+  // ============================================================================
+  const getPOIColor = (type) => {
+    const colorMap = {
+      attraction: 'primary',
+      museum: 'info',
+      restaurant: 'danger',
+      cafe: 'warning',
+      bar: 'success',
+      park: 'success',
+      monument: 'secondary',
+      church: 'info',
+      hotel: 'primary',
+      viewpoint: 'success',
+    };
+    return colorMap[type] || 'primary';
+  };
+
+  // ============================================================================
+  // FUNCIÓN: Obtener imagen del POI (de la API o por defecto)
+  // ============================================================================
+  const getPOIImage = (poi, poiType) => {
+    // Si el POI tiene imagen de Wikimedia/Wikipedia, usarla
+    if (poi.image) {
+      return poi.image;
+    }
+    // Si no, usar imagen por defecto según el tipo
+    return DEFAULT_IMAGES[poiType] || DEFAULT_IMAGES.attraction;
+  };
+
+  // ============================================================================
   // RENDER
   // ============================================================================
   return (
@@ -626,8 +745,13 @@ const CreateRoute = () => {
                       type="text"
                       className="form-control ps-5"
                       placeholder="Buscar país... Ej: España"
-                      value={countryQuery}
-                      onChange={(e) => setCountryQuery(e.target.value)}
+                      value={searchState.countryQuery}
+                      onChange={(e) =>
+                        setSearchState((prev) => ({
+                          ...prev,
+                          countryQuery: e.target.value,
+                        }))
+                      }
                       onFocus={() =>
                         setShowDropdownAll((prev) => ({
                           ...prev,
@@ -657,7 +781,7 @@ const CreateRoute = () => {
 
                   {/* Sugerencias de países */}
                   {showDropdownAll.countries &&
-                    countrySuggestions.length > 0 && (
+                    suggestions.countries.length > 0 && (
                       <div
                         className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
                         style={{
@@ -666,7 +790,7 @@ const CreateRoute = () => {
                           overflowY: "auto",
                         }}
                       >
-                        {countrySuggestions.map((country, idx) => (
+                        {suggestions.countries.map((country, idx) => (
                           <div
                             key={idx}
                             className="p-3 border-bottom cursor-pointer hover-bg-light"
@@ -695,7 +819,7 @@ const CreateRoute = () => {
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
                     Ciudad/Localidad *{" "}
-                    {loadingAll && (
+                    {loadingAll.cities && (
                       <span className="text-primary">
                         <Loader
                           className="d-inline-block animate-spin"
@@ -704,11 +828,11 @@ const CreateRoute = () => {
                         Cargando ciudades y localidades...
                       </span>
                     )}
-                    {!loadingAll &&
+                    {!loadingAll.cities &&
                       formState.country &&
-                      citySuggestions.length > 0 && (
+                      suggestions.cities.length > 0 && (
                         <span className="text-success small ms-2">
-                          ({citySuggestions.length} opciones disponibles)
+                          ({suggestions.cities.length} opciones disponibles)
                         </span>
                       )}
                   </label>
@@ -724,14 +848,19 @@ const CreateRoute = () => {
                       placeholder={
                         !formState.country
                           ? "Primero selecciona un país"
-                          : loadingAll
+                          : loadingAll.cities
                           ? "Buscando..."
-                          : citySuggestions.length > 0
+                          : suggestions.cities.length > 0
                           ? "Escribe para buscar más lugares..."
                           : "Escribe el nombre del pueblo/ciudad (ej: Carmona)"
                       }
-                      value={cityQuery}
-                      onChange={(e) => setCityQuery(e.target.value)}
+                      value={searchState.cityQuery}
+                      onChange={(e) =>
+                        setSearchState((prev) => ({
+                          ...prev,
+                          cityQuery: e.target.value,
+                        }))
+                      }
                       disabled={!formState.country}
                       onFocus={() =>
                         setShowDropdownAll((prev) => ({
@@ -754,10 +883,10 @@ const CreateRoute = () => {
 
                   {/* Mensaje informativo mejorado */}
                   {formState.country &&
-                    !loadingAll &&
-                    citySuggestions.length === 0 &&
+                    !loadingAll.cities &&
+                    suggestions.cities.length === 0 &&
                     !formState.city &&
-                    cityQuery.length === 0 && (
+                    searchState.cityQuery.length === 0 && (
                       <div className="alert alert-info mt-2 mb-0 py-2 small">
                         💡 <strong>Escribe el nombre</strong> del pueblo o
                         ciudad que buscas
@@ -769,19 +898,22 @@ const CreateRoute = () => {
                     )}
 
                   {/* Mensaje mientras busca */}
-                  {formState.country && loadingAll && cityQuery.length >= 3 && (
-                    <div className="alert alert-primary mt-2 mb-0 py-2 small">
-                      🔍 Buscando "{cityQuery}" en {formState.country}...
-                    </div>
-                  )}
+                  {formState.country &&
+                    loadingAll.cities &&
+                    searchState.cityQuery.length >= 3 && (
+                      <div className="alert alert-primary mt-2 mb-0 py-2 small">
+                        🔍 Buscando "{searchState.cityQuery}" en{" "}
+                        {formState.country}...
+                      </div>
+                    )}
 
                   {/* Mensaje si no encuentra resultados */}
                   {formState.country &&
-                    !loadingAll &&
-                    citySuggestions.length === 0 &&
-                    cityQuery.length >= 3 && (
+                    !loadingAll.cities &&
+                    suggestions.cities.length === 0 &&
+                    searchState.cityQuery.length >= 3 && (
                       <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                        ⚠️ No se encontró "{cityQuery}".
+                        ⚠️ No se encontró "{searchState.cityQuery}".
                         <br />
                         <span className="text-muted">
                           Intenta con otro nombre o verifica la ortografía.
@@ -792,7 +924,7 @@ const CreateRoute = () => {
                   {/* Lista de ciudades y localidades (filtrada localmente) */}
                   {showDropdownAll.cities &&
                     formState.country &&
-                    citySuggestions.length > 0 && (
+                    suggestions.cities.length > 0 && (
                       <div
                         className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
                         style={{
@@ -801,7 +933,10 @@ const CreateRoute = () => {
                           overflowY: "auto",
                         }}
                       >
-                        {handleSearchCities(cityQuery, citySuggestions)
+                        {handleSearchCities(
+                          searchState.cityQuery,
+                          suggestions.cities
+                        )
                           .slice(0, 50) // Limitar a 50 para performance
                           .map((city, idx) => (
                             <div
@@ -856,11 +991,11 @@ const CreateRoute = () => {
                   )}
                 </div>
 
-                {/* Puntos de Interés - MÚLTIPLES SELECCIONES */}
+                {/* Puntos de Interés - MÚLTIPLES SELECCIONES CON CARDS */}
                 <div className="mb-3">
                   <label className="form-label fw-semibold">
                     Puntos de Interés *{" "}
-                    {loadingAll && (
+                    {loadingAll.pois && (
                       <Loader
                         className="d-inline-block animate-spin"
                         size={16}
@@ -869,7 +1004,7 @@ const CreateRoute = () => {
                     {formState.city && (
                       <span className="text-muted small ms-2">
                         ({formState.points_of_interest.length} seleccionados,{" "}
-                        {poiSuggestions.length} disponibles)
+                        {suggestions.pois.length} disponibles)
                       </span>
                     )}
                   </label>
@@ -879,7 +1014,7 @@ const CreateRoute = () => {
                     <label className="form-label small fw-semibold">
                       Selecciona una categoría:
                     </label>
-                    <div className="d-flex flex-wrap gap-2">
+                    <div className="d-flex flex-wrap gap-2 STANDARD_ICON_SIZE">
                       {[
                         {
                           value: "attraction",
@@ -948,11 +1083,16 @@ const CreateRoute = () => {
                             key={category.value}
                             type="button"
                             className={`btn ${
-                              poiType === category.value
+                              searchState.poiType === category.value
                                 ? `btn-${category.color}`
                                 : `btn-outline-${category.color}`
                             } btn-sm d-flex align-items-center gap-2`}
-                            onClick={() => setPoiType(category.value)}
+                            onClick={() =>
+                              setSearchState((prev) => ({
+                                ...prev,
+                                poiType: category.value,
+                              }))
+                            }
                             disabled={!formState.city}
                             style={{
                               cursor: formState.city
@@ -996,7 +1136,7 @@ const CreateRoute = () => {
                   )}
 
                   {/* Buscador de POI */}
-                  <div className="position-relative">
+                  <div className="position-relative mb-3">
                     <div className="position-relative">
                       <Search
                         className="position-absolute"
@@ -1008,79 +1148,293 @@ const CreateRoute = () => {
                         className="form-control ps-5"
                         placeholder={
                           formState.city
-                            ? "Buscar para agregar más POIs..."
+                            ? "Buscar por nombre..."
                             : "Primero selecciona una ciudad"
                         }
-                        value={poiQuery}
-                        onChange={(e) => setPoiQuery(e.target.value)}
-                        disabled={!formState.city}
-                        onFocus={() =>
-                          setShowDropdownAll((prev) => ({
+                        value={searchState.poiQuery}
+                        onChange={(e) =>
+                          setSearchState((prev) => ({
                             ...prev,
-                            pois: true,
+                            poiQuery: e.target.value,
                           }))
                         }
-                        onBlur={() =>
-                          setTimeout(
-                            () =>
-                              setShowDropdownAll((prev) => ({
-                                ...prev,
-                                pois: false,
-                              })),
-                            200
-                          )
-                        }
+                        disabled={!formState.city}
                       />
                     </div>
+                  </div>
 
-                    {/* Lista de POIs (filtrada localmente) */}
-                    {showDropdownAll.pois &&
-                      formState.city &&
-                      poiSuggestions.length > 0 && (
-                        <div
-                          className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
-                          style={{
-                            zIndex: 1000,
-                            maxHeight: "400px",
-                            overflowY: "auto",
-                          }}
-                        >
-                          {handleSearchPOIs(poiQuery, poiSuggestions).map(
-                            (poi) => {
-                              const isSelected =
-                                formState.points_of_interest.some(
-                                  (p) => p.id === poi.id
-                                );
-                              return (
-                                <div
-                                  key={poi.id}
-                                  className={`p-3 border-bottom cursor-pointer hover-bg-light d-flex justify-content-between align-items-center ${
-                                    isSelected ? "bg-success bg-opacity-10" : ""
-                                  }`}
-                                  onClick={() => handleAddPOI(poi)}
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  <div className="flex-grow-1">
-                                    <div className="fw-semibold">
-                                      {poi.name}
+                  {/* Grid de Cards de POIs con Paginación */}
+                  {formState.city && suggestions.pois.length > 0 && (
+                    <div className="poi-cards-container">
+                      {/* Información de resultados */}
+                      <div className="mb-3 d-flex justify-content-between align-items-center">
+                        <div className="text-muted small">
+                          Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, getFilteredPOIs().length)} de {getFilteredPOIs().length} resultados
+                        </div>
+                        <div className="text-muted small">
+                          Página {currentPage} de {getTotalPages()}
+                        </div>
+                      </div>
+
+                      {/* Grid de Cards */}
+                      <div className="row g-3 mb-4">
+                        {getPaginatedPOIs().map((poi) => {
+                          const isSelected = formState.points_of_interest.some(
+                            (p) => p.id === poi.id
+                          );
+                          const IconComponent = getPOIIcon(searchState.poiType);
+                          const colorClass = getPOIColor(searchState.poiType);
+                          const imageUrl = getPOIImage(poi, searchState.poiType);
+
+                          return (
+                            <div key={poi.id} className="col-md-6 col-lg-4 col-xl-3">
+                              <div
+                                className={`card h-100 shadow-sm ${
+                                  isSelected ? 'border-success border-3' : ''
+                                }`}
+                                style={{
+                                  cursor: 'pointer',
+                                  transition: 'all 0.3s ease',
+                                  overflow: 'hidden',
+                                }}
+                                onClick={() => handleAddPOI(poi)}
+                                onMouseEnter={(e) => {
+                                  if (!isSelected) {
+                                    e.currentTarget.style.transform = 'translateY(-5px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (!isSelected) {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '';
+                                  }
+                                }}
+                              >
+                                {/* Imagen del POI con altura fija */}
+                                <div style={{
+                                  position: 'relative',
+                                  width: '100%',
+                                  height: '180px',
+                                  overflow: 'hidden',
+                                  backgroundColor: '#f0f0f0',
+                                }}>
+                                  <img
+                                    src={imageUrl}
+                                    alt={poi.name}
+                                    style={{
+                                      width: '100%',
+                                      height: '100%',
+                                      objectFit: 'cover',
+                                    }}
+                                    onError={(e) => {
+                                      // Si la imagen falla, usar la imagen por defecto
+                                      e.target.src = DEFAULT_IMAGES[searchState.poiType] || DEFAULT_IMAGES.attraction;
+                                    }}
+                                  />
+                                  
+                                  {/* Badge de selección en la esquina */}
+                                  {isSelected && (
+                                    <div style={{
+                                      position: 'absolute',
+                                      top: '10px',
+                                      right: '10px',
+                                      backgroundColor: '#198754',
+                                      color: 'white',
+                                      borderRadius: '50%',
+                                      width: '32px',
+                                      height: '32px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                    }}>
+                                      <Check size={20} />
                                     </div>
-                                    <div className="small text-muted">
-                                      {poi.type}{" "}
-                                      {poi.address && `· ${poi.address}`}
-                                    </div>
-                                  </div>
-                                  {isSelected ? (
-                                    <Check size={20} className="text-success" />
-                                  ) : (
-                                    <Plus size={20} className="text-primary" />
                                   )}
+
+                                  {/* Icono de categoría en la esquina */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '10px',
+                                    left: '10px',
+                                    backgroundColor: 'white',
+                                    borderRadius: '8px',
+                                    padding: '8px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                  }}>
+                                    <IconComponent 
+                                      size={20} 
+                                      className={`text-${colorClass}`}
+                                    />
+                                  </div>
                                 </div>
-                              );
-                            }
-                          )}
+
+                                {/* Contenido de la card con altura fija */}
+                                <div className="card-body d-flex flex-column" style={{ 
+                                  padding: '1rem',
+                                  height: '200px', // Altura fija para el contenido
+                                }}>
+                                  {/* Nombre del POI - altura fija */}
+                                  <h6 className="card-title mb-2 fw-bold" style={{
+                                    fontSize: '0.95rem',
+                                    lineHeight: '1.3',
+                                    height: '2.6rem',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                  }}>
+                                    {poi.name}
+                                  </h6>
+
+                                  {/* Tipo - badge */}
+                                  <div className="mb-2">
+                                    <span 
+                                      className="badge" 
+                                      style={{ 
+                                        fontSize: '0.7rem',
+                                        backgroundColor: `var(--bs-${colorClass})`,
+                                        color: 'white',
+                                      }}
+                                    >
+                                      {poi.type}
+                                    </span>
+                                  </div>
+
+                                  {/* Dirección con altura fija */}
+                                  <div style={{
+                                    fontSize: '0.8rem',
+                                    color: '#6c757d',
+                                    lineHeight: '1.3',
+                                    height: '3.9rem',
+                                    overflow: 'hidden',
+                                    marginBottom: '0.5rem',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 3,
+                                    WebkitBoxOrient: 'vertical',
+                                  }}>
+                                    {poi.address ? (
+                                      <>📍 {poi.address}</>
+                                    ) : (
+                                      <span className="text-muted fst-italic">Sin dirección disponible</span>
+                                    )}
+                                  </div>
+
+                                  {/* Botón siempre al final - con margin-top auto */}
+                                  <div className="mt-auto">
+                                    {isSelected ? (
+                                      <button 
+                                        className="btn btn-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemovePOI(poi.id);
+                                        }}
+                                        style={{
+                                          fontWeight: '600',
+                                          padding: '0.5rem',
+                                        }}
+                                      >
+                                        <Check size={16} />
+                                        Seleccionado
+                                      </button>
+                                    ) : (
+                                      <button 
+                                        className={`btn btn-outline-${colorClass} btn-sm w-100 d-flex align-items-center justify-content-center gap-2`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleAddPOI(poi);
+                                        }}
+                                        style={{
+                                          fontWeight: '600',
+                                          padding: '0.5rem',
+                                        }}
+                                      >
+                                        <Plus size={16} />
+                                        Agregar
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Controles de Paginación */}
+                      {getTotalPages() > 1 && (
+                        <div className="d-flex justify-content-center align-items-center gap-3 mb-3">
+                          <button
+                            className="btn btn-outline-primary"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                          >
+                            <ChevronLeft size={20} />
+                            Anterior
+                          </button>
+
+                          <div className="d-flex gap-2">
+                            {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
+                              // Mostrar solo páginas cercanas a la actual
+                              if (
+                                page === 1 ||
+                                page === getTotalPages() ||
+                                (page >= currentPage - 1 && page <= currentPage + 1)
+                              ) {
+                                return (
+                                  <button
+                                    key={page}
+                                    className={`btn ${
+                                      page === currentPage
+                                        ? 'btn-primary'
+                                        : 'btn-outline-primary'
+                                    }`}
+                                    onClick={() => handlePageChange(page)}
+                                    style={{ minWidth: '40px' }}
+                                  >
+                                    {page}
+                                  </button>
+                                );
+                              } else if (
+                                page === currentPage - 2 ||
+                                page === currentPage + 2
+                              ) {
+                                return <span key={page} className="px-2">...</span>;
+                              }
+                              return null;
+                            })}
+                          </div>
+
+                          <button
+                            className="btn btn-outline-primary"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === getTotalPages()}
+                          >
+                            Siguiente
+                            <ChevronRight size={20} />
+                          </button>
                         </div>
                       )}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Mensaje cuando no hay POIs */}
+                  {formState.city && !loadingAll.pois && suggestions.pois.length === 0 && (
+                    <div className="alert alert-info">
+                      <AlertCircle size={20} className="me-2" />
+                      No se encontraron puntos de interés para esta categoría. Prueba con otra categoría.
+                    </div>
+                  )}
+
+                  {/* Mensaje cuando no hay resultados de búsqueda */}
+                  {formState.city && suggestions.pois.length > 0 && getFilteredPOIs().length === 0 && (
+                    <div className="alert alert-warning">
+                      <AlertCircle size={20} className="me-2" />
+                      No se encontraron resultados para "{searchState.poiQuery}". Intenta con otro término.
+                    </div>
+                  )}
                 </div>
 
                 {/* Error */}
@@ -1090,7 +1444,7 @@ const CreateRoute = () => {
                     role="alert"
                   >
                     <AlertCircle size={20} />
-                    {error}
+                    Necesario Registro 
                   </div>
                 )}
 
