@@ -89,17 +89,21 @@ const Register = () => {
 
   const handleInputOnChange = (e) => {
     const { name, value } = e.target;
-    setSignUpData((prevState) => {
-      return { ...prevState, [name]: value };
-    });
-    setErrorMessage('');
+
+    setSignUpData(prevState => ({ ...prevState, [name]: value }));
+
+    setServerError("");
+    setValidationErrors(prevState => ({ ...prevState, [name]: null }));
   };
+
+
 
   const handleRegisterUser = async (e) => {
     e.preventDefault();
 
-    //SET-UP INPUT VALIDATION HERE:
-    //.......
+    if (!validateRegisterForm()) {
+      return;
+    }
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -109,6 +113,7 @@ const Register = () => {
     abortControllerRef.current = controller;
 
     setIsSubmitting(true);
+    setServerError("");
 
     try {
       const result = await registerUser(signUpData, controller.signal);
@@ -116,12 +121,13 @@ const Register = () => {
         setSignUpData(initialSignUpFormState);
         navigate('/login');
       } else {
-        setErrorMessage(result?.error || 'Failed to sign up, please try again.');
+        const error = result?.error || 'Failed to sign up, please try again.';
+        setServerError(error);
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Registration failed: ', error);
-        setErrorMessage('Failed to sign up, please try again.');
+        setServerError('Failed to sign up, please try again.');
       }
     } finally {
       setIsSubmitting(false);
