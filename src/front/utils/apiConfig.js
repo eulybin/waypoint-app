@@ -102,16 +102,20 @@ const getWikimediaImage = async (wikimediaCommons) => {
 
   try {
     // Extraer el nombre del archivo
-    const fileName = wikimediaCommons.replace("File:", "").replace("Category:", "");
-    
+    const fileName = wikimediaCommons
+      .replace("File:", "")
+      .replace("Category:", "");
+
     // Usar la API de Wikimedia para obtener la URL de la imagen
     const response = await fetch(
-      `https://commons.wikimedia.org/w/api.php?action=query&titles=File:${encodeURIComponent(fileName)}&prop=imageinfo&iiprop=url&format=json&origin=*`
+      `https://commons.wikimedia.org/w/api.php?action=query&titles=File:${encodeURIComponent(
+        fileName
+      )}&prop=imageinfo&iiprop=url&format=json&origin=*`
     );
-    
+
     const data = await response.json();
     const pages = data.query?.pages;
-    
+
     if (pages) {
       const pageId = Object.keys(pages)[0];
       const imageUrl = pages[pageId]?.imageinfo?.[0]?.url;
@@ -120,7 +124,7 @@ const getWikimediaImage = async (wikimediaCommons) => {
   } catch (error) {
     console.error("Error fetching Wikimedia image:", error);
   }
-  
+
   return null;
 };
 
@@ -135,12 +139,14 @@ const getWikipediaImage = async (wikipediaTag) => {
     if (!title) return null;
 
     const response = await fetch(
-      `https://${lang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=500&origin=*`
+      `https://${lang}.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(
+        title
+      )}&prop=pageimages&format=json&pithumbsize=500&origin=*`
     );
-    
+
     const data = await response.json();
     const pages = data.query?.pages;
-    
+
     if (pages) {
       const pageId = Object.keys(pages)[0];
       const imageUrl = pages[pageId]?.thumbnail?.source;
@@ -149,7 +155,7 @@ const getWikipediaImage = async (wikipediaTag) => {
   } catch (error) {
     console.error("Error fetching Wikipedia image:", error);
   }
-  
+
   return null;
 };
 
@@ -223,17 +229,17 @@ export const searchPointsOfInterest = async (lat, lon, type, radius = 5000) => {
     const poisWithImages = await Promise.all(
       pois.slice(0, 20).map(async (poi) => {
         let imageUrl = null;
-        
+
         // Intentar primero con Wikimedia Commons
         if (poi.wikimedia) {
           imageUrl = await getWikimediaImage(poi.wikimedia);
         }
-        
+
         // Si no hay imagen, intentar con Wikipedia
         if (!imageUrl && poi.wikipedia) {
           imageUrl = await getWikipediaImage(poi.wikipedia);
         }
-        
+
         return { ...poi, image: imageUrl };
       })
     );

@@ -1,4 +1,6 @@
+import { Image, Alert } from "react-native";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
 // ============================================================================
@@ -113,16 +115,23 @@ const ITEMS_PER_PAGE = 8;
 // IMÁGENES POR DEFECTO SEGÚN TIPO DE POI
 // ============================================================================
 const DEFAULT_IMAGES = {
-  attraction: "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400&h=300&fit=crop",
-  museum: "https://images.unsplash.com/photo-1565626424178-c699f6601afd?w=400&h=300&fit=crop",
-  restaurant: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
+  attraction:
+    "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400&h=300&fit=crop",
+  museum:
+    "https://images.unsplash.com/photo-1565626424178-c699f6601afd?w=400&h=300&fit=crop",
+  restaurant:
+    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
   cafe: "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&h=300&fit=crop",
   bar: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop",
   park: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
-  monument: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=300&fit=crop",
-  church: "https://images.unsplash.com/photo-1491677533189-49215d7e8c2e?w=400&h=300&fit=crop",
-  hotel: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
-  viewpoint: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+  monument:
+    "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=300&fit=crop",
+  church:
+    "https://images.unsplash.com/photo-1491677533189-49215d7e8c2e?w=400&h=300&fit=crop",
+  hotel:
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
+  viewpoint:
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
 };
 
 // ============================================================================
@@ -160,7 +169,7 @@ const CreateRoute = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  
+
   // ========== ESTADO PARA PAGINACIÓN ==========
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -655,7 +664,7 @@ const CreateRoute = () => {
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // ============================================================================
@@ -682,18 +691,18 @@ const CreateRoute = () => {
   // ============================================================================
   const getPOIColor = (type) => {
     const colorMap = {
-      attraction: 'primary',
-      museum: 'info',
-      restaurant: 'danger',
-      cafe: 'warning',
-      bar: 'success',
-      park: 'success',
-      monument: 'secondary',
-      church: 'info',
-      hotel: 'primary',
-      viewpoint: 'success',
+      attraction: "primary",
+      museum: "info",
+      restaurant: "danger",
+      cafe: "warning",
+      bar: "success",
+      park: "success",
+      monument: "secondary",
+      church: "info",
+      hotel: "primary",
+      viewpoint: "success",
     };
-    return colorMap[type] || 'primary';
+    return colorMap[type] || "primary";
   };
 
   // ============================================================================
@@ -1169,7 +1178,12 @@ const CreateRoute = () => {
                       {/* Información de resultados */}
                       <div className="mb-3 d-flex justify-content-between align-items-center">
                         <div className="text-muted small">
-                          Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, getFilteredPOIs().length)} de {getFilteredPOIs().length} resultados
+                          Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
+                          {Math.min(
+                            currentPage * ITEMS_PER_PAGE,
+                            getFilteredPOIs().length
+                          )}{" "}
+                          de {getFilteredPOIs().length} resultados
                         </div>
                         <div className="text-muted small">
                           Página {currentPage} de {getTotalPages()}
@@ -1184,119 +1198,142 @@ const CreateRoute = () => {
                           );
                           const IconComponent = getPOIIcon(searchState.poiType);
                           const colorClass = getPOIColor(searchState.poiType);
-                          const imageUrl = getPOIImage(poi, searchState.poiType);
+                          const imageUrl = getPOIImage(
+                            poi,
+                            searchState.poiType
+                          );
 
                           return (
-                            <div key={poi.id} className="col-md-6 col-lg-4 col-xl-3">
+                            <div
+                              key={poi.id}
+                              className="col-md-6 col-lg-4 col-xl-3"
+                            >
                               <div
                                 className={`card h-100 shadow-sm ${
-                                  isSelected ? 'border-success border-3' : ''
+                                  isSelected ? "border-success border-3" : ""
                                 }`}
                                 style={{
-                                  cursor: 'pointer',
-                                  transition: 'all 0.3s ease',
-                                  overflow: 'hidden',
+                                  cursor: "pointer",
+                                  transition: "all 0.3s ease",
+                                  overflow: "hidden",
                                 }}
                                 onClick={() => handleAddPOI(poi)}
                                 onMouseEnter={(e) => {
                                   if (!isSelected) {
-                                    e.currentTarget.style.transform = 'translateY(-5px)';
-                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                                    e.currentTarget.style.transform =
+                                      "translateY(-5px)";
+                                    e.currentTarget.style.boxShadow =
+                                      "0 8px 20px rgba(0,0,0,0.15)";
                                   }
                                 }}
                                 onMouseLeave={(e) => {
                                   if (!isSelected) {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '';
+                                    e.currentTarget.style.transform =
+                                      "translateY(0)";
+                                    e.currentTarget.style.boxShadow = "";
                                   }
                                 }}
                               >
                                 {/* Imagen del POI con altura fija */}
-                                <div style={{
-                                  position: 'relative',
-                                  width: '100%',
-                                  height: '180px',
-                                  overflow: 'hidden',
-                                  backgroundColor: '#f0f0f0',
-                                }}>
+                                <div
+                                  style={{
+                                    position: "relative",
+                                    width: "100%",
+                                    height: "180px",
+                                    overflow: "hidden",
+                                    backgroundColor: "#f0f0f0",
+                                  }}
+                                >
                                   <img
                                     src={imageUrl}
                                     alt={poi.name}
                                     style={{
-                                      width: '100%',
-                                      height: '100%',
-                                      objectFit: 'cover',
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
                                     }}
                                     onError={(e) => {
                                       // Si la imagen falla, usar la imagen por defecto
-                                      e.target.src = DEFAULT_IMAGES[searchState.poiType] || DEFAULT_IMAGES.attraction;
+                                      e.target.src =
+                                        DEFAULT_IMAGES[searchState.poiType] ||
+                                        DEFAULT_IMAGES.attraction;
                                     }}
                                   />
-                                  
+
                                   {/* Badge de selección en la esquina */}
                                   {isSelected && (
-                                    <div style={{
-                                      position: 'absolute',
-                                      top: '10px',
-                                      right: '10px',
-                                      backgroundColor: '#198754',
-                                      color: 'white',
-                                      borderRadius: '50%',
-                                      width: '32px',
-                                      height: '32px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                    }}>
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        top: "10px",
+                                        right: "10px",
+                                        backgroundColor: "#198754",
+                                        color: "white",
+                                        borderRadius: "50%",
+                                        width: "32px",
+                                        height: "32px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                                      }}
+                                    >
                                       <Check size={20} />
                                     </div>
                                   )}
 
                                   {/* Icono de categoría en la esquina */}
-                                  <div style={{
-                                    position: 'absolute',
-                                    top: '10px',
-                                    left: '10px',
-                                    backgroundColor: 'white',
-                                    borderRadius: '8px',
-                                    padding: '8px',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                  }}>
-                                    <IconComponent 
-                                      size={20} 
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: "10px",
+                                      left: "10px",
+                                      backgroundColor: "white",
+                                      borderRadius: "8px",
+                                      padding: "8px",
+                                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                                    }}
+                                  >
+                                    <IconComponent
+                                      size={20}
                                       className={`text-${colorClass}`}
                                     />
                                   </div>
                                 </div>
 
                                 {/* Contenido de la card con altura fija */}
-                                <div className="card-body d-flex flex-column" style={{ 
-                                  padding: '1rem',
-                                  height: '200px', // Altura fija para el contenido
-                                }}>
+                                <div
+                                  className="card-body d-flex flex-column"
+                                  style={{
+                                    padding: "1rem",
+                                    height: "200px", // Altura fija para el contenido
+                                  }}
+                                >
                                   {/* Nombre del POI - altura fija */}
-                                  <h6 className="card-title mb-2 fw-bold" style={{
-                                    fontSize: '0.95rem',
-                                    lineHeight: '1.3',
-                                    height: '2.6rem',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                  }}>
+                                  <h6
+                                    className="card-title mb-2 fw-bold"
+                                    style={{
+                                      fontSize: "0.95rem",
+                                      lineHeight: "1.3",
+                                      height: "2.6rem",
+                                      display: "-webkit-box",
+                                      WebkitLineClamp: 2,
+                                      WebkitBoxOrient: "vertical",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                  >
                                     {poi.name}
                                   </h6>
 
                                   {/* Tipo - badge */}
                                   <div className="mb-2">
-                                    <span 
-                                      className="badge" 
-                                      style={{ 
-                                        fontSize: '0.7rem',
+                                    <span
+                                      className="badge"
+                                      style={{
+                                        fontSize: "0.7rem",
                                         backgroundColor: `var(--bs-${colorClass})`,
-                                        color: 'white',
+                                        color: "white",
                                       }}
                                     >
                                       {poi.type}
@@ -1304,51 +1341,55 @@ const CreateRoute = () => {
                                   </div>
 
                                   {/* Dirección con altura fija */}
-                                  <div style={{
-                                    fontSize: '0.8rem',
-                                    color: '#6c757d',
-                                    lineHeight: '1.3',
-                                    height: '3.9rem',
-                                    overflow: 'hidden',
-                                    marginBottom: '0.5rem',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 3,
-                                    WebkitBoxOrient: 'vertical',
-                                  }}>
+                                  <div
+                                    style={{
+                                      fontSize: "0.8rem",
+                                      color: "#6c757d",
+                                      lineHeight: "1.3",
+                                      height: "3.9rem",
+                                      overflow: "hidden",
+                                      marginBottom: "0.5rem",
+                                      display: "-webkit-box",
+                                      WebkitLineClamp: 3,
+                                      WebkitBoxOrient: "vertical",
+                                    }}
+                                  >
                                     {poi.address ? (
                                       <>📍 {poi.address}</>
                                     ) : (
-                                      <span className="text-muted fst-italic">Sin dirección disponible</span>
+                                      <span className="text-muted fst-italic">
+                                        Sin dirección disponible
+                                      </span>
                                     )}
                                   </div>
 
                                   {/* Botón siempre al final - con margin-top auto */}
                                   <div className="mt-auto">
                                     {isSelected ? (
-                                      <button 
+                                      <button
                                         className="btn btn-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleRemovePOI(poi.id);
                                         }}
                                         style={{
-                                          fontWeight: '600',
-                                          padding: '0.5rem',
+                                          fontWeight: "600",
+                                          padding: "0.5rem",
                                         }}
                                       >
                                         <Check size={16} />
                                         Seleccionado
                                       </button>
                                     ) : (
-                                      <button 
+                                      <button
                                         className={`btn btn-outline-${colorClass} btn-sm w-100 d-flex align-items-center justify-content-center gap-2`}
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleAddPOI(poi);
                                         }}
                                         style={{
-                                          fontWeight: '600',
-                                          padding: '0.5rem',
+                                          fontWeight: "600",
+                                          padding: "0.5rem",
                                         }}
                                       >
                                         <Plus size={16} />
@@ -1376,23 +1417,27 @@ const CreateRoute = () => {
                           </button>
 
                           <div className="d-flex gap-2">
-                            {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
+                            {Array.from(
+                              { length: getTotalPages() },
+                              (_, i) => i + 1
+                            ).map((page) => {
                               // Mostrar solo páginas cercanas a la actual
                               if (
                                 page === 1 ||
                                 page === getTotalPages() ||
-                                (page >= currentPage - 1 && page <= currentPage + 1)
+                                (page >= currentPage - 1 &&
+                                  page <= currentPage + 1)
                               ) {
                                 return (
                                   <button
                                     key={page}
                                     className={`btn ${
                                       page === currentPage
-                                        ? 'btn-primary'
-                                        : 'btn-outline-primary'
+                                        ? "btn-primary"
+                                        : "btn-outline-primary"
                                     }`}
                                     onClick={() => handlePageChange(page)}
-                                    style={{ minWidth: '40px' }}
+                                    style={{ minWidth: "40px" }}
                                   >
                                     {page}
                                   </button>
@@ -1401,7 +1446,11 @@ const CreateRoute = () => {
                                 page === currentPage - 2 ||
                                 page === currentPage + 2
                               ) {
-                                return <span key={page} className="px-2">...</span>;
+                                return (
+                                  <span key={page} className="px-2">
+                                    ...
+                                  </span>
+                                );
                               }
                               return null;
                             })}
@@ -1421,20 +1470,26 @@ const CreateRoute = () => {
                   )}
 
                   {/* Mensaje cuando no hay POIs */}
-                  {formState.city && !loadingAll.pois && suggestions.pois.length === 0 && (
-                    <div className="alert alert-info">
-                      <AlertCircle size={20} className="me-2" />
-                      No se encontraron puntos de interés para esta categoría. Prueba con otra categoría.
-                    </div>
-                  )}
+                  {formState.city &&
+                    !loadingAll.pois &&
+                    suggestions.pois.length === 0 && (
+                      <div className="alert alert-info">
+                        <AlertCircle size={20} className="me-2" />
+                        No se encontraron puntos de interés para esta categoría.
+                        Prueba con otra categoría.
+                      </div>
+                    )}
 
                   {/* Mensaje cuando no hay resultados de búsqueda */}
-                  {formState.city && suggestions.pois.length > 0 && getFilteredPOIs().length === 0 && (
-                    <div className="alert alert-warning">
-                      <AlertCircle size={20} className="me-2" />
-                      No se encontraron resultados para "{searchState.poiQuery}". Intenta con otro término.
-                    </div>
-                  )}
+                  {formState.city &&
+                    suggestions.pois.length > 0 &&
+                    getFilteredPOIs().length === 0 && (
+                      <div className="alert alert-warning">
+                        <AlertCircle size={20} className="me-2" />
+                        No se encontraron resultados para "
+                        {searchState.poiQuery}". Intenta con otro término.
+                      </div>
+                    )}
                 </div>
 
                 {/* Error */}
@@ -1444,7 +1499,7 @@ const CreateRoute = () => {
                     role="alert"
                   >
                     <AlertCircle size={20} />
-                    Necesario Registro 
+                    Necesario Registro
                   </div>
                 )}
 
