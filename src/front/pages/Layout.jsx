@@ -1,17 +1,19 @@
-import HorizontalNavbar from "../components/HorizontalNavbar"
-import Navbar from "../components/Navbar"
-import { Outlet } from "react-router-dom/dist"
-import useGlobalReducer from "../hooks/useGlobalReducer"
+import { Outlet } from "react-router-dom/dist";
+import HorizontalNavbar from "../components/HorizontalNavbar";
+import Navbar from "../components/Navbar";
+import useAuth from "../hooks/useAuth";
+import Loader from "../components/Loader";
 
 export const Layout = () => {
+    const { isAuthenticated, loading } = useAuth();
 
-    const { store } = useGlobalReducer()
+    if (loading) return <Loader />;
 
+    const Navigation = isAuthenticated ? Navbar : HorizontalNavbar;
     return (
         <>
-            {store.userIsLoggedIn ? <Navbar /> : <HorizontalNavbar />}
+            <Navigation />
             <Outlet />
         </>
-
-    )
-}
+    );
+};

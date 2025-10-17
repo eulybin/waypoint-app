@@ -1,23 +1,23 @@
-import useGlobalReducer from "../hooks/useGlobalReducer"
+import useGlobalReducer from "../hooks/useGlobalReducer";
 import { actionTypes } from "../store";
 import { Moon, Sun } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { NAVBAR_ICON_SIZE, NAVBAR_LOGO_SIZE } from "../utils/constants";
-import logo from "../assets/logo.svg"
+import logo from "../assets/logo.svg";
 
 
 const HorizontalNavbar = () => {
 
-    const { store, dispatch } = useGlobalReducer()
+    const { store, dispatch } = useGlobalReducer();
 
     const handleChangeAppearance = () => {
-        dispatch({ type: actionTypes.TOGGLE_DARK_MODE })
-    }
+        dispatch({ type: actionTypes.TOGGLE_DARK_MODE });
+    };
 
     return (
         <nav className="navbar navbar-expand bg-body sitcky-top border-bottom p-2">
             <div className="container-fluid">
-                <Link to="/" className="navbar-brand">
+                <Link to="/search" className="navbar-brand">
                     <img src={logo} alt="Waypoint Logo" height={NAVBAR_LOGO_SIZE} />
                 </Link>
                 <div className="d-flex align-items-center gap-2">
@@ -39,6 +39,6 @@ const HorizontalNavbar = () => {
             </div>
         </nav>
     );
-}
+};
 
 export default HorizontalNavbar;
