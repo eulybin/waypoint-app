@@ -8,6 +8,7 @@ import {
   HIDE_OR_SHOW_PASSWORD_ICON_SIZE,
 } from '../utils/constants';
 import useAuth from '../hooks/useAuth';
+import LoadingButton from '../components/LoadingButton';
 
 const initialSignUpFormState = {
   name: '',
@@ -243,17 +244,14 @@ const Register = () => {
 
 
           {serverError && <p className="text-danger small">{serverError}</p>}
-
-          <button type="submit" className="btn bg-orange w-100 text-white fw-semibold p-2" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Signing up...
-              </>
-            ) : (
-              'Sign up'
-            )}
-          </button>
+          <LoadingButton
+            type='submit'
+            className={"btn bg-orange w-100 text-white fw-semibold p-2"}
+            isLoading={isSubmitting}
+            loadingText={"Signing up..."}
+          >
+            Sign up
+          </LoadingButton>
         </form>
 
         <div className="d-flex align-items-center my-3">
