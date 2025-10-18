@@ -16,7 +16,12 @@ export const RESET_PASSWORD_HEADER_ICON_DIV_SIZE = {
   borderColor: 'var(--app-border-accent) !important',
 };
 
-export const INPUT_ICON_POSITION = { left: '12px', top: '50%', transform: 'translateY(-50%)' };
+export const INPUT_ICON_POSITION = {
+  left: '12px',
+  top: '12px',
+  zIndex: 5,
+  pointerEvents: 'none',
+};
 
 //----------- DIV SIZES -----------
 

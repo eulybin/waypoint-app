@@ -106,3 +106,18 @@ body {
 .dropdown-suggestions {
   z-index: 1050 !important;
 }
+
+.custom-input {
+  padding-left: 2.5rem;
+}
+
+/* default: show the toggle */
+.position-relative .password-toggle {
+  display: block;
+  cursor: pointer;
+}
+
+/* when invalid, hide the toggle… */
+.position-relative .form-control.is-invalid ~ .password-toggle {
+  display: none;
+}
