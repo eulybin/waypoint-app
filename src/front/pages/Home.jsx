@@ -1,8 +1,10 @@
 import React from "react";
 
-export const Home = () => {
+const Home = () => {
 
 	return (
 		<div className="text-center pt-5 display-1">Home Component</div>
 	);
-}; 
+};
+
+export default Home;

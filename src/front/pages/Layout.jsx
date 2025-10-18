@@ -4,10 +4,10 @@ import Navbar from "../components/Navbar";
 import useAuth from "../hooks/useAuth";
 import Loader from "../components/Loader";
 
-export const Layout = () => {
+const Layout = () => {
     const { isAuthenticated, loading } = useAuth();
-
     if (loading) return <Loader />;
+
 
     const Navigation = isAuthenticated ? Navbar : HorizontalNavbar;
     return (
@@ -17,3 +17,5 @@ export const Layout = () => {
         </>
     );
 };
+
+export default Layout;

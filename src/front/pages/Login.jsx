@@ -20,7 +20,7 @@ const Login = () => {
 
   const [loginData, setLoginData] = useState(initialLoginFormState);
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
 
