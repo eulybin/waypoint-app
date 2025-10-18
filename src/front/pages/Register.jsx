@@ -21,7 +21,7 @@ const Register = () => {
 
   const [signUpData, setSignUpData] = useState(initialSignUpFormState);
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(true);
   const [serverError, setServerError] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -160,6 +160,7 @@ const Register = () => {
                 placeholder="Enter your name"
                 value={signUpData.name}
                 onChange={handleInputOnChange}
+                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, name: null }))}
                 disabled={isSubmitting}
               />
               <User
@@ -187,6 +188,7 @@ const Register = () => {
                 placeholder="Enter your email"
                 value={signUpData.email}
                 onChange={handleInputOnChange}
+                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, email: null }))}
                 disabled={isSubmitting}
               />
               <Mail className="position-absolute text-muted"
@@ -213,10 +215,11 @@ const Register = () => {
                 placeholder="Create a password"
                 value={signUpData.password}
                 onChange={handleInputOnChange}
+                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, password: null }))}
                 disabled={isSubmitting}
               />
               <div
-                onClick={() => setShowPassword((prevState) => !prevState)}
+                onClick={() => !isSubmitting && setShowPassword((prevState) => !prevState)}
                 className="password-toggle position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 disabled={isSubmitting}
