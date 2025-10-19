@@ -37,6 +37,8 @@ export const SEARCH_BAR_MAX_WIDTH = '600px';
 
 export const CREATE_ROUTE_FONT_SIZE = '1.1rem';
 
+export const NOT_FOUND_FONT_SIZE = '7rem';
+
 //----------- BACKGROUNDS -----------
 
 export const MODAL_BACKGROUND = 'rgba(0,0,0,0.5)';

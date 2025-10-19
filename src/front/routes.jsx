@@ -14,6 +14,7 @@ import Popular from "./pages/Popular";
 import Profile from "./pages/Profile";
 import CreateRoute from "./pages/CreateRoute";
 import SearchBar from "./pages/Search";
+import NotFound from "./pages/NotFound";
 
 // WRAPPERS
 import AuthenticatedRoute from "./components/Routes/AuthenticatedRoute";
@@ -21,7 +22,7 @@ import GuestRoute from "./components/Routes/GuestRoute";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+    <Route path="/" element={<Layout />} errorElement={<NotFound />} >
 
       {/* AUTHENTICATED ROUTES */}
       <Route element={<AuthenticatedRoute />}>
