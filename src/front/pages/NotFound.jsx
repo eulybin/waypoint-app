@@ -1,12 +1,21 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft, Search, CircleAlert } from 'lucide-react';
 import { STANDARD_ICON_SIZE, NOT_FOUND_FONT_SIZE } from '../utils/constants';
+import useGlobalReducer from '../hooks/useGlobalReducer';
+import { actionTypes } from '../store';
 
 const NotFound = () => {
+
+    const { dispatch } = useGlobalReducer();
+
     const navigate = useNavigate();
 
     const handleGoBack = () => {
         navigate(-1);
+    };
+
+    const handleOpenReportModal = () => {
+        dispatch({ type: actionTypes.OPEN_REPORT_MODAL });
     };
 
     return (
@@ -46,9 +55,12 @@ const NotFound = () => {
                 <div className="mt-4">
                     <p className="text-muted small">
                         If you believe this is a mistake, please report it{' '}
-                        <Link to="/contact" className="text-orange text-decoration-none fw-semibold">
+                        <button
+                            onClick={handleOpenReportModal}
+                            type='button'
+                            className="text-orange text-decoration-none fw-semibold bg-transparent border-0 p-0">
                             here
-                        </Link>
+                        </button>
                     </p>
                 </div>
             </div>
