@@ -8,6 +8,7 @@ import {
   HIDE_OR_SHOW_PASSWORD_ICON_SIZE,
 } from '../utils/constants';
 import useAuth from '../hooks/useAuth';
+import LoadingButton from '../components/LoadingButton';
 
 const initialSignUpFormState = {
   name: '',
@@ -76,8 +77,8 @@ const Register = () => {
     const errors = {};
 
     const nameError = validateName(signUpData.name);
-    const emailError = validateName(signUpData.email);
-    const passwordError = validateName(signUpData.password);
+    const emailError = validateEmail(signUpData.email);
+    const passwordError = validatePassword(signUpData.password);
 
     if (nameError) errors.name = nameError;
     if (emailError) errors.email = emailError;
@@ -89,17 +90,21 @@ const Register = () => {
 
   const handleInputOnChange = (e) => {
     const { name, value } = e.target;
-    setSignUpData((prevState) => {
-      return { ...prevState, [name]: value };
-    });
-    setErrorMessage('');
+
+    setSignUpData(prevState => ({ ...prevState, [name]: value }));
+
+    setServerError("");
+    setValidationErrors(prevState => ({ ...prevState, [name]: null }));
   };
+
+
 
   const handleRegisterUser = async (e) => {
     e.preventDefault();
 
-    //SET-UP INPUT VALIDATION HERE:
-    //.......
+    if (!validateRegisterForm()) {
+      return;
+    }
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -109,6 +114,7 @@ const Register = () => {
     abortControllerRef.current = controller;
 
     setIsSubmitting(true);
+    setServerError("");
 
     try {
       const result = await registerUser(signUpData, controller.signal);
@@ -116,12 +122,13 @@ const Register = () => {
         setSignUpData(initialSignUpFormState);
         navigate('/login');
       } else {
-        setErrorMessage(result?.error || 'Failed to sign up, please try again.');
+        const error = result?.error || 'Failed to sign up, please try again.';
+        setServerError(error);
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Registration failed: ', error);
-        setErrorMessage('Failed to sign up, please try again.');
+        setServerError('Failed to sign up, please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -143,69 +150,111 @@ const Register = () => {
 
         <form onSubmit={handleRegisterUser}>
           <div className="mb-3">
-            <label className="form-label">Full Name</label>
+            <label htmlFor='name' className="form-label">Full Name</label>
             <div className="position-relative">
-              <User className="position-absolute text-muted" size={STANDARD_ICON_SIZE} style={INPUT_ICON_POSITION} />
               <input
+                id='name'
                 type="text"
                 name="name"
-                className="form-control ps-5 py-2"
+                className={`form-control ps-5 py-2 custom-input ${validationErrors.name ? 'is-invalid' : ''}`}
                 placeholder="Enter your name"
                 value={signUpData.name}
                 onChange={handleInputOnChange}
-                required
+                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, name: null }))}
+                disabled={isSubmitting}
               />
+              <User
+                className="position-absolute text-muted"
+                size={STANDARD_ICON_SIZE}
+                style={INPUT_ICON_POSITION}
+                aria-hidden="true"
+              />
+              {validationErrors.name && (
+                <div className="invalid-feedback d-block">
+                  {validationErrors.name}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Email</label>
+            <label htmlFor='email' className="form-label">Email</label>
             <div className="position-relative">
-              <Mail className="position-absolute text-muted" size={STANDARD_ICON_SIZE} style={INPUT_ICON_POSITION} />
               <input
+                id='email'
                 type="email"
                 name="email"
-                className="form-control ps-5 py-2"
+                className={`form-control ps-5 py-2 custom-input ${validationErrors.email ? 'is-invalid' : ''}`}
                 placeholder="Enter your email"
                 value={signUpData.email}
                 onChange={handleInputOnChange}
-                required
+                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, email: null }))}
+                disabled={isSubmitting}
               />
+              <Mail className="position-absolute text-muted"
+                size={STANDARD_ICON_SIZE}
+                style={INPUT_ICON_POSITION}
+                aria-hidden="true"
+              />
+              {validationErrors.email && (
+                <div className="invalid-feedback d-block">
+                  {validationErrors.email}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="mb-4">
-            <label className="form-label">Password</label>
+            <label htmlFor="password" className="form-label">Password</label>
             <div className="position-relative">
-              <Lock className="position-absolute text-muted" size={STANDARD_ICON_SIZE} style={INPUT_ICON_POSITION} />
               <input
+                id="password"
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                className="form-control ps-5 py-2"
+                className={`form-control ps-5 py-2 custom-input ${validationErrors.password ? 'is-invalid' : ''}`}
                 placeholder="Create a password"
                 value={signUpData.password}
                 onChange={handleInputOnChange}
-                required
+                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, password: null }))}
+                disabled={isSubmitting}
               />
               <div
-                onClick={() => setShowPassword((prevState) => !prevState)}
-                className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
-                role="button"
+                onClick={() => !isSubmitting && setShowPassword((prevState) => !prevState)}
+                className="password-toggle position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                disabled={isSubmitting}
+                role='button'
               >
                 {showPassword ? (
-                  <EyeClosed size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} />
+                  <EyeClosed size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} aria-hidden="true" />
                 ) : (
-                  <Eye size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} />
+                  <Eye size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} aria-hidden="true" />
                 )}
               </div>
+              <Lock
+                className="position-absolute text-muted"
+                size={STANDARD_ICON_SIZE}
+                style={INPUT_ICON_POSITION}
+                aria-hidden="true"
+              />
+              {validationErrors.password && (
+                <div className="invalid-feedback d-block">
+                  {validationErrors.password}
+                </div>
+              )}
             </div>
           </div>
 
-          {serverError && <p className="text-danger small">{serverError}</p>}
 
-          <button type="submit" className="btn bg-orange w-100 text-white fw-semibold p-2" disabled={isSubmitting}>
-            {isSubmitting ? 'Signing up...' : 'Sign up'}
-          </button>
+          {serverError && <p className="text-danger small">{serverError}</p>}
+          <LoadingButton
+            type='submit'
+            className={"btn bg-orange w-100 text-white fw-semibold p-2"}
+            isLoading={isSubmitting}
+            loadingText={"Signing up..."}
+          >
+            Sign up
+          </LoadingButton>
         </form>
 
         <div className="d-flex align-items-center my-3">

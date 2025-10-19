@@ -55,11 +55,6 @@ const Navbar = () => {
 		setShowMoreMenu(false);
 	};
 
-
-	// -------- MODAL LOGIC --------
-	const [showReportModal, setShowReportModal] = useState(false);
-	const [showThankYouModal, setShowThankYouModal] = useState(false);
-
 	return (
 		<div className="d-flex flex-column bg-body border-end vh-100 position-fixed" style={{ width: NAVBAR_WIDTH, zIndex: 1000 }}>
 
@@ -111,7 +106,7 @@ const Navbar = () => {
 								<span>Appearance</span>
 							</button>
 							<button
-								onClick={() => setShowReportModal(true)}
+								onClick={() => dispatch({ type: actionTypes.OPEN_REPORT_MODAL })}
 								className="d-flex align-items-center gap-3 text-body p-3 border-bottom w-100 border-0 bg-transparent text-start sidebar-item"
 
 							>
@@ -157,16 +152,18 @@ const Navbar = () => {
 					)}
 				</div>
 			</nav >
-			{showReportModal && (
+			{store.showReportModal && (
 				<ReportProblemModal
-					onClose={() => setShowReportModal(false)}
+					onClose={() => dispatch({ type: actionTypes.CLOSE_REPORT_MODAL })}
 					onSuccess={() => {
-						setShowReportModal(false);
-						setShowThankYouModal(true);
+						dispatch({ type: actionTypes.CLOSE_REPORT_MODAL });
+						dispatch({ type: actionTypes.OPEN_THANK_YOU_MODAL });
 					}}
 				/>
 			)}
-			{showThankYouModal && <ThankYouModal onClose={() => setShowThankYouModal(false)} />}
+			{store.showThankYouModal && <ThankYouModal onClose={() => dispatch({
+				type: actionTypes.CLOSE_THANK_YOU_MODAL
+			})} />}
 		</div >
 	);
 };

@@ -80,7 +80,6 @@ const ReportProblemModal = ({ onClose, onSuccess }) => {
                                     placeholder="Please describe the problem..."
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    required
                                     minLength={10}
                                 />
                             </div>
