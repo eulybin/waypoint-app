@@ -25,7 +25,6 @@ const Navbar = () => {
 		{ icon: Home, label: "Home", path: "/" },
 		{ icon: Compass, label: "Explore", path: "/explore" },
 		{ icon: TrendingUp, label: "Trending", path: "/trending" },
-		{ icon: Star, label: "Popular", path: "/popular" },
 		{ icon: User, label: "Profile", path: "/profile" },
 	];
 

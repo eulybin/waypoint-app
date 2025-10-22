@@ -61,6 +61,7 @@ const NotFound = () => {
                             className="text-orange text-decoration-none fw-semibold bg-transparent border-0 p-0">
                             here
                         </button>
+                        .
                     </p>
                 </div>
             </div>
