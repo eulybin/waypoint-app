@@ -1,4 +1,7 @@
-:root[data-bs-theme='dark'] {
+/* Importar estilos de Leaflet para que el mapa se vea correctamente */
+@import "leaflet/dist/leaflet.css";
+
+:root[data-bs-theme="dark"] {
   --bs-body-bg: #121212;
   --bs-body-color: #e0e0e0;
   --bs-border-color: #969696;
@@ -8,12 +11,12 @@
   --app-border-accent: #212529 !important;
 }
 
-:root[data-bs-theme='dark'] {
+:root[data-bs-theme="dark"] {
   --app-border-accent: #969696 !important;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 400;
 }
 
@@ -47,11 +50,11 @@ body {
   background-color: #349040;
 }
 
-[data-bs-theme='light'] .sidebar-item:hover {
+[data-bs-theme="light"] .sidebar-item:hover {
   background-color: #dadada !important;
 }
 
-[data-bs-theme='dark'] .sidebar-item:hover {
+[data-bs-theme="dark"] .sidebar-item:hover {
   background-color: #3d3d3d !important;
 }
 
@@ -81,7 +84,7 @@ body {
   background-color: #f8f9fa !important;
 }
 
-[data-bs-theme='dark'] .hover-bg-light:hover {
+[data-bs-theme="dark"] .hover-bg-light:hover {
   background-color: #2d2d2d !important;
 }
 
@@ -120,4 +123,28 @@ body {
 /* when invalid, hide the toggle… */
 .position-relative .form-control.is-invalid ~ .password-toggle {
   display: none;
+}
+
+/* Estilos adicionales para el mapa de Leaflet */
+.leaflet-container {
+  width: 100%;
+  height: 500px;
+  border-radius: 8px;
+  z-index: 1;
+}
+
+/* Asegurar que los controles del mapa estén visibles */
+.leaflet-control-zoom,
+.leaflet-control-attribution {
+  z-index: 1000 !important;
+}
+
+/* Mejorar la apariencia de los popups */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 10px;
+  line-height: 1.4;
 }
