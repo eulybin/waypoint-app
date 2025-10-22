@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { MapContainer, TileLayer, Polyline, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { MapPin, Star, Trash2 } from "lucide-react";
+import { MapPin, Star, Trash2, Maximize2 } from "lucide-react";
 import DeleteRouteModal from "../Modals/DeleteRouteModal";
+import FullscreenMapModal from "../Modals/FullscreenMapModal";
 
 // Arreglo para el icono por defecto de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,6 +21,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
   const typeLabel = type === "created" ? "Ruta Creada" : "Ruta Favorita";
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
@@ -44,6 +45,10 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
       alert("No se pudo eliminar la ruta. Por favor, intenta de nuevo.");
       setIsDeleting(false);
     }
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
   };
 
   // Función para extraer las coordenadas de la ruta
@@ -166,14 +171,39 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
               </div>
             </div>
 
-            {route.average_rating > 0 && (
-              <div className="d-flex align-items-center gap-2">
-                <Star size={16} className="text-warning" fill="currentColor" />
-                <span className="small">
-                  {route.average_rating.toFixed(1)} ({route.total_votes} votos)
-                </span>
+            {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
+            <div className="mb-3 p-3 bg-light rounded">
+              <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
+              <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={20}
+                      fill={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "none"
+                      }
+                      color={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "#6c757d"
+                      }
+                    />
+                  ))}
+                </div>
+                <div>
+                  <span className="fw-bold fs-5">
+                    {(route.average_rating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-muted small ms-2">
+                    ({route.total_votes || 0}{" "}
+                    {(route.total_votes || 0) === 1 ? "voto" : "votos"})
+                  </span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -190,121 +220,182 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
   }
 
   return (
-    <div className="col-md-6 mb-4">
-      <div className="card h-100 shadow-sm">
-        <div className="card-body">
-          <div className="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h5 className="card-title mb-1">
-                <MapPin
-                  size={20}
-                  className="me-2"
-                  style={{ color: lineColor }}
-                />
-                {route.city}, {route.country}
-              </h5>
-              {route.locality && (
-                <p className="text-muted small mb-2">{route.locality}</p>
-              )}
-            </div>
-            <div className="d-flex gap-2 align-items-center">
-              <span
-                className={`badge ${type === "created" ? "bg-primary" : "bg-warning"}`}
-              >
-                {typeLabel}
-              </span>
-              {onDelete && (
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={handleDeleteClick}
-                  disabled={isDeleting}
-                  title="Eliminar ruta"
+    <>
+      <div className="col-md-6 mb-4">
+        <div className="card h-100 shadow-sm">
+          <div className="card-body">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 className="card-title mb-1">
+                  <MapPin
+                    size={20}
+                    className="me-2"
+                    style={{ color: lineColor }}
+                  />
+                  {route.city}, {route.country}
+                </h5>
+                {route.locality && (
+                  <p className="text-muted small mb-2">{route.locality}</p>
+                )}
+              </div>
+              <div className="d-flex gap-2 align-items-center">
+                <span
+                  className={`badge ${type === "created" ? "bg-primary" : "bg-warning"}`}
                 >
-                  {isDeleting ? (
-                    <span
-                      className="spinner-border spinner-border-sm"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                  ) : (
-                    <Trash2 size={16} />
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <h6 className="text-muted small mb-2">
-              Puntos de Interés ({coordinates.length}):
-            </h6>
-            <div className="d-flex flex-wrap gap-1">
-              {route.points_of_interest?.map((poi, index) => (
-                <span key={index} className="badge bg-light text-dark border">
-                  {poi}
+                  {typeLabel}
                 </span>
-              ))}
+                {onDelete && (
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                    title="Eliminar ruta"
+                  >
+                    {isDeleting ? (
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
 
-          {route.average_rating > 0 && (
-            <div className="d-flex align-items-center gap-2 mb-3">
-              <Star size={16} className="text-warning" fill="currentColor" />
-              <span className="small">
-                {route.average_rating.toFixed(1)} ({route.total_votes} votos)
-              </span>
+            <div className="mb-3">
+              <h6 className="text-muted small mb-2">
+                Puntos de Interés ({coordinates.length}):
+              </h6>
+              <div className="d-flex flex-wrap gap-1">
+                {route.points_of_interest?.map((poi, index) => (
+                  <span key={index} className="badge bg-light text-dark border">
+                    {poi}
+                  </span>
+                ))}
+              </div>
             </div>
-          )}
 
-          {/* Mapa individual de la ruta */}
-          <div
-            style={{
-              width: "100%",
-              height: "300px",
-              borderRadius: "8px",
-              overflow: "hidden",
-            }}
-          >
-            <MapContainer
-              center={mapCenter}
-              zoom={12}
-              style={{ height: "100%", width: "100%" }}
-              scrollWheelZoom={false}
+            {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
+            <div className="mb-3 p-3 bg-light rounded">
+              <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
+              <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={20}
+                      fill={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "none"
+                      }
+                      color={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "#6c757d"
+                      }
+                    />
+                  ))}
+                </div>
+                <div>
+                  <span className="fw-bold fs-5">
+                    {(route.average_rating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-muted small ms-2">
+                    ({route.total_votes || 0}{" "}
+                    {(route.total_votes || 0) === 1 ? "voto" : "votos"})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Mapa individual de la ruta con botón de pantalla completa */}
+            <div
+              style={{
+                width: "100%",
+                height: "300px",
+                borderRadius: "8px",
+                overflow: "hidden",
+                position: "relative",
+              }}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              />
-              <Polyline
-                positions={coordinates}
-                color={lineColor}
-                weight={4}
-                opacity={0.7}
+              {/* Botón de pantalla completa */}
+              <button
+                onClick={toggleFullscreen}
+                className="btn btn-light btn-sm shadow-sm"
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: 1000,
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                title="Ver mapa a pantalla completa"
               >
-                <Popup>
-                  <div>
-                    <strong>{typeLabel}</strong>
-                    <br />
-                    {route.city}, {route.country}
-                    <br />
-                    <small>{coordinates.length} puntos de interés</small>
-                  </div>
-                </Popup>
-              </Polyline>
-            </MapContainer>
+                <Maximize2 size={18} />
+                <span className="small">Pantalla completa</span>
+              </button>
+
+              <MapContainer
+                center={mapCenter}
+                zoom={12}
+                style={{ height: "100%", width: "100%" }}
+                scrollWheelZoom={false}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                />
+                <Polyline
+                  positions={coordinates}
+                  color={lineColor}
+                  weight={4}
+                  opacity={0.7}
+                >
+                  <Popup>
+                    <div>
+                      <strong>{typeLabel}</strong>
+                      <br />
+                      {route.city}, {route.country}
+                      <br />
+                      <small>{coordinates.length} puntos de interés</small>
+                    </div>
+                  </Popup>
+                </Polyline>
+              </MapContainer>
+            </div>
           </div>
         </div>
+
+        {/* Modal de confirmación de eliminación */}
+        <DeleteRouteModal
+          show={showDeleteModal}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmDelete}
+          routeName={`${route.city}, ${route.country}`}
+          isDeleting={isDeleting}
+        />
       </div>
 
-      {/* Modal de confirmación de eliminación */}
-      <DeleteRouteModal
-        show={showDeleteModal}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmDelete}
-        routeName={`${route.city}, ${route.country}`}
-        isDeleting={isDeleting}
+      {/* Modal de mapa en pantalla completa */}
+      <FullscreenMapModal
+        show={isFullscreen}
+        onClose={toggleFullscreen}
+        route={route}
+        coordinates={coordinates}
+        mapCenter={mapCenter}
+        lineColor={lineColor}
+        typeLabel={typeLabel}
+        type={type}
       />
-    </div>
+    </>
   );
 };
 
