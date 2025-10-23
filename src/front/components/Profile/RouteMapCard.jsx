@@ -1,10 +1,19 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Polyline, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { MapPin, Star, Trash2, Maximize2 } from "lucide-react";
+import {
+  MapPin,
+  Star,
+  Trash2,
+  Maximize2,
+  Route as RouteIcon,
+} from "lucide-react";
 import DeleteRouteModal from "../Modals/DeleteRouteModal";
 import FullscreenMapModal from "../Modals/FullscreenMapModal";
+import RouteMarkers from "./RouteMarkers";
+import { getRouteFromOSRM } from "../../services/routingService";
 
 // Arreglo para el icono por defecto de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -22,6 +31,16 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // Nuevo estado para las coordenadas con ruta calculada por calles
+  const [useStreetRouting, setUseStreetRouting] = useState(false); // Toggle para activar/desactivar routing
+  const [streetRoute, setStreetRoute] = useState(null); // Guarda la ruta calculada por calles
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false); // Loading state
+
+  //EFECTO: Limpiar ruta calculada si cambian las coordenadas
+  useEffect(() => {
+    setStreetRoute(null);
+    setUseStreetRouting(false);
+  }, [route.id]); // Se ejecuta cuando cambia la ruta
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
@@ -49,6 +68,35 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+  };
+
+  // Nueva función para activar/desactivar el routing por calles
+  const toggleStreetRouting = async () => {
+    // Si ya está activado, lo desactivamos (volver a línea recta)
+    if (useStreetRouting) {
+      setUseStreetRouting(false);
+      return;
+    }
+
+    // Si no hay ruta calculada, la calculamos
+    if (!streetRoute && coordinates.length > 0) {
+      setIsCalculatingRoute(true);
+
+      try {
+        // Llamamos al servicio OSRM para calcular la ruta
+        const calculatedRoute = await getRouteFromOSRM(coordinates);
+        setStreetRoute(calculatedRoute); // Guardamos la ruta calculada
+        setUseStreetRouting(true); // Activamos el modo routing
+      } catch (error) {
+        console.error("Error al calcular ruta:", error);
+        alert("No se pudo calcular la ruta por calles");
+      } finally {
+        setIsCalculatingRoute(false);
+      }
+    } else {
+      // Si ya está calculada, solo la activamos
+      setUseStreetRouting(true);
+    }
   };
 
   // Función para extraer las coordenadas de la ruta
@@ -322,6 +370,41 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                 position: "relative",
               }}
             >
+              {/* BOTÓN DE ROUTING POR CALLES */}
+              <button
+                onClick={toggleStreetRouting}
+                disabled={isCalculatingRoute || coordinates.length === 0}
+                className={`btn btn-sm shadow-sm ${useStreetRouting ? "btn-success" : "btn-light"}`}
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  left: "10px",
+                  zIndex: 1000,
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                title={
+                  useStreetRouting ? "Ver línea recta" : "Ver ruta por calles"
+                }
+              >
+                {isCalculatingRoute ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm" />
+                    <span className="small">Calculando...</span>
+                  </>
+                ) : (
+                  <>
+                    <RouteIcon size={18} />
+                    <span className="small">
+                      {useStreetRouting ? "Línea recta" : "Ruta por calles"}
+                    </span>
+                  </>
+                )}
+              </button>
+
               {/* Botón de pantalla completa */}
               <button
                 onClick={toggleFullscreen}
@@ -354,7 +437,9 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
                 <Polyline
-                  positions={coordinates}
+                  positions={
+                    useStreetRouting && streetRoute ? streetRoute : coordinates
+                  }
                   color={lineColor}
                   weight={4}
                   opacity={0.7}
@@ -369,6 +454,12 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                     </div>
                   </Popup>
                 </Polyline>
+                {/* MARCADORES NUMERADOS */}
+                <RouteMarkers
+                  coordinates={coordinates}
+                  color={lineColor}
+                  pointsOfInterest={route.points_of_interest}
+                />
               </MapContainer>
             </div>
           </div>
@@ -394,6 +485,8 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
         lineColor={lineColor}
         typeLabel={typeLabel}
         type={type}
+        useStreetRouting={useStreetRouting}
+        streetRoute={streetRoute}
       />
     </>
   );

@@ -5,6 +5,7 @@
 import { MapContainer, TileLayer, Polyline, Popup } from "react-leaflet";
 import { MapPin, Star, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
+import RouteMarkers from "../Profile/RouteMarkers";
 
 const FullscreenMapModal = ({
   show,
@@ -15,6 +16,8 @@ const FullscreenMapModal = ({
   lineColor,
   typeLabel,
   type,
+  useStreetRouting = false,
+  streetRoute = null,
 }) => {
   if (!show) return null;
 
@@ -96,6 +99,13 @@ const FullscreenMapModal = ({
               </div>
             </Popup>
           </Polyline>
+          {/*MARCADORES NUMERADOS */}
+          <RouteMarkers
+            coordinates={coordinates}
+            color={lineColor}
+            pointsOfInterest={route.points_of_interest}
+          />
+
         </MapContainer>
 
         {/* Info overlay en pantalla completa */}
