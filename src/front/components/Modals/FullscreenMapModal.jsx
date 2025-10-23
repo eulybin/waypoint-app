@@ -1,3 +1,4 @@
+
 // COMPONENTE: FullscreenMapModal
 // Modal de pantalla completa para visualizar el mapa de una ruta
 // Incluye información detallada, puntuación y puntos de interés
@@ -84,7 +85,9 @@ const FullscreenMapModal = ({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
           <Polyline
-            positions={coordinates}
+            positions={
+              useStreetRouting && streetRoute ? streetRoute : coordinates
+            }
             color={lineColor}
             weight={5}
             opacity={0.8}
@@ -105,7 +108,6 @@ const FullscreenMapModal = ({
             color={lineColor}
             pointsOfInterest={route.points_of_interest}
           />
-
         </MapContainer>
 
         {/* Info overlay en pantalla completa */}
