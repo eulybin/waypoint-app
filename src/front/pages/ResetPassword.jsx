@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, UserLock } from "lucide-react";
-import { STANDARD_ICON_SIZE, HEADER_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION, RESET_PASSWORD_HEADER_ICON_DIV_SIZE } from "../utils/constants";
+import { STANDARD_ICON_SIZE, FORGOT_PASS_HEADER_ICON_SIZE, AUTH_FORM_WIDTH, INPUT_ICON_POSITION, RESET_PASSWORD_HEADER_ICON_DIV_SIZE } from "../utils/constants";
 
 const ResetPassword = () => {
     return (
@@ -10,7 +10,7 @@ const ResetPassword = () => {
                 <div className="text-center mb-4">
                     <div className="d-inline-flex justify-content-center align-items-center rounded-circle border border-3"
                         style={RESET_PASSWORD_HEADER_ICON_DIV_SIZE}>
-                        <UserLock size={HEADER_ICON_SIZE} className="text-body" />
+                        <UserLock size={FORGOT_PASS_HEADER_ICON_SIZE} className="text-body" />
                     </div>
                 </div>
 
