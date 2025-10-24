@@ -1,10 +1,12 @@
 
+import { useState, useEffect } from 'react';
+
 // COMPONENTE: FullscreenMapModal
 // Modal de pantalla completa para visualizar el mapa de una ruta
 // Incluye información detallada, puntuación y puntos de interés
 
 import { MapContainer, TileLayer, Polyline, Popup } from "react-leaflet";
-import { MapPin, Star, X } from "lucide-react";
+import { MapPin, Star, X, Car, Footprints } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import RouteMarkers from "../Profile/RouteMarkers";
 
@@ -19,6 +21,7 @@ const FullscreenMapModal = ({
   type,
   useStreetRouting = false,
   streetRoute = null,
+  transportMode = "driving",
 }) => {
   if (!show) return null;
 
@@ -85,6 +88,7 @@ const FullscreenMapModal = ({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
           <Polyline
+            key={`fullscreen-${route.id}-${transportMode}-${useStreetRouting ? 'street' : 'direct'}`}
             positions={
               useStreetRouting && streetRoute ? streetRoute : coordinates
             }
@@ -134,6 +138,21 @@ const FullscreenMapModal = ({
             >
               {typeLabel}
             </span>
+            {useStreetRouting && (
+              <span className="badge bg-success text-white ms-2">
+                {transportMode === "driving" ? (
+                  <>
+                    <Car size={14} className="me-1" />
+                    En coche
+                  </>
+                ) : (
+                  <>
+                    <Footprints size={14} className="me-1" />
+                    Caminando
+                  </>
+                )}
+              </span>
+            )}
           </div>
 
           {/* Puntuación en fullscreen - SIEMPRE VISIBLE */}

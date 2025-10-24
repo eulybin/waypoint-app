@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Polyline, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -9,6 +8,8 @@ import {
   Trash2,
   Maximize2,
   Route as RouteIcon,
+  Car,
+  Footprints,
 } from "lucide-react";
 import DeleteRouteModal from "../Modals/DeleteRouteModal";
 import FullscreenMapModal from "../Modals/FullscreenMapModal";
@@ -35,11 +36,13 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
   const [useStreetRouting, setUseStreetRouting] = useState(false); // Toggle para activar/desactivar routing
   const [streetRoute, setStreetRoute] = useState(null); // Guarda la ruta calculada por calles
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false); // Loading state
+  const [transportMode, setTransportMode] = useState("driving"); // 'driving' (coche) o 'foot' (caminando)
 
   //EFECTO: Limpiar ruta calculada si cambian las coordenadas
   useEffect(() => {
     setStreetRoute(null);
     setUseStreetRouting(false);
+    setTransportMode("driving");
   }, [route.id]); // Se ejecuta cuando cambia la ruta
 
   const handleDeleteClick = () => {
@@ -83,8 +86,11 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
       setIsCalculatingRoute(true);
 
       try {
-        // Llamamos al servicio OSRM para calcular la ruta
-        const calculatedRoute = await getRouteFromOSRM(coordinates);
+        // Llamamos al servicio OSRM para calcular la ruta con el modo de transporte seleccionado
+        const calculatedRoute = await getRouteFromOSRM(
+          coordinates,
+          transportMode
+        );
         setStreetRoute(calculatedRoute); // Guardamos la ruta calculada
         setUseStreetRouting(true); // Activamos el modo routing
       } catch (error) {
@@ -96,6 +102,39 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
     } else {
       // Si ya está calculada, solo la activamos
       setUseStreetRouting(true);
+    }
+  };
+
+  // Nueva función para cambiar el modo de transporte
+  const handleTransportModeChange = async (newMode) => {
+    if (newMode === transportMode) return; // No hacer nada si ya está seleccionado
+
+    console.log(`🔄 Cambiando modo de ${transportMode} a ${newMode}`);
+    setTransportMode(newMode);
+
+    // Si el routing está activado, recalcular con el nuevo modo
+    if (useStreetRouting && coordinates.length > 0) {
+      setIsCalculatingRoute(true);
+
+      try {
+        console.log(`📍 Calculando nueva ruta para modo: ${newMode}`);
+        const calculatedRoute = await getRouteFromOSRM(coordinates, newMode);
+        console.log(
+          `✅ Nueva ruta calculada con ${calculatedRoute.length} puntos`
+        );
+
+        // Forzar actualización limpiando primero el estado
+        setStreetRoute(null);
+        // Usar setTimeout para asegurar que React detecte el cambio
+        setTimeout(() => {
+          setStreetRoute(calculatedRoute);
+        }, 0);
+      } catch (error) {
+        console.error("Error al calcular ruta:", error);
+        alert("No se pudo calcular la ruta por calles");
+      } finally {
+        setIsCalculatingRoute(false);
+      }
     }
   };
 
@@ -405,6 +444,54 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                 )}
               </button>
 
+              {/* SELECTOR DE MODO DE TRANSPORTE */}
+              {useStreetRouting && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "60px",
+                    left: "10px",
+                    zIndex: 1000,
+                    display: "flex",
+                    gap: "8px",
+                  }}
+                >
+                  <button
+                    onClick={() => handleTransportModeChange("driving")}
+                    disabled={isCalculatingRoute}
+                    className={`btn btn-sm shadow-sm ${transportMode === "driving" ? "btn-primary" : "btn-light"}`}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    title="Ruta en coche"
+                  >
+                    <Car size={18} />
+                    <span className="small">Coche</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleTransportModeChange("foot")}
+                    disabled={isCalculatingRoute}
+                    className={`btn btn-sm shadow-sm ${transportMode === "foot" ? "btn-primary" : "btn-light"}`}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    title="Ruta caminando"
+                  >
+                    <Footprints size={18} />
+                    <span className="small">Caminando</span>
+                  </button>
+                </div>
+              )}
+
               {/* Botón de pantalla completa */}
               <button
                 onClick={toggleFullscreen}
@@ -437,6 +524,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 />
                 <Polyline
+                  key={`${route.id}-${transportMode}-${useStreetRouting ? "street" : "direct"}`}
                   positions={
                     useStreetRouting && streetRoute ? streetRoute : coordinates
                   }
@@ -487,6 +575,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
         type={type}
         useStreetRouting={useStreetRouting}
         streetRoute={streetRoute}
+        transportMode={transportMode}
       />
     </>
   );
