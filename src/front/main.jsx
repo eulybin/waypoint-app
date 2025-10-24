@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "leaflet/dist/leaflet.css";
 import "./index.css";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
 import { StoreProvider } from "./context/StoreContext";
-import { AuthProvider } from "./context/AuthContext"; // ← AGREGAR ESTE IMPORT
+import { AuthProvider } from "./context/AuthContext";
 
 const container = document.getElementById("root");
 const root = ReactDOM.createRoot(container);

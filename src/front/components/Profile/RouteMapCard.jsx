@@ -1,0 +1,584 @@
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Polyline, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import {
+  MapPin,
+  Star,
+  Trash2,
+  Maximize2,
+  Route as RouteIcon,
+  Car,
+  Footprints,
+} from "lucide-react";
+import DeleteRouteModal from "../Modals/DeleteRouteModal";
+import FullscreenMapModal from "../Modals/FullscreenMapModal";
+import RouteMarkers from "./RouteMarkers";
+import { getRouteFromOSRM } from "../../services/routingService";
+
+// Arreglo para el icono por defecto de Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
+
+const RouteMapCard = ({ route, type = "created", onDelete }) => {
+  // type puede ser "created" o "favorite"
+  const lineColor = type === "created" ? "blue" : "orange";
+  const typeLabel = type === "created" ? "Ruta Creada" : "Ruta Favorita";
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  // Nuevo estado para las coordenadas con ruta calculada por calles
+  const [useStreetRouting, setUseStreetRouting] = useState(false); // Toggle para activar/desactivar routing
+  const [streetRoute, setStreetRoute] = useState(null); // Guarda la ruta calculada por calles
+  const [isCalculatingRoute, setIsCalculatingRoute] = useState(false); // Loading state
+  const [transportMode, setTransportMode] = useState("driving"); // 'driving' (coche) o 'foot' (caminando)
+
+  //EFECTO: Limpiar ruta calculada si cambian las coordenadas
+  useEffect(() => {
+    setStreetRoute(null);
+    setUseStreetRouting(false);
+    setTransportMode("driving");
+  }, [route.id]); // Se ejecuta cuando cambia la ruta
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseModal = () => {
+    if (!isDeleting) {
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!onDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await onDelete(route.id);
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Error al eliminar la ruta:", error);
+      alert("No se pudo eliminar la ruta. Por favor, intenta de nuevo.");
+      setIsDeleting(false);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  // Nueva función para activar/desactivar el routing por calles
+  const toggleStreetRouting = async () => {
+    // Si ya está activado, lo desactivamos (volver a línea recta)
+    if (useStreetRouting) {
+      setUseStreetRouting(false);
+      return;
+    }
+
+    // Si no hay ruta calculada, la calculamos
+    if (!streetRoute && coordinates.length > 0) {
+      setIsCalculatingRoute(true);
+
+      try {
+        // Llamamos al servicio OSRM para calcular la ruta con el modo de transporte seleccionado
+        const calculatedRoute = await getRouteFromOSRM(
+          coordinates,
+          transportMode
+        );
+        setStreetRoute(calculatedRoute); // Guardamos la ruta calculada
+        setUseStreetRouting(true); // Activamos el modo routing
+      } catch (error) {
+        console.error("Error al calcular ruta:", error);
+        alert("No se pudo calcular la ruta por calles");
+      } finally {
+        setIsCalculatingRoute(false);
+      }
+    } else {
+      // Si ya está calculada, solo la activamos
+      setUseStreetRouting(true);
+    }
+  };
+
+  // Nueva función para cambiar el modo de transporte
+  const handleTransportModeChange = async (newMode) => {
+    if (newMode === transportMode) return; // No hacer nada si ya está seleccionado
+
+    console.log(`🔄 Cambiando modo de ${transportMode} a ${newMode}`);
+    setTransportMode(newMode);
+
+    // Si el routing está activado, recalcular con el nuevo modo
+    if (useStreetRouting && coordinates.length > 0) {
+      setIsCalculatingRoute(true);
+
+      try {
+        console.log(`📍 Calculando nueva ruta para modo: ${newMode}`);
+        const calculatedRoute = await getRouteFromOSRM(coordinates, newMode);
+        console.log(
+          `✅ Nueva ruta calculada con ${calculatedRoute.length} puntos`
+        );
+
+        // Forzar actualización limpiando primero el estado
+        setStreetRoute(null);
+        // Usar setTimeout para asegurar que React detecte el cambio
+        setTimeout(() => {
+          setStreetRoute(calculatedRoute);
+        }, 0);
+      } catch (error) {
+        console.error("Error al calcular ruta:", error);
+        alert("No se pudo calcular la ruta por calles");
+      } finally {
+        setIsCalculatingRoute(false);
+      }
+    }
+  };
+
+  // Función para extraer las coordenadas de la ruta
+  const getRouteCoordinates = () => {
+    if (!route.coordinates) {
+      console.log("Ruta sin coordenadas:", route.city);
+      return [];
+    }
+
+    try {
+      let path;
+      if (typeof route.coordinates === "string") {
+        path = JSON.parse(route.coordinates);
+      } else {
+        path = route.coordinates;
+      }
+
+      if (Array.isArray(path) && path.length > 0) {
+        const validPath = path.filter(
+          (p) =>
+            Array.isArray(p) &&
+            p.length === 2 &&
+            typeof p[0] === "number" &&
+            typeof p[1] === "number" &&
+            !isNaN(p[0]) &&
+            !isNaN(p[1])
+        );
+
+        if (validPath.length > 0) {
+          return validPath;
+        }
+      }
+      return [];
+    } catch (e) {
+      console.error("Error al parsear coordenadas:", e);
+      return [];
+    }
+  };
+
+  const coordinates = getRouteCoordinates();
+
+  // Calcular el centro del mapa basado en las coordenadas de la ruta
+  const calculateCenter = () => {
+    if (coordinates.length === 0) {
+      return [40.416775, -3.70379]; // Centro por defecto
+    }
+
+    const avgLat =
+      coordinates.reduce((sum, coord) => sum + coord[0], 0) /
+      coordinates.length;
+    const avgLon =
+      coordinates.reduce((sum, coord) => sum + coord[1], 0) /
+      coordinates.length;
+    return [avgLat, avgLon];
+  };
+
+  const mapCenter = calculateCenter();
+
+  // Si no hay coordenadas, mostrar un mensaje
+  if (coordinates.length === 0) {
+    return (
+      <div className="col-md-6 mb-4">
+        <div className="card h-100 shadow-sm">
+          <div className="card-body">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 className="card-title mb-1">
+                  <MapPin
+                    size={20}
+                    className="me-2"
+                    style={{ color: lineColor }}
+                  />
+                  {route.city}, {route.country}
+                </h5>
+                {route.locality && (
+                  <p className="text-muted small mb-2">{route.locality}</p>
+                )}
+              </div>
+              <div className="d-flex gap-2 align-items-center">
+                <span
+                  className={`badge ${type === "created" ? "bg-primary" : "bg-warning"}`}
+                >
+                  {typeLabel}
+                </span>
+                {onDelete && (
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                    title="Eliminar ruta"
+                  >
+                    {isDeleting ? (
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="alert alert-warning mb-3">
+              <small>
+                Esta ruta no tiene coordenadas guardadas. Fue creada antes de la
+                actualización del sistema.
+              </small>
+            </div>
+
+            <div className="mb-3">
+              <h6 className="text-muted small mb-2">Puntos de Interés:</h6>
+              <div className="d-flex flex-wrap gap-1">
+                {route.points_of_interest?.map((poi, index) => (
+                  <span key={index} className="badge bg-light text-dark border">
+                    {poi}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
+            <div className="mb-3 p-3 bg-light rounded">
+              <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
+              <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={20}
+                      fill={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "none"
+                      }
+                      color={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "#6c757d"
+                      }
+                    />
+                  ))}
+                </div>
+                <div>
+                  <span className="fw-bold fs-5">
+                    {(route.average_rating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-muted small ms-2">
+                    ({route.total_votes || 0}{" "}
+                    {(route.total_votes || 0) === 1 ? "voto" : "votos"})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal de confirmación de eliminación */}
+        <DeleteRouteModal
+          show={showDeleteModal}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmDelete}
+          routeName={`${route.city}, ${route.country}`}
+          isDeleting={isDeleting}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="col-md-6 mb-4">
+        <div className="card h-100 shadow-sm">
+          <div className="card-body">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 className="card-title mb-1">
+                  <MapPin
+                    size={20}
+                    className="me-2"
+                    style={{ color: lineColor }}
+                  />
+                  {route.city}, {route.country}
+                </h5>
+                {route.locality && (
+                  <p className="text-muted small mb-2">{route.locality}</p>
+                )}
+              </div>
+              <div className="d-flex gap-2 align-items-center">
+                <span
+                  className={`badge ${type === "created" ? "bg-primary" : "bg-warning"}`}
+                >
+                  {typeLabel}
+                </span>
+                {onDelete && (
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={handleDeleteClick}
+                    disabled={isDeleting}
+                    title="Eliminar ruta"
+                  >
+                    {isDeleting ? (
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <h6 className="text-muted small mb-2">
+                Puntos de Interés ({coordinates.length}):
+              </h6>
+              <div className="d-flex flex-wrap gap-1">
+                {route.points_of_interest?.map((poi, index) => (
+                  <span key={index} className="badge bg-light text-dark border">
+                    {poi}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
+            <div className="mb-3 p-3 bg-light rounded">
+              <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
+              <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={20}
+                      fill={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "none"
+                      }
+                      color={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "#6c757d"
+                      }
+                    />
+                  ))}
+                </div>
+                <div>
+                  <span className="fw-bold fs-5">
+                    {(route.average_rating || 0).toFixed(1)}
+                  </span>
+                  <span className="text-muted small ms-2">
+                    ({route.total_votes || 0}{" "}
+                    {(route.total_votes || 0) === 1 ? "voto" : "votos"})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Mapa individual de la ruta con botón de pantalla completa */}
+            <div
+              style={{
+                width: "100%",
+                height: "300px",
+                borderRadius: "8px",
+                overflow: "hidden",
+                position: "relative",
+              }}
+            >
+              {/* BOTÓN DE ROUTING POR CALLES */}
+              <button
+                onClick={toggleStreetRouting}
+                disabled={isCalculatingRoute || coordinates.length === 0}
+                className={`btn btn-sm shadow-sm ${useStreetRouting ? "btn-success" : "btn-light"}`}
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  left: "10px",
+                  zIndex: 1000,
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                title={
+                  useStreetRouting ? "Ver línea recta" : "Ver ruta por calles"
+                }
+              >
+                {isCalculatingRoute ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm" />
+                    <span className="small">Calculando...</span>
+                  </>
+                ) : (
+                  <>
+                    <RouteIcon size={18} />
+                    <span className="small">
+                      {useStreetRouting ? "Línea recta" : "Ruta por calles"}
+                    </span>
+                  </>
+                )}
+              </button>
+
+              {/* SELECTOR DE MODO DE TRANSPORTE */}
+              {useStreetRouting && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "60px",
+                    left: "10px",
+                    zIndex: 1000,
+                    display: "flex",
+                    gap: "8px",
+                  }}
+                >
+                  <button
+                    onClick={() => handleTransportModeChange("driving")}
+                    disabled={isCalculatingRoute}
+                    className={`btn btn-sm shadow-sm ${transportMode === "driving" ? "btn-primary" : "btn-light"}`}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    title="Ruta en coche"
+                  >
+                    <Car size={18} />
+                    <span className="small">Coche</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleTransportModeChange("foot")}
+                    disabled={isCalculatingRoute}
+                    className={`btn btn-sm shadow-sm ${transportMode === "foot" ? "btn-primary" : "btn-light"}`}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    title="Ruta caminando"
+                  >
+                    <Footprints size={18} />
+                    <span className="small">Caminando</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Botón de pantalla completa */}
+              <button
+                onClick={toggleFullscreen}
+                className="btn btn-light btn-sm shadow-sm"
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: 1000,
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                title="Ver mapa a pantalla completa"
+              >
+                <Maximize2 size={18} />
+                <span className="small">Pantalla completa</span>
+              </button>
+
+              <MapContainer
+                center={mapCenter}
+                zoom={12}
+                style={{ height: "100%", width: "100%" }}
+                scrollWheelZoom={false}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                />
+                <Polyline
+                  key={`${route.id}-${transportMode}-${useStreetRouting ? "street" : "direct"}`}
+                  positions={
+                    useStreetRouting && streetRoute ? streetRoute : coordinates
+                  }
+                  color={lineColor}
+                  weight={4}
+                  opacity={0.7}
+                >
+                  <Popup>
+                    <div>
+                      <strong>{typeLabel}</strong>
+                      <br />
+                      {route.city}, {route.country}
+                      <br />
+                      <small>{coordinates.length} puntos de interés</small>
+                    </div>
+                  </Popup>
+                </Polyline>
+                {/* MARCADORES NUMERADOS */}
+                <RouteMarkers
+                  coordinates={coordinates}
+                  color={lineColor}
+                  pointsOfInterest={route.points_of_interest}
+                />
+              </MapContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal de confirmación de eliminación */}
+        <DeleteRouteModal
+          show={showDeleteModal}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmDelete}
+          routeName={`${route.city}, ${route.country}`}
+          isDeleting={isDeleting}
+        />
+      </div>
+
+      {/* Modal de mapa en pantalla completa */}
+      <FullscreenMapModal
+        show={isFullscreen}
+        onClose={toggleFullscreen}
+        route={route}
+        coordinates={coordinates}
+        mapCenter={mapCenter}
+        lineColor={lineColor}
+        typeLabel={typeLabel}
+        type={type}
+        useStreetRouting={useStreetRouting}
+        streetRoute={streetRoute}
+        transportMode={transportMode}
+      />
+    </>
+  );
+};
+
+export default RouteMapCard;
