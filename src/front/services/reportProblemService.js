@@ -1,25 +1,30 @@
-// (POST) Send Report a Problem Form Data to Backend
+import { API_ENDPOINTS } from '../utils/apiConfig';
+
 export const reportProblem = async (formDataObj, signal) => {
   const requestOptions = {
     method: 'POST',
     body: formDataObj,
     signal,
   };
+
   try {
-    const response = await fetch('url', requestOptions);
+    const response = await fetch(`${API_ENDPOINTS.REPORT}`, requestOptions);
+
     let data;
     try {
       data = await response.json();
     } catch {
       data = { message: 'Server returned invalid JSON.' };
     }
+
     if (!response.ok) {
-      throw new Error(data.message || 'Could not send the form data from Report a Problem modal.');
+      throw new Error(data.error || data.message || 'Could not send the report.');
     }
+
     return data;
   } catch (error) {
     if (error.name === 'AbortError') {
-      console.warn('The request was aborted by the user or it timed out.');
+      console.warn('Report request aborted.');
     }
     console.error('Error in reportProblem:', error);
     throw error;
