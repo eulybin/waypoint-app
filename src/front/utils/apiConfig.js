@@ -17,6 +17,11 @@ export const API_ENDPOINTS = {
   ROUTES_BY_USER: (userId) => `${API_BASE_URL}/api/routes/user/${userId}`,
   TOP_ROUTES: `${API_BASE_URL}/api/routes/top`,
 
+  // Favoritos
+  ADD_FAVORITE: (routeId) => `${API_BASE_URL}/api/routes/${routeId}/favorite`,
+  REMOVE_FAVORITE: (routeId) => `${API_BASE_URL}/api/routes/${routeId}/favorite`,
+  USER_FAVORITES: (userId) => `${API_BASE_URL}/api/users/${userId}/favorites`,
+
   // Votos
   VOTES: `${API_BASE_URL}/api/votes`,
   ROUTE_VOTES: (routeId) => `${API_BASE_URL}/api/votes/route/${routeId}`,
