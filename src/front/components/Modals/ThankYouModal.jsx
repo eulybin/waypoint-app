@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom";
 import { CircleCheck } from "lucide-react";
-import { HEADER_ICON_SIZE, MODAL_BACKGROUND } from "../../utils/constants";
+import { CHECKMARK_HEADER_ICON_SIZE, MODAL_BACKGROUND } from "../../utils/constants";
 
 const ThankYouModal = ({ onClose }) => {
     const portalRoot = document.getElementById("thank-you-portal-root");
@@ -14,7 +14,7 @@ const ThankYouModal = ({ onClose }) => {
                     </div>
 
                     <div className="modal-body text-center py-4">
-                        <CircleCheck size={HEADER_ICON_SIZE} color="#3fa34d" />
+                        <CircleCheck className="text-green" size={CHECKMARK_HEADER_ICON_SIZE} />
                         <h2 className="fw-bold mb-3 display-6 mt-3">Thank you!</h2>
                         <p className="text-muted mb-0">
                             Your report has been submitted successfully. We'll get back to you soon.
@@ -34,3 +34,4 @@ const ThankYouModal = ({ onClose }) => {
 };
 
 export default ThankYouModal;
+

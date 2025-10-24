@@ -8,7 +8,9 @@ export const STANDARD_ICON_SIZE = 20;
 
 export const HIDE_OR_SHOW_PASSWORD_ICON_SIZE = 18;
 
-export const HEADER_ICON_SIZE = 40;
+export const FORGOT_PASS_HEADER_ICON_SIZE = 40;
+
+export const CHECKMARK_HEADER_ICON_SIZE = 56;
 
 export const RESET_PASSWORD_HEADER_ICON_DIV_SIZE = {
   width: '80px',
