@@ -10,6 +10,10 @@ def report_problem():
         description = request.form.get("description", "").strip()
         file = request.files.get("attachedFile")
 
+        user_email = request.form.get("userEmail")
+        user_name = request.form.get("userName")
+        user_id = request.form.get("userId")
+
         if not description:
             return jsonify({"error": "Description is required."}), 400
 
@@ -26,7 +30,28 @@ def report_problem():
         msg["Subject"] = f"New Problem Report — {datetime.now():%Y-%m-%d %H:%M:%S}"
         msg["From"] = sender
         msg["To"] = receiver
-        msg.set_content(f"Problem Description:\n\n{description}")
+
+        user_info = []
+        if user_id:
+            user_info.append(f"User ID: {user_id}")
+        if user_name:
+            user_info.append(f"Name: {user_name}")
+        if user_email:
+            user_info.append(f"Email: {user_email}")
+
+        user_info_block = "\n".join(user_info) if user_info else "Anonymous user"
+
+        msg.set_content(
+            f"""
+--- User Info ---
+
+{user_info_block}
+
+--- Problem Description ---
+
+{description}
+"""
+        )
 
         if file:
             msg.add_attachment(

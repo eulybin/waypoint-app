@@ -143,7 +143,7 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="mb-3">
+          <div className="mb-4">
             <label htmlFor="password" className="form-label">Password</label>
             <div className="position-relative">
               <input
@@ -181,11 +181,6 @@ const Login = () => {
                   {validationErrors.password}
                 </div>
               )}
-            </div>
-            <div className="text-end mt-1">
-              <Link to="/reset-password" className="small text-green text-decoration-none fw-semibold">
-                Forgot password?
-              </Link>
             </div>
           </div>
 
