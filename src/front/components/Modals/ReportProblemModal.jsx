@@ -2,8 +2,12 @@ import ReactDOM from "react-dom";
 import { useState, useRef, useEffect } from "react";
 import { MODAL_BACKGROUND } from "../../utils/constants";
 import { reportProblem } from "../../services/reportProblemService";
+import useAuth from "../../hooks/useAuth";
 
 const ReportProblemModal = ({ onClose, onSuccess }) => {
+
+    const { user } = useAuth();
+
     const [description, setDescription] = useState("");
     const [attachedFile, setAttachedFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +37,12 @@ const ReportProblemModal = ({ onClose, onSuccess }) => {
         formData.append("description", description);
         if (attachedFile) {
             formData.append("attachedFile", attachedFile);
+        }
+
+        if (user) {
+            formData.append("userEmail", user.email || "");
+            formData.append("userName", user.name || "");
+            formData.append("userId", user.id || "");
         }
 
         setIsSubmitting(true);
