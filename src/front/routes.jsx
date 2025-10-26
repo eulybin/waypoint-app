@@ -7,7 +7,6 @@ import Layout from "./pages/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ResetPassword from "./pages/ResetPassword";
 import Explore from "./pages/Explore";
 import Trending from "./pages/Trending";
 import Profile from "./pages/Profile";
@@ -37,7 +36,6 @@ export const router = createBrowserRouter(
         <Route path="search" element={<SearchBar />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
-        <Route path="reset-password" element={<ResetPassword />} />
       </Route>
 
       {/* 404 PAGE NOT FOUND */}
