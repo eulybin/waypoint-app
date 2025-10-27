@@ -122,15 +122,16 @@ const Navbar = () => {
 								className="position-absolute bottom-100 start-0 bg-body border rounded-3 shadow-lg mb-2"
 								style={{ width: NAVBAR_CHILD_DIV_WIDTH }}
 							>
-								<button
-									onClick={() => {
-										setShowAppearance((prev) => !prev);
-									}}
-									className="d-flex align-items-center gap-3 text-body p-3 border-bottom w-100 border-0 bg-transparent text-start sidebar-item rounded-top-3"
-								>
-									<Moon size={STANDARD_ICON_SIZE} />
-									<span>Appearance</span>
-								</button>
+                                <button
+                                    onClick={() => {
+                                        setShowAppearance(true);
+                                        setShowMoreMenu(false);
+                                    }}
+                                    className="d-flex align-items-center gap-3 text-body p-3 border-bottom w-100 border-0 bg-transparent text-start sidebar-item rounded-top-3"
+                                >
+                                    <Moon size={STANDARD_ICON_SIZE} />
+                                    <span>Appearance</span>
+                                </button>
 								<button
 									onClick={() =>
 										dispatch({ type: actionTypes.OPEN_REPORT_MODAL })
@@ -254,11 +255,16 @@ const Navbar = () => {
                             className="position-absolute bottom-100 start-50 translate-middle-x bg-body border rounded-3 shadow-lg navbar-popup mb-2"
                         >
                             <button
-                                onClick={() => setShowAppearance((prev) => !prev)}
+                                onClick={() => dispatch({ type: actionTypes.TOGGLE_DARK_MODE })}
                                 className="d-flex align-items-center justify-content-center text-body p-3 w-100 border-0 bg-transparent sidebar-item rounded-top-3"
-                                aria-label="Appearance"
+                                aria-label={store.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                                title={store.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
                             >
-                                <Moon size={STANDARD_ICON_SIZE} />
+                                {store.isDarkMode ? (
+                                    <Sun size={STANDARD_ICON_SIZE} />
+                                ) : (
+                                    <Moon size={STANDARD_ICON_SIZE} />
+                                )}
                             </button>
                             <button
                                 onClick={() => dispatch({ type: actionTypes.OPEN_REPORT_MODAL })}
