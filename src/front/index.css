@@ -152,11 +152,6 @@ body {
   line-height: 1.4;
 }
 
-.navbar-desktop {
-  width: var(--navbar-width);
-  z-index: var(--z-navbar);
-}
-
 /* Labels visible on desktop */
 .navbar-desktop .nav-label {
   display: inline;
@@ -196,19 +191,11 @@ body {
   background-color: #3d3d3d !important;
 }
 
-/* Mobile “More” sheet that slides out to the right */
-.mobile-more-sheet {
-  width: 200px;
-  z-index: calc(var(--z-navbar) + 1);
-}
-
-/* Compact mobile popup for More/Appearance (icon-only) */
 .navbar-popup {
   width: 56px;
-  z-index: calc(var(--z-navbar) + 5) !important; /* Above floating UI */
+  z-index: calc(var(--z-navbar) + 5) !important;
 }
 
-/* Visibility handling */
 .navbar-desktop {
   display: none;
 }
@@ -222,7 +209,7 @@ body {
   }
 
   .with-sidebar {
-    margin-left: var(--navbar-width-desktop); /* 240px on desktop */
+    margin-left: var(--navbar-width-desktop);
   }
 }
 
@@ -235,6 +222,6 @@ body {
   }
 
   .with-sidebar {
-    margin-left: var(--navbar-width-mobile); /* 72px (or whatever you set) on mobile */
+    margin-left: var(--navbar-width-mobile);
   }
 }
