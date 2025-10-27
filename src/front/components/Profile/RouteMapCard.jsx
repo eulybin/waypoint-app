@@ -26,9 +26,14 @@ L.Icon.Default.mergeOptions({
 });
 
 const RouteMapCard = ({ route, type = "created", onDelete }) => {
-  // type puede ser "created" o "favorite"
-  const lineColor = type === "created" ? "blue" : "orange";
-  const typeLabel = type === "created" ? "Ruta Creada" : "Ruta Favorita";
+  // type puede ser "created", "favorite" o "detail"
+  const lineColor = "blue"; // Todas las rutas en azul
+  const typeLabel =
+    type === "created"
+      ? "Ruta Creada"
+      : type === "favorite"
+        ? "Ruta Favorita"
+        : "Detalle de Ruta";
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -197,7 +202,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
   // Si no hay coordenadas, mostrar un mensaje
   if (coordinates.length === 0) {
     return (
-      <div className="col-md-6 mb-4">
+      <div className={`${type === "detail" ? "col-12" : "col-md-6"} mb-4`}>
         <div className="card h-100 shadow-sm">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start mb-3">
@@ -308,7 +313,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
 
   return (
     <>
-      <div className="col-md-6 mb-4">
+      <div className={`${type === "detail" ? "col-12" : "col-md-6"} mb-4`}>
         <div className="card h-100 shadow-sm">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start mb-3">
@@ -403,7 +408,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             <div
               style={{
                 width: "100%",
-                height: "300px",
+                height: type === "detail" ? "600px" : "300px",
                 borderRadius: "8px",
                 overflow: "hidden",
                 position: "relative",

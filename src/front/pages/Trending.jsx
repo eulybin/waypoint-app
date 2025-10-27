@@ -44,7 +44,6 @@ const Trending = () => {
 
   /**
    * Obtiene TODAS las rutas y las ordena por puntuación
-   * Primero intenta con TOP_ROUTES, si está vacío usa ROUTES (todas)
    *
    * Criterios de ordenamiento:
    * 1. Por average_rating (descendente) - Las mejor puntuadas primero
@@ -56,8 +55,10 @@ const Trending = () => {
       setIsLoading(true);
       setError(null);
 
-      // Intentamos primero con el endpoint de top routes
-      let response = await fetch(API_ENDPOINTS.TOP_ROUTES, {
+      console.log("🔄 Obteniendo todas las rutas...");
+
+      // Obtenemos TODAS las rutas directamente
+      const response = await fetch(API_ENDPOINTS.ROUTES, {
         method: "GET",
         headers: getAuthHeaders(),
       });
@@ -66,23 +67,9 @@ const Trending = () => {
         throw new Error("Error al cargar las rutas");
       }
 
-      let data = await response.json();
+      const data = await response.json();
 
-      // Si el endpoint TOP_ROUTES está vacío, obtenemos TODAS las rutas
-      if (!data || data.length === 0) {
-        console.log("🔄 TOP_ROUTES vacío, obteniendo todas las rutas...");
-
-        response = await fetch(API_ENDPOINTS.ROUTES, {
-          method: "GET",
-          headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-          throw new Error("Error al cargar todas las rutas");
-        }
-
-        data = await response.json();
-      }
+      console.log(`📊 Total de rutas encontradas: ${data.length}`);
 
       // Ordenamos las rutas por múltiples criterios
       const sortedRoutes = data.sort((a, b) => {
@@ -111,9 +98,7 @@ const Trending = () => {
       // Tomamos solo las primeras 5 rutas
       setTopRoutes(sortedRoutes.slice(0, 5));
 
-      console.log(
-        `✅ Cargadas ${sortedRoutes.slice(0, 5).length} rutas para el ranking`
-      );
+      console.log(`✅ TOP 5 rutas cargadas para el ranking`);
     } catch (err) {
       console.error("❌ Error al obtener rutas trending:", err);
       setError(err.message);
