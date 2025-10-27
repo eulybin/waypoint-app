@@ -35,7 +35,6 @@ import {
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
-import { NAVBAR_WIDTH } from "../utils/constants";
 import { STANDARD_ICON_SIZE } from "../utils/constants";
 
 // ============================================================================
@@ -719,7 +718,7 @@ const CreateRoute = () => {
   // RENDER
   // ============================================================================
   return (
-    <div className="container-fluid p-4" style={{ marginLeft: NAVBAR_WIDTH }}>
+    <div className="container-fluid p-4">
       {/* Header */}
       <div className="mb-4">
         <h1 className="display-4 fw-bold mb-2">Crear Nueva Ruta</h1>

@@ -10,10 +10,13 @@ const Layout = () => {
 
 
     const Navigation = isAuthenticated ? Navbar : HorizontalNavbar;
+    const hasSidebar = isAuthenticated;
     return (
         <>
             <Navigation />
-            <Outlet />
+            <main className={hasSidebar ? "with-sidebar" : undefined}>
+                <Outlet />
+            </main>
         </>
     );
 };
