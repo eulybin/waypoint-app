@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom/dist";
-import HorizontalNavbar from "../components/HorizontalNavbar";
-import Navbar from "../components/Navbar";
+import HorizontalNavbar from "../components/Navbars/HorizontalNavbar";
+import Navbar from "../components/Navbars/Navbar";
 import useAuth from "../hooks/useAuth";
 import Loader from "../components/Loader";
 
