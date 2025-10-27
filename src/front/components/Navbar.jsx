@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-    Home,
-    Compass,
-    User,
-    TrendingUp,
-    Menu,
-    Sun,
-    Moon,
-    LogOut,
-    MapPinPlus,
-    MessageSquareWarning,
-    X,
+	Home,
+	Compass,
+	User,
+	TrendingUp,
+	Menu,
+	Sun,
+	Moon,
+	LogOut,
+	MapPinPlus,
+	MessageSquareWarning,
 } from "lucide-react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { actionTypes } from "../store";
@@ -122,16 +121,16 @@ const Navbar = () => {
 								className="position-absolute bottom-100 start-0 bg-body border rounded-3 shadow-lg mb-2"
 								style={{ width: NAVBAR_CHILD_DIV_WIDTH }}
 							>
-                                <button
-                                    onClick={() => {
-                                        setShowAppearance(true);
-                                        setShowMoreMenu(false);
-                                    }}
-                                    className="d-flex align-items-center gap-3 text-body p-3 border-bottom w-100 border-0 bg-transparent text-start sidebar-item rounded-top-3"
-                                >
-                                    <Moon size={STANDARD_ICON_SIZE} />
-                                    <span>Appearance</span>
-                                </button>
+								<button
+									onClick={() => {
+										setShowAppearance(true);
+										setShowMoreMenu(false);
+									}}
+									className="d-flex align-items-center gap-3 text-body p-3 border-bottom w-100 border-0 bg-transparent text-start sidebar-item rounded-top-3"
+								>
+									<Moon size={STANDARD_ICON_SIZE} />
+									<span>Appearance</span>
+								</button>
 								<button
 									onClick={() =>
 										dispatch({ type: actionTypes.OPEN_REPORT_MODAL })
@@ -249,82 +248,39 @@ const Navbar = () => {
 							<Menu size={24} />
 						</button>
 
-						{/* Mobile “More” dropdown (styled like desktop) */}
-                    {showMoreMenu && (
-                        <div
-                            className="position-absolute bottom-100 start-50 translate-middle-x bg-body border rounded-3 shadow-lg navbar-popup mb-2"
-                        >
-                            <button
-                                onClick={() => dispatch({ type: actionTypes.TOGGLE_DARK_MODE })}
-                                className="d-flex align-items-center justify-content-center text-body p-3 w-100 border-0 bg-transparent sidebar-item rounded-top-3"
-                                aria-label={store.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-                                title={store.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-                            >
-                                {store.isDarkMode ? (
-                                    <Sun size={STANDARD_ICON_SIZE} />
-                                ) : (
-                                    <Moon size={STANDARD_ICON_SIZE} />
-                                )}
-                            </button>
-                            <button
-                                onClick={() => dispatch({ type: actionTypes.OPEN_REPORT_MODAL })}
-                                className="d-flex align-items-center justify-content-center text-body p-3 w-100 border-0 bg-transparent sidebar-item"
-                                aria-label="Report a Problem"
-                            >
-                                <MessageSquareWarning size={STANDARD_ICON_SIZE} />
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="d-flex align-items-center justify-content-center text-body p-3 w-100 border-0 bg-transparent logout-item rounded-bottom-3"
-                                aria-label="Logout"
-                            >
-                                <LogOut size={STANDARD_ICON_SIZE} />
-                            </button>
-                        </div>
-                    )}
-
-						{/* Appearance submenu (styled like desktop) */}
-                    {showAppearance && (
-                        <div
-                            className="position-absolute bottom-100 start-50 translate-middle-x bg-body border rounded-3 shadow-lg navbar-popup mb-2"
-                        >
-                            <div className="p-2 d-flex align-items-center justify-content-between">
-                                <div className="d-flex align-items-center justify-content-center w-100">
-                                    {store.isDarkMode ? (
-                                        <Moon size={STANDARD_ICON_SIZE} />
-                                    ) : (
-                                        <Sun size={STANDARD_ICON_SIZE} />
-                                    )}
-                                </div>
-                                <div className="form-check form-switch m-0">
-                                    <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        aria-label="Toggle dark mode"
-                                        checked={store.isDarkMode}
-                                        onChange={() =>
-                                            dispatch({ type: actionTypes.TOGGLE_DARK_MODE })
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <div className="border-top p-2 d-flex justify-content-center">
-                                <button
-                                    onClick={() => {
-                                        setShowAppearance(false);
-                                        setShowMoreMenu(false);
-                                    }}
-                                    className="btn btn-link text-body p-1"
-                                    aria-label="Close"
-                                >
-                                    <X size={STANDARD_ICON_SIZE} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+						{showMoreMenu && (
+							<div
+								className="position-absolute bottom-100 start-50 translate-middle-x bg-body border rounded-3 shadow-lg navbar-popup mb-2"
+							>
+								<button
+									onClick={() => dispatch({ type: actionTypes.TOGGLE_DARK_MODE })}
+									className="d-flex align-items-center justify-content-center text-body p-3 w-100 border-0 bg-transparent sidebar-item rounded-top-3"
+									aria-label={store.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+									title={store.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+								>
+									{store.isDarkMode ? (
+										<Sun size={STANDARD_ICON_SIZE} />
+									) : (
+										<Moon size={STANDARD_ICON_SIZE} />
+									)}
+								</button>
+								<button
+									onClick={() => dispatch({ type: actionTypes.OPEN_REPORT_MODAL })}
+									className="d-flex align-items-center justify-content-center text-body p-3 w-100 border-0 bg-transparent sidebar-item"
+									aria-label="Report a Problem"
+								>
+									<MessageSquareWarning size={STANDARD_ICON_SIZE} />
+								</button>
+								<button
+									onClick={handleLogout}
+									className="d-flex align-items-center justify-content-center text-body p-3 w-100 border-0 bg-transparent logout-item rounded-bottom-3"
+									aria-label="Logout"
+								>
+									<LogOut size={STANDARD_ICON_SIZE} />
+								</button>
+							</div>
+						)}
 					</div>
-
-					{/* Create Route */}
 					<Link
 						to="/create-route"
 						className="mobile-nav-item d-flex align-items-center justify-content-center text-body text-decoration-none my-3 w-100"
@@ -333,11 +289,7 @@ const Navbar = () => {
 					>
 						<MapPinPlus size={24} color="#f36011" />
 					</Link>
-
-
 				</div>
-
-				{/* Removed slide-out sheets in favor of popup-style menus */}
 			</div>
 		</>
 	);
