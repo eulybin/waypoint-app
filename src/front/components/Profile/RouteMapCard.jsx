@@ -409,16 +409,37 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                 position: "relative",
               }}
             >
-              {/* BOTÓN DE ROUTING POR CALLES */}
+              {/* Botón de pantalla completa */}
+              <button
+                onClick={toggleFullscreen}
+                className="btn btn-light btn-sm shadow-sm"
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: 900,
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                title="Ver mapa a pantalla completa"
+              >
+                <Maximize2 size={18} />
+                <span className="small">Pantalla completa</span>
+              </button>
+
+              {/* BOTÓN DE ROUTING POR CALLES - Debajo del de pantalla completa */}
               <button
                 onClick={toggleStreetRouting}
                 disabled={isCalculatingRoute || coordinates.length === 0}
                 className={`btn btn-sm shadow-sm ${useStreetRouting ? "btn-success" : "btn-light"}`}
                 style={{
                   position: "absolute",
-                  top: "10px",
-                  left: "10px",
-                  zIndex: 1000,
+                  top: "60px", // Debajo del botón de pantalla completa
+                  right: "10px",
+                  zIndex: 900,
                   borderRadius: "8px",
                   padding: "8px 12px",
                   display: "flex",
@@ -444,15 +465,16 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                 )}
               </button>
 
-              {/* SELECTOR DE MODO DE TRANSPORTE */}
+              {/* SELECTOR DE MODO DE TRANSPORTE - Debajo del botón de routing */}
               {useStreetRouting && (
                 <div
                   style={{
                     position: "absolute",
-                    top: "60px",
-                    left: "10px",
-                    zIndex: 1000,
+                    top: "110px", // Debajo del botón de routing
+                    right: "10px",
+                    zIndex: 900,
                     display: "flex",
+                    flexDirection: "column", // Vertical para no ocupar mucho espacio
                     gap: "8px",
                   }}
                 >
@@ -491,27 +513,6 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   </button>
                 </div>
               )}
-
-              {/* Botón de pantalla completa */}
-              <button
-                onClick={toggleFullscreen}
-                className="btn btn-light btn-sm shadow-sm"
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  zIndex: 1000,
-                  borderRadius: "8px",
-                  padding: "8px 12px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-                title="Ver mapa a pantalla completa"
-              >
-                <Maximize2 size={18} />
-                <span className="small">Pantalla completa</span>
-              </button>
 
               <MapContainer
                 center={mapCenter}
