@@ -6,6 +6,8 @@ export const NAVBAR_ICON_SIZE = 24;
 
 export const STANDARD_ICON_SIZE = 20;
 
+export const WEATHER_ICON_SIZE = 16;
+
 export const HIDE_OR_SHOW_PASSWORD_ICON_SIZE = 18;
 
 export const FORGOT_PASS_HEADER_ICON_SIZE = 40;
@@ -28,6 +30,8 @@ export const INPUT_ICON_POSITION = {
 //----------- DIV SIZES -----------
 
 export const NAVBAR_WIDTH = '250px';
+
+export const WEATHER_WIDGET_WIDTH = '320px';
 
 export const NAVBAR_CHILD_DIV_WIDTH = '220px';
 

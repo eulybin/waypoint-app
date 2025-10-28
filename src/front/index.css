@@ -227,3 +227,8 @@ body {
     margin-left: var(--navbar-width-mobile);
   }
 }
+
+.weather-btn {
+  width: 48px;
+  height: 48px;
+}
