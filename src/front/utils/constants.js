@@ -45,6 +45,10 @@ export const NOT_FOUND_FONT_SIZE = '7rem';
 
 export const MODAL_BACKGROUND = 'rgba(0,0,0,0.5)';
 
+//----------- Z-INDEX ----------------
+
+export const NAVBAR_Z_INDEX = 1000;
+
 //----------- IMAGES ----------------
 
 // export const BRAND_NAME_SVG_HEIGHT = '90';

@@ -1,20 +1,19 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, Compass, User, TrendingUp, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning } from 'lucide-react';
 import useGlobalReducer from '../../hooks/useGlobalReducer';
 import { actionTypes } from '../../store';
-import { STANDARD_ICON_SIZE } from '../../utils/constants';
+import { STANDARD_ICON_SIZE, NAVBAR_ICON_SIZE } from '../../utils/constants';
 import useAuth from '../../hooks/useAuth';
 import { navRouteLinks } from './navRouteLinks';
 
 const iconMap = { Home, Compass, User, TrendingUp };
 
-const MobileSidebar = () => {
+const MobileNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowAppearance }) => {
   const { store, dispatch } = useGlobalReducer();
   const { logoutUser } = useAuth();
   const navigate = useNavigate();
 
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const isMoreOpen = showMoreMenu || showAppearance;
 
   const handleLogout = () => {
     logoutUser();
@@ -31,27 +30,33 @@ const MobileSidebar = () => {
             <Link
               key={idx}
               to={item.path}
-              className="mobile-nav-item d-flex align-items-center justify-content-center text-body text-decoration-none my-3 w-100"
+              className="mobile-nav-item d-inline-flex align-items-center justify-content-center text-body text-decoration-none my-3 p-3 rounded-4 sidebar-item mx-2 w-80"
               aria-label={item.label}
               title={item.label}
             >
-              <Icon size={24} />
+              <Icon size={NAVBAR_ICON_SIZE} />
             </Link>
           );
         })}
 
-        {/* “More” */}
+        {/* MORE BUTTON */}
         <div className="position-relative w-100 d-flex justify-content-center">
           <button
-            className="mobile-nav-item d-flex align-items-center justify-content-center text-body border-0 bg-transparent my-3 w-100"
-            onClick={() => setShowMoreMenu((prev) => !prev)}
+            className="mobile-nav-item d-flex align-items-center justify-content-center text-body border-0 bg-transparent my-3 w-100 p-3 rounded-4 sidebar-item mx-2"
+            onClick={() => {
+              if (showAppearance) {
+                setShowAppearance(false);
+                setShowMoreMenu(false);
+              } else {
+                setShowMoreMenu((prev) => !prev);
+              }
+            }}
             aria-label="More"
           >
-            <Menu size={24} />
+            <Menu size={NAVBAR_ICON_SIZE} />
           </button>
 
-          {/* Mobile icon-only popup above the button */}
-          {showMoreMenu && (
+          {isMoreOpen && (
             <div className="position-absolute bottom-100 start-50 translate-middle-x bg-body border rounded-3 shadow-lg navbar-popup mb-2">
               <button
                 onClick={() => dispatch({ type: actionTypes.TOGGLE_DARK_MODE })}
@@ -81,18 +86,18 @@ const MobileSidebar = () => {
           )}
         </div>
 
-        {/* Create Route */}
+        {/* CREATE ROUTE */}
         <Link
           to="/create-route"
-          className="mobile-nav-item d-flex align-items-center justify-content-center text-body text-decoration-none my-3 w-100"
+          className="mobile-nav-item d-inline-flex align-items-center justify-content-center text-body text-decoration-none my-3 p-3 rounded-4 sidebar-item mx-2"
           aria-label="Create Route"
           title="Create Route"
         >
-          <MapPinPlus size={24} color="#f36011" />
+          <MapPinPlus className='text-orange' size={NAVBAR_ICON_SIZE} />
         </Link>
       </div>
     </div>
   );
 };
 
-export default MobileSidebar;
+export default MobileNavbar;

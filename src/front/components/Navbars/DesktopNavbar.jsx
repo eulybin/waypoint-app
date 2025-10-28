@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, Compass, User, TrendingUp, Menu, Sun, Moon, LogOut, MapPinPlus, MessageSquareWarning } from 'lucide-react';
 import useGlobalReducer from '../../hooks/useGlobalReducer';
 import { actionTypes } from '../../store';
-import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE } from '../../utils/constants';
+import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_WIDTH, NAVBAR_CHILD_DIV_WIDTH, CREATE_ROUTE_FONT_SIZE, NAVBAR_Z_INDEX } from '../../utils/constants';
 import brandNameLight from '../../assets/brand-name-light.svg';
 import brandNameDark from '../../assets/brand-name-dark.svg';
 import useAuth from '../../hooks/useAuth';
@@ -11,13 +10,10 @@ import { navRouteLinks } from './navRouteLinks';
 
 const iconMap = { Home, Compass, User, TrendingUp };
 
-const DesktopSidebar = () => {
+const DesktopNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowAppearance }) => {
   const { store, dispatch } = useGlobalReducer();
   const { logoutUser } = useAuth();
   const navigate = useNavigate();
-
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [showAppearance, setShowAppearance] = useState(false);
 
   const handleLogout = () => {
     logoutUser();
@@ -28,9 +24,8 @@ const DesktopSidebar = () => {
   return (
     <div
       className="navbar-desktop d-none d-md-flex flex-column bg-body border-end vh-100 position-fixed top-0 start-0"
-      style={{ width: NAVBAR_WIDTH, zIndex: 1000 }}
+      style={{ width: NAVBAR_WIDTH, zIndex: NAVBAR_Z_INDEX }}
     >
-      {/* Brand */}
       <div className="p-4">
         <Link to="/" className="text-decoration-none d-inline-block mt-3">
           {store.isDarkMode ? (
@@ -41,7 +36,7 @@ const DesktopSidebar = () => {
         </Link>
       </div>
 
-      {/* Nav items */}
+      {/* MAP NAV LINKS */}
       <nav className="flex-grow-1 p-3">
         {navRouteLinks.map((item, index) => {
           const Icon = iconMap[item.icon];
@@ -49,7 +44,7 @@ const DesktopSidebar = () => {
             <Link
               key={index}
               to={item.path}
-              className="d-flex align-items-center gap-3 text-decoration-none text-body p-3 rounded-3 mb-2 sidebar-item"
+              className="d-flex align-items-center gap-3 text-decoration-none text-body p-3 rounded-4 mb-2 sidebar-item"
             >
               <Icon size={NAVBAR_ICON_SIZE} />
               <span className="fw-semibold nav-label">{item.label}</span>
@@ -57,28 +52,28 @@ const DesktopSidebar = () => {
           );
         })}
 
+        {/* MORE MENU */}
         <div className="position-relative rounded-3">
           <button
             onClick={() => {
               setShowAppearance(false);
               setShowMoreMenu((prev) => !prev);
             }}
-            className="d-flex align-items-center gap-3 text-body p-3 rounded-3 w-100 border-0 bg-transparent sidebar-item"
+            className="d-flex align-items-center gap-3 text-body p-3 rounded-4 w-100 border-0 bg-transparent sidebar-item"
           >
-            <Menu size={24} />
+            <Menu size={NAVBAR_ICON_SIZE} />
             <span className="fw-semibold nav-label">More</span>
           </button>
 
           <Link
             to="/create-route"
-            className="btn bg-orange text-white rounded-3 w-100 fw-bold py-3 mt-4 d-flex align-items-center justify-content-center gap-2"
+            className="btn bg-orange text-white rounded-4 w-100 fw-bold py-3 mt-4 d-flex align-items-center justify-content-center gap-2"
             style={{ fontSize: CREATE_ROUTE_FONT_SIZE }}
           >
             <MapPinPlus size={NAVBAR_ICON_SIZE} />
             <span className="nav-label">Create Route</span>
           </Link>
 
-          {/* More dropdown */}
           {showMoreMenu && (
             <div
               className="position-absolute bottom-100 start-0 bg-body border rounded-3 shadow-lg mb-2"
@@ -111,7 +106,7 @@ const DesktopSidebar = () => {
             </div>
           )}
 
-          {/* Appearance submenu */}
+          {/* APPEARANCE POPUP */}
           {showAppearance && (
             <div
               className="position-absolute bottom-100 start-0 bg-body border rounded-3 shadow-lg mb-2"
@@ -156,4 +151,4 @@ const DesktopSidebar = () => {
   );
 };
 
-export default DesktopSidebar;
+export default DesktopNavbar;

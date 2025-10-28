@@ -1,16 +1,30 @@
+import { useState } from "react";
 import useGlobalReducer from "../../hooks/useGlobalReducer";
 import { actionTypes } from "../../store";
 import ReportProblemModal from "../Modals/ReportProblemModal";
 import ThankYouModal from "../Modals/ThankYouModal";
-import DesktopSidebar from "./DesktopSidebar";
-import MobileSidebar from "./MobileSidebar";
+import DesktopNavbar from "./DesktopNavbar";
+import MobileNavbar from "./MobileNavbar";
 
-const Navbar = () => {
+const VerticalNavbar = () => {
   const { store, dispatch } = useGlobalReducer();
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showAppearance, setShowAppearance] = useState(false);
+
   return (
     <>
-      <DesktopSidebar />
-      <MobileSidebar />
+      <DesktopNavbar
+        showMoreMenu={showMoreMenu}
+        setShowMoreMenu={setShowMoreMenu}
+        showAppearance={showAppearance && !showMoreMenu}
+        setShowAppearance={setShowAppearance}
+      />
+      <MobileNavbar
+        showMoreMenu={showMoreMenu}
+        showAppearance={showAppearance}
+        setShowMoreMenu={setShowMoreMenu}
+        setShowAppearance={setShowAppearance}
+      />
       {store.showReportModal && (
         <ReportProblemModal
           onClose={() => dispatch({ type: actionTypes.CLOSE_REPORT_MODAL })}
@@ -27,4 +41,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default VerticalNavbar;
