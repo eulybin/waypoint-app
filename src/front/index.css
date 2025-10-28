@@ -1,7 +1,7 @@
 /* Importar estilos de Leaflet para que el mapa se vea correctamente */
-@import "leaflet/dist/leaflet.css";
+@import 'leaflet/dist/leaflet.css';
 
-:root[data-bs-theme="dark"] {
+:root[data-bs-theme='dark'] {
   --bs-body-bg: #121212;
   --bs-body-color: #e0e0e0;
   --bs-border-color: #969696;
@@ -9,14 +9,17 @@
 
 :root {
   --app-border-accent: #212529 !important;
+  --navbar-width-desktop: 250px;
+  --navbar-width-mobile: 72px;
+  --z-navbar: 1000;
 }
 
-:root[data-bs-theme="dark"] {
+:root[data-bs-theme='dark'] {
   --app-border-accent: #969696 !important;
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
 }
 
@@ -50,11 +53,11 @@ body {
   background-color: #349040;
 }
 
-[data-bs-theme="light"] .sidebar-item:hover {
+[data-bs-theme='light'] .sidebar-item:hover {
   background-color: #dadada !important;
 }
 
-[data-bs-theme="dark"] .sidebar-item:hover {
+[data-bs-theme='dark'] .sidebar-item:hover {
   background-color: #3d3d3d !important;
 }
 
@@ -84,7 +87,7 @@ body {
   background-color: #f8f9fa !important;
 }
 
-[data-bs-theme="dark"] .hover-bg-light:hover {
+[data-bs-theme='dark'] .hover-bg-light:hover {
   background-color: #2d2d2d !important;
 }
 
@@ -147,4 +150,78 @@ body {
 .leaflet-popup-content {
   margin: 10px;
   line-height: 1.4;
+}
+
+/* Labels visible on desktop */
+.navbar-desktop .nav-label {
+  display: inline;
+}
+
+/* =============================
+   Desktop Sidebar (≥768px)
+   ============================= */
+.navbar-desktop {
+  width: var(--navbar-width-desktop);
+}
+
+/* =============================
+   Mobile Vertical Bar (<768px)
+   ============================= */
+.navbar-mobile {
+  width: var(--navbar-width-mobile);
+  z-index: var(--z-navbar);
+}
+
+.navbar-mobile .mobile-nav-item {
+  width: 100%;
+  padding: 0.75rem 0;
+  transition: background-color 0.2s;
+}
+
+.navbar-mobile .mobile-nav-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Match desktop hover colors for mobile nav items */
+[data-bs-theme='light'] .navbar-mobile .mobile-nav-item:hover {
+  background-color: #dadada !important;
+}
+
+[data-bs-theme='dark'] .navbar-mobile .mobile-nav-item:hover {
+  background-color: #3d3d3d !important;
+}
+
+.navbar-popup {
+  width: 56px;
+  z-index: calc(var(--z-navbar) + 5) !important;
+}
+
+.navbar-desktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .navbar-desktop {
+    display: flex !important;
+  }
+  .navbar-mobile {
+    display: none !important;
+  }
+
+  .with-sidebar {
+    margin-left: var(--navbar-width-desktop);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .navbar-desktop {
+    display: none !important;
+  }
+  .navbar-mobile {
+    display: flex !important;
+  }
+
+  .with-sidebar {
+    margin-left: var(--navbar-width-mobile);
+  }
 }

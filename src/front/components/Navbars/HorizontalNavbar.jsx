@@ -1,9 +1,9 @@
-import useGlobalReducer from "../hooks/useGlobalReducer";
-import { actionTypes } from "../store";
+import useGlobalReducer from "../../hooks/useGlobalReducer";
+import { actionTypes } from "../../store";
 import { Moon, Sun } from 'lucide-react';
 import { Link } from "react-router-dom";
-import { NAVBAR_ICON_SIZE, NAVBAR_LOGO_SIZE } from "../utils/constants";
-import logo from "../assets/logo.svg";
+import { NAVBAR_ICON_SIZE, NAVBAR_LOGO_SIZE } from "../../utils/constants";
+import logo from "../../assets/logo.svg";
 
 
 const HorizontalNavbar = () => {
