@@ -2,6 +2,8 @@
 
 export const NAVBAR_LOGO_SIZE = '48';
 
+export const SETTINGS_ICON_SIZE = 30;
+
 export const NAVBAR_ICON_SIZE = 24;
 
 export const STANDARD_ICON_SIZE = 20;
@@ -52,6 +54,8 @@ export const MODAL_BACKGROUND = 'rgba(0,0,0,0.5)';
 //----------- Z-INDEX ----------------
 
 export const NAVBAR_Z_INDEX = 1000;
+
+export const WEATHER_WIDGET_Z_INDEX = 1100;
 
 //----------- IMAGES ----------------
 

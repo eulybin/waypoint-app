@@ -15,7 +15,7 @@
 }
 
 :root[data-bs-theme='dark'] {
-  --app-border-accent: #969696 !important;
+  --app-border-accent: #c2c2c2 !important;
 }
 
 body {
@@ -231,4 +231,12 @@ body {
 .weather-btn {
   width: 48px;
   height: 48px;
+}
+
+.rotate-on-hover {
+  transition: transform 0.25s ease;
+}
+
+.rotate-on-hover:hover {
+  transform: rotate(90deg);
 }

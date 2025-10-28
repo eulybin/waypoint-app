@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import WeatherWidget from "../components/WeatherWidget";
 import { fetchWeather } from "../services/weatherService";
+import { WEATHER_WIDGET_Z_INDEX } from "../utils/constants";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ const Home = () => {
 
   return (
     <div className="container-fluid p-4 position-relative">
-      <div className="position-absolute top-0 end-0 p-2" style={{ zIndex: 1100 }}>
+      <div className="position-absolute top-0 end-0 p-4" style={{ zIndex: WEATHER_WIDGET_Z_INDEX }}>
         <WeatherWidget
           city={city}
           weather={weather}

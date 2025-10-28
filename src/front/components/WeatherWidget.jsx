@@ -1,8 +1,14 @@
 import { useState } from 'react';
-import { ThermometerSun, CloudRain, Wind, Droplets, X } from 'lucide-react';
-import { NAVBAR_ICON_SIZE, WEATHER_ICON_SIZE, WEATHER_WIDGET_WIDTH } from '../utils/constants';
+import { ThermometerSun, CloudRain, Wind, Droplets, X, Settings } from 'lucide-react';
+import { NAVBAR_ICON_SIZE, WEATHER_ICON_SIZE, WEATHER_WIDGET_WIDTH, SETTINGS_ICON_SIZE } from '../utils/constants';
+import { weatherThemes } from '../utils/weatherThemes';
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
 const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = false }) => {
+
+  const { store } = useGlobalReducer();
+  const textMutedClass = !store.isDarkMode ? "text-light" : "text-muted";
+
   const [open, setOpen] = useState(defaultOpen);
   const [searchMode, setSearchMode] = useState(!city);
   const [query, setQuery] = useState(city || '');
@@ -10,7 +16,6 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
   const current = weather?.current;
   const forecast3 = weather?.forecast?.slice(0, 3) || [];
 
-  // --- Handlers ---
   const handleToggle = () => setOpen((prev) => !prev);
 
   const handleSubmitCity = (e) => {
@@ -20,9 +25,10 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
     if (onChangeCity) onChangeCity(trimmed);
     else localStorage.setItem('home.city', trimmed);
     setSearchMode(false);
+    setQuery("");
   };
 
-  // --- Render helpers ---
+  // --- RENDER HELPERS ---
   const renderCollapsedButton = () => (
     <button
       type="button"
@@ -37,19 +43,44 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
   const renderHeader = () => (
     <div className="d-flex align-items-start justify-content-between">
       <div>
-        <div className="small text-muted">{weather?.country || ''}</div>
+        <div className={`small ${textMutedClass}`}>{weather?.country || ''}</div>
         <div className="fw-semibold">{weather?.city || city}</div>
       </div>
-      <button
-        type="button"
-        className="btn btn-sm btn-body border rounded-circle p-1"
-        onClick={handleToggle}
-        aria-label="Close weather"
-      >
-        <X size={NAVBAR_ICON_SIZE} />
-      </button>
+
+      <div className="d-flex align-items-center gap-1">
+        <button
+          type="button"
+          className="btn btn-sm text-light p-1 rotate-on-hover"
+          onClick={() => {
+            setSearchMode((prev) => {
+              const next = !prev;
+              if (next) {
+                setQuery("");
+              }
+
+              return next;
+            });
+          }}
+          aria-label="Search another city"
+          title="Search another city"
+        >
+          <Settings size={SETTINGS_ICON_SIZE} />
+        </button>
+
+
+        <button
+          type="button"
+          className="btn btn-sm text-light border-light border-2 rounded-circle p-1 rotate-on-hover"
+          onClick={handleToggle}
+          aria-label="Close weather"
+          title="Close weather"
+        >
+          <X size={NAVBAR_ICON_SIZE} />
+        </button>
+      </div>
     </div>
   );
+
 
   const renderSearchForm = () => (
     <form className="mt-2 d-flex align-items-center gap-2" onSubmit={handleSubmitCity}>
@@ -61,13 +92,13 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      <button type="submit" className="btn bg-orange">Go</button>
+      <button type="submit" className="btn bg-orange text-white">Go</button>
     </form>
   );
   const renderWeatherInfo = () => {
     if (loading) {
       return (
-        <div className="d-flex align-items-center text-muted">
+        <div className={`d-flex align-items-center ${textMutedClass}`}>
           <span
             className="spinner-border spinner-border-sm me-2"
             role="status"
@@ -82,7 +113,7 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
       return (
         <>
           <span className="display-6 fw-bold">{Math.round(current.temperature)}°</span>
-          <span className="text-muted">{current.description}</span>
+          <span className={`${textMutedClass}`}>{current.description}</span>
         </>
       );
     }
@@ -92,7 +123,7 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
 
 
   const renderCurrentStats = () => (
-    <div className="mt-2 d-flex flex-wrap gap-3 small text-muted">
+    <div className={`mt-2 d-flex flex-wrap gap-3 small ${textMutedClass}`}>
       <span className="d-inline-flex align-items-center gap-1">
         <Droplets size={WEATHER_ICON_SIZE} />{current.humidity}%
       </span>
@@ -106,7 +137,7 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
     <div className="mt-3 row g-2 row-cols-3">
       {forecast3.map((d) => (
         <div key={d.date} className="col">
-          <div className="bg-body-tertiary rounded-3 p-2 text-center h-100">
+          <div className="rounded-3 p-2 text-center h-100 bg-white bg-opacity-10">
             <div className="small fw-semibold text-truncate">
               {d.day_name.slice(0, 3).toUpperCase()}
             </div>
@@ -122,12 +153,43 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
     </div>
   );
 
-  // --- Main render ---
+  // --- BG THEMES ---
+  const themeFor = (desc = '') => {
+    const d = desc.toLowerCase();
+    if (d.includes('clear')) return weatherThemes.Clear;
+    if (d.includes('cloud')) return weatherThemes.Clouds;
+    if (d.includes('rain')) return weatherThemes.Rain;
+    if (d.includes('snow')) return weatherThemes.Snow;
+    if (d.includes('thunder')) return weatherThemes.Thunderstorm;
+    if (d.includes('drizzle')) return weatherThemes.Drizzle;
+    if (d.includes('mist') || d.includes('fog') || d.includes('haze')) return weatherThemes.Mist;
+    return weatherThemes.Default;
+  };
+
+  const cardStyle = {
+    width: WEATHER_WIDGET_WIDTH,
+    background: themeFor(current?.description || ''),
+    color: '#fff',
+  };
+
+  // --- MAIN RENDER ---
   if (!open) return renderCollapsedButton();
 
   return (
-    <div className="card shadow-sm border rounded-4" style={{ width: WEATHER_WIDGET_WIDTH }}>
-      <div className="card-body p-3">
+    <div
+      className="card position-relative shadow-sm border rounded-4 text-white overflow-hidden"
+      style={cardStyle}
+    >
+      {/* --- OVERLAY --- */}
+      <div
+        className="position-absolute top-0 start-0 w-100 h-100"
+        style={{
+          backgroundColor: "rgba(0, 0, 0, 0.25)",
+          zIndex: 1,
+        }}
+      ></div>
+
+      <div className="card-body position-relative p-3" style={{ zIndex: 2 }}>
         {renderHeader()}
 
         {searchMode ? (
@@ -143,6 +205,7 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
       </div>
     </div>
   );
+
 };
 
 export default WeatherWidget;
