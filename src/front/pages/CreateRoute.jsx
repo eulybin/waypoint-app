@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
+
 // ============================================================================
 // PÁGINA: CreateRoute - VERSIÓN PROFESIONAL 2025 ✨
 // ============================================================================
@@ -30,7 +31,7 @@ import {
   Church,
   Hotel,
   Mountain,
-  ChevronLeft, 
+  ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
@@ -855,10 +856,10 @@ const CreateRoute = () => {
                         !formState.country
                           ? "Primero selecciona un país"
                           : loadingAll.cities
-                          ? "Buscando..."
-                          : suggestions.cities.length > 0
-                          ? "Escribe para buscar más lugares..."
-                          : "Escribe el nombre del pueblo/ciudad (ej: Carmona)"
+                            ? "Buscando..."
+                            : suggestions.cities.length > 0
+                              ? "Escribe para buscar más lugares..."
+                              : "Escribe el nombre del pueblo/ciudad (ej: Carmona)"
                       }
                       value={searchState.cityQuery}
                       onChange={(e) =>
@@ -960,12 +961,12 @@ const CreateRoute = () => {
                                       {city.type === "city"
                                         ? "Ciudad"
                                         : city.type === "town"
-                                        ? "Pueblo"
-                                        : city.type === "village"
-                                        ? "Aldea"
-                                        : city.type === "municipality"
-                                        ? "Municipio"
-                                        : city.type}
+                                          ? "Pueblo"
+                                          : city.type === "village"
+                                            ? "Aldea"
+                                            : city.type === "municipality"
+                                              ? "Municipio"
+                                              : city.type}
                                     </span>
                                   )}
                                 </div>
@@ -1129,12 +1130,23 @@ const CreateRoute = () => {
                           >
                             <MapPin size={14} />
                             {poi.name}
-                            <X
-                              size={16}
-                              className="cursor-pointer"
-                              onClick={() => handleRemovePOI(poi.id)}
-                              style={{ cursor: "pointer" }}
-                            />
+                            <button
+                              type="button"
+                              className="btn btn-link p-0 m-0 border-0"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleRemovePOI(poi.id);
+                              }}
+                              style={{
+                                cursor: "pointer",
+                                background: "none",
+                                color: "inherit",
+                                lineHeight: 0,
+                              }}
+                            >
+                              <X size={16} />
+                            </button>
                           </span>
                         ))}
                       </div>
@@ -1364,6 +1376,7 @@ const CreateRoute = () => {
                                   <div className="mt-auto">
                                     {isSelected ? (
                                       <button
+                                        type="button"
                                         className="btn btn-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -1379,6 +1392,7 @@ const CreateRoute = () => {
                                       </button>
                                     ) : (
                                       <button
+                                        type="button"
                                         className={`btn btn-outline-${colorClass} btn-sm w-100 d-flex align-items-center justify-content-center gap-2`}
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -1405,6 +1419,7 @@ const CreateRoute = () => {
                       {getTotalPages() > 1 && (
                         <div className="d-flex justify-content-center align-items-center gap-3 mb-3">
                           <button
+                            type="button"
                             className="btn btn-outline-primary"
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
@@ -1428,6 +1443,7 @@ const CreateRoute = () => {
                                 return (
                                   <button
                                     key={page}
+                                    type="button"
                                     className={`btn ${
                                       page === currentPage
                                         ? "btn-primary"
@@ -1454,6 +1470,7 @@ const CreateRoute = () => {
                           </div>
 
                           <button
+                            type="button"
                             className="btn btn-outline-primary"
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === getTotalPages()}

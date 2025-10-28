@@ -26,9 +26,14 @@ L.Icon.Default.mergeOptions({
 });
 
 const RouteMapCard = ({ route, type = "created", onDelete }) => {
-  // type puede ser "created" o "favorite"
-  const lineColor = type === "created" ? "blue" : "orange";
-  const typeLabel = type === "created" ? "Ruta Creada" : "Ruta Favorita";
+  // type puede ser "created", "favorite" o "detail"
+  const lineColor = "blue"; // Todas las rutas en azul
+  const typeLabel =
+    type === "created"
+      ? "Ruta Creada"
+      : type === "favorite"
+        ? "Ruta Favorita"
+        : "Detalle de Ruta";
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -197,7 +202,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
   // Si no hay coordenadas, mostrar un mensaje
   if (coordinates.length === 0) {
     return (
-      <div className="col-md-6 mb-4">
+      <div className={`${type === "detail" ? "col-12" : "col-md-6"} mb-4`}>
         <div className="card h-100 shadow-sm">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start mb-3">
@@ -308,7 +313,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
 
   return (
     <>
-      <div className="col-md-6 mb-4">
+      <div className={`${type === "detail" ? "col-12" : "col-md-6"} mb-4`}>
         <div className="card h-100 shadow-sm">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start mb-3">
@@ -403,22 +408,43 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             <div
               style={{
                 width: "100%",
-                height: "300px",
+                height: type === "detail" ? "600px" : "300px",
                 borderRadius: "8px",
                 overflow: "hidden",
                 position: "relative",
               }}
             >
-              {/* BOTÓN DE ROUTING POR CALLES */}
+              {/* Botón de pantalla completa */}
+              <button
+                onClick={toggleFullscreen}
+                className="btn btn-light btn-sm shadow-sm"
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: 900,
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                title="Ver mapa a pantalla completa"
+              >
+                <Maximize2 size={18} />
+                <span className="small">Pantalla completa</span>
+              </button>
+
+              {/* BOTÓN DE ROUTING POR CALLES - Debajo del de pantalla completa */}
               <button
                 onClick={toggleStreetRouting}
                 disabled={isCalculatingRoute || coordinates.length === 0}
                 className={`btn btn-sm shadow-sm ${useStreetRouting ? "btn-success" : "btn-light"}`}
                 style={{
                   position: "absolute",
-                  top: "10px",
-                  left: "10px",
-                  zIndex: 1000,
+                  top: "60px", // Debajo del botón de pantalla completa
+                  right: "10px",
+                  zIndex: 900,
                   borderRadius: "8px",
                   padding: "8px 12px",
                   display: "flex",
@@ -444,15 +470,16 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                 )}
               </button>
 
-              {/* SELECTOR DE MODO DE TRANSPORTE */}
+              {/* SELECTOR DE MODO DE TRANSPORTE - Debajo del botón de routing */}
               {useStreetRouting && (
                 <div
                   style={{
                     position: "absolute",
-                    top: "60px",
-                    left: "10px",
-                    zIndex: 1000,
+                    top: "110px", // Debajo del botón de routing
+                    right: "10px",
+                    zIndex: 900,
                     display: "flex",
+                    flexDirection: "column", // Vertical para no ocupar mucho espacio
                     gap: "8px",
                   }}
                 >
@@ -491,27 +518,6 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   </button>
                 </div>
               )}
-
-              {/* Botón de pantalla completa */}
-              <button
-                onClick={toggleFullscreen}
-                className="btn btn-light btn-sm shadow-sm"
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  zIndex: 1000,
-                  borderRadius: "8px",
-                  padding: "8px 12px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-                title="Ver mapa a pantalla completa"
-              >
-                <Maximize2 size={18} />
-                <span className="small">Pantalla completa</span>
-              </button>
 
               <MapContainer
                 center={mapCenter}
