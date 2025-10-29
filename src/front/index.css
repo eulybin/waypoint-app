@@ -15,7 +15,7 @@
 }
 
 :root[data-bs-theme='dark'] {
-  --app-border-accent: #969696 !important;
+  --app-border-accent: #c2c2c2 !important;
 }
 
 body {
@@ -55,14 +55,17 @@ body {
 
 [data-bs-theme='light'] .sidebar-item:hover {
   background-color: #dadada !important;
+  transition: background-color 0.2s;
 }
 
 [data-bs-theme='dark'] .sidebar-item:hover {
   background-color: #3d3d3d !important;
+  transition: background-color 0.2s;
 }
 
 .logout-item:hover {
   background-color: #ff5858 !important;
+  transition: background-color 0.2s;
 }
 
 .search-input:hover {
@@ -173,8 +176,7 @@ body {
 }
 
 .navbar-mobile .mobile-nav-item {
-  width: 100%;
-  padding: 0.75rem 0;
+  width: auto;
   transition: background-color 0.2s;
 }
 
@@ -224,4 +226,26 @@ body {
   .with-sidebar {
     margin-left: var(--navbar-width-mobile);
   }
+}
+
+/* WEATHER */
+
+.weather-btn {
+  width: 48px;
+  height: 48px;
+}
+
+.rotate-on-hover {
+  transition: transform 0.25s ease;
+}
+
+.rotate-on-hover:hover {
+  transform: rotate(90deg);
+}
+.weather-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  pointer-events: none;
 }
