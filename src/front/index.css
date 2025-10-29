@@ -404,6 +404,7 @@ body.compact-mode .with-sidebar {
   justify-content: center;
   border-radius: 50%;
 }
+<<<<<<< HEAD
 
 .btn-circle {
   width: 28px;
@@ -468,3 +469,5 @@ body.compact-mode .with-sidebar {
     max-width: 100%;
   }
 }
+=======
+>>>>>>> a9ab61b (small css fix to weather widget)
