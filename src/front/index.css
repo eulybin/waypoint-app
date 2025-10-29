@@ -193,6 +193,58 @@ body {
   background-color: #3d3d3d !important;
 }
 
+/* =============================
+   Home: Visual Pop Cards
+   ============================= */
+.pop-card {
+  border: 1px solid var(--app-border-accent);
+  border-radius: 0.75rem !important; /* rounded-3-ish */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+.pop-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.icon-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.badge-orange {
+  background: linear-gradient(135deg, #ff8a3d, #f36011);
+}
+
+.badge-orange-dark {
+  background: linear-gradient(135deg, #e47a33, #d75610);
+}
+.badge-blue {
+  background: linear-gradient(135deg, #7aa8ff, #3b82f6);
+}
+.badge-green {
+  background: linear-gradient(135deg, #71d08c, #3fa34d);
+}
+.badge-purple {
+  background: linear-gradient(135deg, #b49bff, #7c3aed);
+}
+.badge-gray {
+  background: linear-gradient(135deg, #9aa0a6, #6b7280);
+}
+
+.badge-crimson {
+  background: linear-gradient(135deg, #ef4444, #991b1b);
+  color: #fff;
+}
+
 .navbar-popup {
   width: 56px;
   z-index: calc(var(--z-navbar) + 5) !important;
