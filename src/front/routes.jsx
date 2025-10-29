@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import CreateRoute from "./pages/CreateRoute";
 import SearchBar from "./pages/Search";
 import NotFound from "./pages/NotFound";
+import RouteDetail from "./pages/RouteDetail";
 
 // WRAPPERS
 import AuthenticatedRoute from "./components/Routes/AuthenticatedRoute";
@@ -29,6 +30,7 @@ export const router = createBrowserRouter(
         <Route path="trending" element={<Trending />} />
         <Route path="profile" element={<Profile />} />
         <Route path="create-route" element={<CreateRoute />} />
+        <Route path="route/:id" element={<RouteDetail />} />
       </Route>
 
       {/* GUEST ROUTES */}
