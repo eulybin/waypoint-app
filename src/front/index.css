@@ -228,6 +228,8 @@ body {
   }
 }
 
+/* WEATHER */
+
 .weather-btn {
   width: 48px;
   height: 48px;
@@ -239,4 +241,11 @@ body {
 
 .rotate-on-hover:hover {
   transform: rotate(90deg);
+}
+.weather-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  pointer-events: none;
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ThermometerSun, CloudRain, Wind, Droplets, X, Settings } from 'lucide-react';
-import { NAVBAR_ICON_SIZE, WEATHER_ICON_SIZE, WEATHER_WIDGET_WIDTH, SETTINGS_ICON_SIZE } from '../utils/constants';
+import { NAVBAR_ICON_SIZE, WEATHER_ICON_SIZE, WEATHER_WIDGET_WIDTH, SETTINGS_ICON_SIZE, CLOSE_WEATHER_ICON_SIZE } from '../utils/constants';
 import { weatherThemes } from '../utils/weatherThemes';
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
@@ -28,6 +28,16 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
     setQuery("");
   };
 
+  const handleChangeCity = () => {
+    setSearchMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setQuery("");
+      }
+      return next;
+    });
+  };
+
   // --- RENDER HELPERS ---
   const renderCollapsedButton = () => (
     <button
@@ -51,16 +61,7 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
         <button
           type="button"
           className="btn btn-sm text-light p-1 rotate-on-hover"
-          onClick={() => {
-            setSearchMode((prev) => {
-              const next = !prev;
-              if (next) {
-                setQuery("");
-              }
-
-              return next;
-            });
-          }}
+          onClick={handleChangeCity}
           aria-label="Search another city"
           title="Search another city"
         >
@@ -70,12 +71,12 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
 
         <button
           type="button"
-          className="btn btn-sm text-light border-light border-2 rounded-circle p-1 rotate-on-hover"
+          className="btn btn-sm text-light border-light border rounded-circle p-1 rotate-on-hover"
           onClick={handleToggle}
           aria-label="Close weather"
           title="Close weather"
         >
-          <X size={NAVBAR_ICON_SIZE} />
+          <X size={CLOSE_WEATHER_ICON_SIZE} />
         </button>
       </div>
     </div>
@@ -156,14 +157,27 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
   // --- BG THEMES ---
   const themeFor = (desc = '') => {
     const d = desc.toLowerCase();
-    if (d.includes('clear')) return weatherThemes.Clear;
-    if (d.includes('cloud')) return weatherThemes.Clouds;
-    if (d.includes('rain')) return weatherThemes.Rain;
-    if (d.includes('snow')) return weatherThemes.Snow;
-    if (d.includes('thunder')) return weatherThemes.Thunderstorm;
-    if (d.includes('drizzle')) return weatherThemes.Drizzle;
-    if (d.includes('mist') || d.includes('fog') || d.includes('haze')) return weatherThemes.Mist;
-    return weatherThemes.Default;
+
+    switch (true) {
+      case d.includes('clear') || d.includes('sunny'):
+        return weatherThemes.Clear;
+      case d.includes('cloud'):
+        return weatherThemes.Clouds;
+      case d.includes('rain'):
+        return weatherThemes.Rain;
+      case d.includes('snow'):
+        return weatherThemes.Snow;
+      case d.includes('thunder'):
+        return weatherThemes.Thunderstorm;
+      case d.includes('drizzle'):
+        return weatherThemes.Drizzle;
+      case d.includes('mist'):
+      case d.includes('fog'):
+      case d.includes('haze'):
+        return weatherThemes.Mist;
+      default:
+        return weatherThemes.Default;
+    }
   };
 
   const cardStyle = {
@@ -182,11 +196,7 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
     >
       {/* --- OVERLAY --- */}
       <div
-        className="position-absolute top-0 start-0 w-100 h-100"
-        style={{
-          backgroundColor: "rgba(0, 0, 0, 0.25)",
-          zIndex: 1,
-        }}
+        className="position-absolute top-0 start-0 w-100 h-100 weather-overlay"
       ></div>
 
       <div className="card-body position-relative p-3" style={{ zIndex: 2 }}>

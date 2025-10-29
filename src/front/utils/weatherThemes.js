@@ -1,5 +1,5 @@
 export const weatherThemes = {
-  Clear: 'linear-gradient(135deg, #f9d423 10%, #ff4e50 100%)',
+  Clear: 'linear-gradient(135deg, #ffd65e 0%, #6dd5ed 40%, #2193b0 100%)',
   Clouds: 'linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)',
   Rain: 'linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%)',
   Snow: 'linear-gradient(135deg, #83a4d4 0%, #b6fbff 100%)',

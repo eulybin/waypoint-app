@@ -6,6 +6,8 @@ export const SETTINGS_ICON_SIZE = 30;
 
 export const NAVBAR_ICON_SIZE = 24;
 
+export const CLOSE_WEATHER_ICON_SIZE = 21;
+
 export const STANDARD_ICON_SIZE = 20;
 
 export const WEATHER_ICON_SIZE = 16;
