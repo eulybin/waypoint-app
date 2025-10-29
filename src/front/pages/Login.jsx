@@ -112,7 +112,7 @@ const Login = () => {
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-body">
       <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
-        <h1 className="fw-bold text-green mb-4">Log in</h1>
+        <h2 className="fw-bold text-body mb-4">Log in</h2>
 
         <form onSubmit={handleLoginUser}>
           <div className="mb-3">
