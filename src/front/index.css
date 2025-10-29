@@ -404,3 +404,27 @@ body.compact-mode .with-sidebar {
   justify-content: center;
   border-radius: 50%;
 }
+<<<<<<< HEAD
+
+.profile-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+/* Waypoint brand responsive sizing */
+.waypoint-brand {
+  height: 114px;
+  width: auto;
+}
+
+@media (max-width: 767.98px) {
+  .waypoint-brand {
+    height: auto;
+    max-height: 114px;
+    max-width: 100%;
+  }
+}
+=======
+>>>>>>> 52b0066 (small css fix to weather widget)
