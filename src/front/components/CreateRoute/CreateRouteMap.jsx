@@ -203,13 +203,61 @@ const CreateRouteMap = ({
 
         {/* Línea de la ruta (conecta POIs seleccionados) */}
         {showRoute && routeCoordinates.length > 1 && (
-          <Polyline
-            positions={routeCoordinates}
-            color="#1427fdff"
-            weight={4}
-            opacity={0.7}
-            dashArray="10, 10"
-          />
+          <>
+            {/* Línea de conexión entre POIs */}
+            <Polyline
+              positions={routeCoordinates}
+              color="#0d6efd"
+              weight={3}
+              opacity={0.6}
+            />
+
+            {/* Puntos azules numerados en cada POI seleccionado */}
+            {selectedPOIs
+              .filter((poi) => poi && poi.lat != null && poi.lon != null)
+              .map((poi, index) => (
+                <Marker
+                  key={`route-point-${poi.id}-${index}`}
+                  position={[poi.lat, poi.lon]}
+                  icon={L.divIcon({
+                    html: `
+              <div style="
+                width: 20px;
+                height: 20px;
+                background-color: #0d6efd;
+                border: 4px solid white;
+                border-radius: 50%;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+                position: relative;
+                z-index: 2000 !important;
+              ">
+                <div style="
+                  position: absolute;
+                  top: -30px;
+                  left: 50%;
+                  transform: translateX(-50%);
+                  background: #0d6efd;
+                  color: white;
+                  padding: 3px 8px;
+                  border-radius: 12px;
+                  font-size: 12px;
+                  font-weight: bold;
+                  white-space: nowrap;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                  border: 2px solid white;
+                ">
+                  ${index + 1}
+                </div>
+              </div>
+            `,
+                    className: 'route-point-marker',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10],
+                  })}
+                  zIndexOffset={2000}
+                />
+              ))}
+          </>
         )}
 
         {/* Markers con clustering */}
