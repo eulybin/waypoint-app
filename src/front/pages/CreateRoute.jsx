@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
 
@@ -41,6 +40,7 @@ import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import { STANDARD_ICON_SIZE } from "../utils/constants";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
+import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -100,6 +100,14 @@ const initialFormState = {
   city: "",
   coordinates: null,
   points_of_interest: [],
+};
+
+const normalizeText = (text) => {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize('NFD') // Descomponer caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, ''); // Eliminar marcas diacríticas (tildes)
 };
 
 const loadingAll = {
@@ -201,10 +209,13 @@ const CreateRoute = () => {
       const results = await searchLocations(query, { type: "country" });
 
       // Filtrar solo países
+
       const countries = results
-        .filter(
-          (r) => r.addresstype === "country" || r.type === "administrative"
-        )
+        .filter((r) => {
+          const isCountry = r.addresstype === "country" || r.type === "administrative";
+          const displayName = r.display_name.split(",")[0];
+          return isCountry && normalizeText(displayName).includes(normalizedQuery);
+        })
         .map((r) => ({
           name: r.display_name.split(",")[0],
           code: r.address?.country_code?.toUpperCase() || "",
@@ -350,8 +361,9 @@ const CreateRoute = () => {
     if (!query) {
       return allCities;
     }
+    const normalizedQuery = normalizeText(query);
     return allCities.filter((city) =>
-      city.name.toLowerCase().includes(query.toLowerCase())
+      normalizeText(city.name).includes(normalizedQuery)
     );
   }, []);
 
@@ -880,6 +892,53 @@ const CreateRoute = () => {
                   )}
                 </div>
 
+                {/* Cards de Ciudades Populares del País Seleccionado */}
+                {formState.country &&
+                  !formState.city &&
+                  POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
+                    <div className="mb-4">
+                      <h5 className="fw-semibold mb-3">
+                        🏙️ Ciudades Más Visitadas de {formState.country}
+                      </h5>
+                      <div className="row g-3">
+                        {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map((city) => (
+                          <div key={city.name} className="col-md-3 col-sm-6">
+                            <div
+                              className="card h-100 shadow-sm"
+                              style={{
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                              }}
+                              onClick={() => handleSelectCity(city)}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-5px)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '';
+                              }}
+                            >
+                              <img
+                                src={city.image}
+                                className="card-img-top"
+                                alt={city.name}
+                                style={{ height: '100px', objectFit: 'cover' }}
+                              />
+                              <div className="card-body text-center p-2">
+                                <h6 className="card-title mb-0 fw-bold small">{city.name}</h6>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <hr className="my-4" />
+                      <p className="text-center text-muted small">
+                        O busca otra ciudad/pueblo:
+                      </p>
+                    </div>
+                  )}
+
                 {/* Ciudad/Localidad con Autocompletado */}
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
@@ -1171,8 +1230,8 @@ const CreateRoute = () => {
                             key={category.value}
                             type="button"
                             className={`btn ${searchState.poiType === category.value
-                                ? `btn-${category.color}`
-                                : `btn-outline-${category.color}`
+                              ? `btn-${category.color}`
+                              : `btn-outline-${category.color}`
                               } btn-sm d-flex align-items-center gap-2`}
                             onClick={() =>
                               setSearchState((prev) => ({
@@ -1308,8 +1367,8 @@ const CreateRoute = () => {
                                 >
                                   <div
                                     className={`card h-100 shadow-sm ${isSelected
-                                        ? "border-success border-3"
-                                        : ""
+                                      ? "border-success border-3"
+                                      : ""
                                       }`}
                                     style={{
                                       cursor: "pointer",
@@ -1540,8 +1599,8 @@ const CreateRoute = () => {
                                         key={page}
                                         type="button"
                                         className={`btn ${page === currentPage
-                                            ? "btn-primary"
-                                            : "btn-outline-primary"
+                                          ? "btn-primary"
+                                          : "btn-outline-primary"
                                           }`}
                                         onClick={() => handlePageChange(page)}
                                         style={{ minWidth: "40px" }}
