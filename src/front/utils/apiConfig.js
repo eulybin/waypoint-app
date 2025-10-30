@@ -165,6 +165,20 @@ const getWikipediaImage = async (wikipediaTag) => {
 };
 
 /**
+ * Calcular centroide de un polígono o way
+ */
+const calculateCentroid = (nodes) => {
+  if (!nodes || nodes.length === 0) return null;
+
+  const validNodes = nodes.filter(n => n.lat != null && n.lon != null);
+  if (validNodes.length === 0) return null;
+
+  const lat = validNodes.reduce((sum, node) => sum + node.lat, 0) / validNodes.length;
+  const lon = validNodes.reduce((sum, node) => sum + node.lon, 0) / validNodes.length;
+
+  return { lat, lon };
+};
+/**
  * Buscar puntos de interés con Overpass API (OpenStreetMap)
  * Usado para encontrar museos, restaurantes, monumentos, etc.
  */
@@ -187,19 +201,16 @@ export const searchPointsOfInterest = async (lat, lon, type, radius = 5000) => {
 
   // Query Overpass API
   const query = `
-    [out:json][timeout:25];
-    (
-      node["${osmQuery.split("=")[0]}"="${
-    osmQuery.split("=")[1]
-  }"](around:${radius},${lat},${lon});
-      way["${osmQuery.split("=")[0]}"="${
-    osmQuery.split("=")[1]
-  }"](around:${radius},${lat},${lon});
-    );
-    out body;
-    >;
-    out skel qt;
-  `;
+  [out:json][timeout:25];
+  (
+    node["${osmQuery.split("=")[0]}"="${osmQuery.split("=")[1]}"](around:${radius},${lat},${lon});
+    way["${osmQuery.split("=")[0]}"="${osmQuery.split("=")[1]}"](around:${radius},${lat},${lon});
+    relation["${osmQuery.split("=")[0]}"="${osmQuery.split("=")[1]}"](around:${radius},${lat},${lon});
+  );
+  out center body;
+  >;
+  out skel qt;
+`;
 
   try {
     const response = await fetch("https://overpass-api.de/api/interpreter", {
@@ -214,21 +225,62 @@ export const searchPointsOfInterest = async (lat, lon, type, radius = 5000) => {
     const data = await response.json();
 
     // Procesar y formatear resultados
+    // Procesar y formatear resultados con mejor manejo de coordenadas
     const pois = data.elements
       .filter((el) => el.tags && el.tags.name)
-      .map((el) => ({
-        id: el.id,
-        name: el.tags.name,
-        type: el.tags[osmQuery.split("=")[0]],
-        lat: el.lat || el.center?.lat,
-        lon: el.lon || el.center?.lon,
-        address: el.tags["addr:street"] || "",
-        city: el.tags["addr:city"] || "",
-        wikimedia: el.tags["wikimedia_commons"] || null,
-        wikipedia: el.tags["wikipedia"] || null,
-        image: null, // Se llenará después
-      }))
+      .map((el) => {
+        let poiLat = null;
+        let poiLon = null;
+
+        // Estrategia de obtención de coordenadas (en orden de prioridad):
+
+        // 1. Si es un nodo, tiene lat/lon directamente
+        if (el.lat != null && el.lon != null) {
+          poiLat = el.lat;
+          poiLon = el.lon;
+        }
+        // 2. Si es un way o relation con center calculado por Overpass
+        else if (el.center?.lat != null && el.center?.lon != null) {
+          poiLat = el.center.lat;
+          poiLon = el.center.lon;
+        }
+        // 3. Si hay bounds (límites), usar el centro del bounding box
+        else if (el.bounds) {
+          poiLat = (el.bounds.minlat + el.bounds.maxlat) / 2;
+          poiLon = (el.bounds.minlon + el.bounds.maxlon) / 2;
+        }
+        // 4. Calcular centroide de los nodos (para ways sin center)
+        else if (el.nodes && data.elements) {
+          const wayNodes = el.nodes
+            .map(nodeId => data.elements.find(e => e.id === nodeId))
+            .filter(n => n && n.lat != null && n.lon != null);
+
+          if (wayNodes.length > 0) {
+            const centroid = calculateCentroid(wayNodes);
+            if (centroid) {
+              poiLat = centroid.lat;
+              poiLon = centroid.lon;
+            }
+          }
+        }
+
+        return {
+          id: el.id,
+          name: el.tags.name,
+          type: el.tags[osmQuery.split("=")[0]],
+          lat: poiLat,
+          lon: poiLon,
+          address: el.tags["addr:street"] || "",
+          city: el.tags["addr:city"] || "",
+          wikimedia: el.tags["wikimedia_commons"] || null,
+          wikipedia: el.tags["wikipedia"] || null,
+          image: null, // Se llenará después
+          elementType: el.type, // Añadir tipo de elemento para debug
+        };
+      })
+      .filter((poi) => poi.lat != null && poi.lon != null) // ✅ CRUCIAL: Filtrar POIs sin coordenadas
       .slice(0, 50); // Limitar a 50 resultados
+
 
     // Obtener imágenes de Wikimedia/Wikipedia en paralelo (solo las primeras 20 para optimizar)
     const poisWithImages = await Promise.all(
