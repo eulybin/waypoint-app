@@ -33,10 +33,13 @@ import {
   Mountain,
   ChevronLeft,
   ChevronRight,
+  Map,
+  LayoutGrid,
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import { STANDARD_ICON_SIZE } from "../utils/constants";
+import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -170,6 +173,9 @@ const CreateRoute = () => {
 
   // ========== ESTADO PARA PAGINACIÓN ==========
   const [currentPage, setCurrentPage] = useState(1);
+
+  // ========== ESTADO PARA VISTA (MAPA O CARDS) ==========
+  const [viewMode, setViewMode] = useState("cards"); // "cards" o "map"
 
   // ========== REFS PARA DEBOUNCING ==========
   const countryDebounceRef = useRef(null);
@@ -581,17 +587,27 @@ const CreateRoute = () => {
   };
 
   const handleAddPOI = (poi) => {
-    dispatch({
-      type: "ADD_POI",
-      poi: {
-        id: poi.id,
-        name: poi.name,
-        type: poi.type,
-        lat: poi.lat,
-        lon: poi.lon,
-      },
-    });
-    // No limpiamos el query ni cerramos para permitir agregar múltiples
+    // Verificar si ya está seleccionado para hacer toggle
+    const isAlreadySelected = formState.points_of_interest.some(
+      (p) => p.id === poi.id
+    );
+
+    if (isAlreadySelected) {
+      // Si ya está seleccionado, quitarlo
+      handleRemovePOI(poi.id);
+    } else {
+      // Si no está seleccionado, agregarlo
+      dispatch({
+        type: "ADD_POI",
+        poi: {
+          id: poi.id,
+          name: poi.name,
+          type: poi.type,
+          lat: poi.lat,
+          lon: poi.lon,
+        },
+      });
+    }
   };
 
   const handleRemovePOI = (poiId) => {
@@ -730,7 +746,7 @@ const CreateRoute = () => {
 
       {/* Formulario */}
       <div className="row">
-        <div className="col-lg-8">
+        <div className="col-12">
           <div className="card shadow-sm">
             <div className="card-body p-4">
               <form onSubmit={handleSubmit}>
@@ -1016,6 +1032,29 @@ const CreateRoute = () => {
                     )}
                   </label>
 
+                  {/* Toggle entre Vista de Cards y Mapa */}
+                  <div className="mb-3 d-flex justify-content-center">
+                    <div className="btn-group" role="group">
+                      <button
+                        type="button"
+                        className={`btn ${viewMode === "cards" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
+                        onClick={() => setViewMode("cards")}
+                      >
+                        <LayoutGrid size={18} />
+                        Vista de Cards
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn ${viewMode === "map" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
+                        onClick={() => setViewMode("map")}
+                        disabled={!formState.city}
+                      >
+                        <Map size={18} />
+                        Vista de Mapa
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Selector de categoría de POI con Botones */}
                   <div className="mb-3">
                     <label className="form-label small fw-semibold">
@@ -1153,357 +1192,406 @@ const CreateRoute = () => {
                     </div>
                   )}
 
-                  {/* Buscador de POI */}
-                  <div className="position-relative mb-3">
-                    <div className="position-relative">
-                      <Search
-                        className="position-absolute"
-                        size={20}
-                        style={{ left: 12, top: 12 }}
-                      />
-                      <input
-                        type="text"
-                        className="form-control ps-5"
-                        placeholder={
-                          formState.city
-                            ? "Buscar por nombre..."
-                            : "Primero selecciona una ciudad"
-                        }
-                        value={searchState.poiQuery}
-                        onChange={(e) =>
-                          setSearchState((prev) => ({
-                            ...prev,
-                            poiQuery: e.target.value,
-                          }))
-                        }
-                        disabled={!formState.city}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Grid de Cards de POIs con Paginación */}
-                  {formState.city && suggestions.pois.length > 0 && (
-                    <div className="poi-cards-container">
-                      {/* Información de resultados */}
-                      <div className="mb-3 d-flex justify-content-between align-items-center">
-                        <div className="text-muted small">
-                          Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1} -{" "}
-                          {Math.min(
-                            currentPage * ITEMS_PER_PAGE,
-                            getFilteredPOIs().length
-                          )}{" "}
-                          de {getFilteredPOIs().length} resultados
-                        </div>
-                        <div className="text-muted small">
-                          Página {currentPage} de {getTotalPages()}
+                  {/* VISTA DE CARDS */}
+                  {viewMode === "cards" && (
+                    <>
+                      {/* Buscador de POI */}
+                      <div className="position-relative mb-3">
+                        <div className="position-relative">
+                          <Search
+                            className="position-absolute"
+                            size={20}
+                            style={{ left: 12, top: 12 }}
+                          />
+                          <input
+                            type="text"
+                            className="form-control ps-5"
+                            placeholder={
+                              formState.city
+                                ? "Buscar por nombre..."
+                                : "Primero selecciona una ciudad"
+                            }
+                            value={searchState.poiQuery}
+                            onChange={(e) =>
+                              setSearchState((prev) => ({
+                                ...prev,
+                                poiQuery: e.target.value,
+                              }))
+                            }
+                            disabled={!formState.city}
+                          />
                         </div>
                       </div>
 
-                      {/* Grid de Cards */}
-                      <div className="row g-3 mb-4">
-                        {getPaginatedPOIs().map((poi) => {
-                          const isSelected = formState.points_of_interest.some(
-                            (p) => p.id === poi.id
-                          );
-                          const IconComponent = getPOIIcon(searchState.poiType);
-                          const colorClass = getPOIColor(searchState.poiType);
-                          const imageUrl = getPOIImage(
-                            poi,
-                            searchState.poiType
-                          );
+                      {/* Grid de Cards de POIs con Paginación */}
+                      {formState.city && suggestions.pois.length > 0 && (
+                        <div className="poi-cards-container">
+                          {/* Información de resultados */}
+                          <div className="mb-3 d-flex justify-content-between align-items-center">
+                            <div className="text-muted small">
+                              Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1}{" "}
+                              -{" "}
+                              {Math.min(
+                                currentPage * ITEMS_PER_PAGE,
+                                getFilteredPOIs().length
+                              )}{" "}
+                              de {getFilteredPOIs().length} resultados
+                            </div>
+                            <div className="text-muted small">
+                              Página {currentPage} de {getTotalPages()}
+                            </div>
+                          </div>
 
-                          return (
-                            <div
-                              key={poi.id}
-                              className="col-md-6 col-lg-4 col-xl-3"
-                            >
-                              <div
-                                className={`card h-100 shadow-sm ${
-                                  isSelected ? "border-success border-3" : ""
-                                }`}
-                                style={{
-                                  cursor: "pointer",
-                                  transition: "all 0.3s ease",
-                                  overflow: "hidden",
-                                }}
-                                onClick={() => handleAddPOI(poi)}
-                                onMouseEnter={(e) => {
-                                  if (!isSelected) {
-                                    e.currentTarget.style.transform =
-                                      "translateY(-5px)";
-                                    e.currentTarget.style.boxShadow =
-                                      "0 8px 20px rgba(0,0,0,0.15)";
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  if (!isSelected) {
-                                    e.currentTarget.style.transform =
-                                      "translateY(0)";
-                                    e.currentTarget.style.boxShadow = "";
-                                  }
-                                }}
-                              >
-                                {/* Imagen del POI con altura fija */}
+                          {/* Grid de Cards */}
+                          <div className="row g-3 mb-4">
+                            {getPaginatedPOIs().map((poi) => {
+                              const isSelected =
+                                formState.points_of_interest.some(
+                                  (p) => p.id === poi.id
+                                );
+                              const IconComponent = getPOIIcon(
+                                searchState.poiType
+                              );
+                              const colorClass = getPOIColor(
+                                searchState.poiType
+                              );
+                              const imageUrl = getPOIImage(
+                                poi,
+                                searchState.poiType
+                              );
+
+                              return (
                                 <div
-                                  style={{
-                                    position: "relative",
-                                    width: "100%",
-                                    height: "180px",
-                                    overflow: "hidden",
-                                    backgroundColor: "#f0f0f0",
-                                  }}
+                                  key={poi.id}
+                                  className="col-md-6 col-lg-4 col-xl-3"
                                 >
-                                  <img
-                                    src={imageUrl}
-                                    alt={poi.name}
+                                  <div
+                                    className={`card h-100 shadow-sm ${
+                                      isSelected
+                                        ? "border-success border-3"
+                                        : ""
+                                    }`}
                                     style={{
-                                      width: "100%",
-                                      height: "100%",
-                                      objectFit: "cover",
+                                      cursor: "pointer",
+                                      transition: "all 0.3s ease",
+                                      overflow: "hidden",
                                     }}
-                                    onError={(e) => {
-                                      // Si la imagen falla, usar la imagen por defecto
-                                      e.target.src =
-                                        DEFAULT_IMAGES[searchState.poiType] ||
-                                        DEFAULT_IMAGES.attraction;
+                                    onClick={() => handleAddPOI(poi)}
+                                    onMouseEnter={(e) => {
+                                      if (!isSelected) {
+                                        e.currentTarget.style.transform =
+                                          "translateY(-5px)";
+                                        e.currentTarget.style.boxShadow =
+                                          "0 8px 20px rgba(0,0,0,0.15)";
+                                      }
                                     }}
-                                  />
-
-                                  {/* Badge de selección en la esquina */}
-                                  {isSelected && (
+                                    onMouseLeave={(e) => {
+                                      if (!isSelected) {
+                                        e.currentTarget.style.transform =
+                                          "translateY(0)";
+                                        e.currentTarget.style.boxShadow = "";
+                                      }
+                                    }}
+                                  >
+                                    {/* Imagen del POI con altura fija */}
                                     <div
                                       style={{
-                                        position: "absolute",
-                                        top: "10px",
-                                        right: "10px",
-                                        backgroundColor: "#198754",
-                                        color: "white",
-                                        borderRadius: "50%",
-                                        width: "32px",
-                                        height: "32px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                                        position: "relative",
+                                        width: "100%",
+                                        height: "180px",
+                                        overflow: "hidden",
+                                        backgroundColor: "#f0f0f0",
                                       }}
                                     >
-                                      <Check size={20} />
+                                      <img
+                                        src={imageUrl}
+                                        alt={poi.name}
+                                        style={{
+                                          width: "100%",
+                                          height: "100%",
+                                          objectFit: "cover",
+                                        }}
+                                        onError={(e) => {
+                                          // Si la imagen falla, usar la imagen por defecto
+                                          e.target.src =
+                                            DEFAULT_IMAGES[
+                                              searchState.poiType
+                                            ] || DEFAULT_IMAGES.attraction;
+                                        }}
+                                      />
+
+                                      {/* Badge de selección en la esquina */}
+                                      {isSelected && (
+                                        <div
+                                          style={{
+                                            position: "absolute",
+                                            top: "10px",
+                                            right: "10px",
+                                            backgroundColor: "#198754",
+                                            color: "white",
+                                            borderRadius: "50%",
+                                            width: "32px",
+                                            height: "32px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            boxShadow:
+                                              "0 2px 8px rgba(0,0,0,0.3)",
+                                          }}
+                                        >
+                                          <Check size={20} />
+                                        </div>
+                                      )}
+
+                                      {/* Icono de categoría en la esquina */}
+                                      <div
+                                        style={{
+                                          position: "absolute",
+                                          top: "10px",
+                                          left: "10px",
+                                          backgroundColor: "white",
+                                          borderRadius: "8px",
+                                          padding: "8px",
+                                          boxShadow:
+                                            "0 2px 8px rgba(0,0,0,0.2)",
+                                        }}
+                                      >
+                                        <IconComponent
+                                          size={20}
+                                          className={`text-${colorClass}`}
+                                        />
+                                      </div>
                                     </div>
-                                  )}
 
-                                  {/* Icono de categoría en la esquina */}
-                                  <div
-                                    style={{
-                                      position: "absolute",
-                                      top: "10px",
-                                      left: "10px",
-                                      backgroundColor: "white",
-                                      borderRadius: "8px",
-                                      padding: "8px",
-                                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                                    }}
-                                  >
-                                    <IconComponent
-                                      size={20}
-                                      className={`text-${colorClass}`}
-                                    />
-                                  </div>
-                                </div>
-
-                                {/* Contenido de la card con altura fija */}
-                                <div
-                                  className="card-body d-flex flex-column"
-                                  style={{
-                                    padding: "1rem",
-                                    height: "200px", // Altura fija para el contenido
-                                  }}
-                                >
-                                  {/* Nombre del POI - altura fija */}
-                                  <h6
-                                    className="card-title mb-2 fw-bold"
-                                    style={{
-                                      fontSize: "0.95rem",
-                                      lineHeight: "1.3",
-                                      height: "2.6rem",
-                                      display: "-webkit-box",
-                                      WebkitLineClamp: 2,
-                                      WebkitBoxOrient: "vertical",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                    }}
-                                  >
-                                    {poi.name}
-                                  </h6>
-
-                                  {/* Tipo - badge */}
-                                  <div className="mb-2">
-                                    <span
-                                      className="badge"
+                                    {/* Contenido de la card con altura fija */}
+                                    <div
+                                      className="card-body d-flex flex-column"
                                       style={{
-                                        fontSize: "0.7rem",
-                                        backgroundColor: `var(--bs-${colorClass})`,
-                                        color: "white",
+                                        padding: "1rem",
+                                        height: "200px", // Altura fija para el contenido
                                       }}
                                     >
-                                      {poi.type}
-                                    </span>
-                                  </div>
-
-                                  {/* Dirección con altura fija */}
-                                  <div
-                                    style={{
-                                      fontSize: "0.8rem",
-                                      color: "#6c757d",
-                                      lineHeight: "1.3",
-                                      height: "3.9rem",
-                                      overflow: "hidden",
-                                      marginBottom: "0.5rem",
-                                      display: "-webkit-box",
-                                      WebkitLineClamp: 3,
-                                      WebkitBoxOrient: "vertical",
-                                    }}
-                                  >
-                                    {poi.address ? (
-                                      <>📍 {poi.address}</>
-                                    ) : (
-                                      <span className="text-muted fst-italic">
-                                        Sin dirección disponible
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {/* Botón siempre al final - con margin-top auto */}
-                                  <div className="mt-auto">
-                                    {isSelected ? (
-                                      <button
-                                        type="button"
-                                        className="btn btn-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleRemovePOI(poi.id);
-                                        }}
+                                      {/* Nombre del POI - altura fija */}
+                                      <h6
+                                        className="card-title mb-2 fw-bold"
                                         style={{
-                                          fontWeight: "600",
-                                          padding: "0.5rem",
+                                          fontSize: "0.95rem",
+                                          lineHeight: "1.3",
+                                          height: "2.6rem",
+                                          display: "-webkit-box",
+                                          WebkitLineClamp: 2,
+                                          WebkitBoxOrient: "vertical",
+                                          overflow: "hidden",
+                                          textOverflow: "ellipsis",
                                         }}
                                       >
-                                        <Check size={16} />
-                                        Seleccionado
-                                      </button>
-                                    ) : (
-                                      <button
-                                        type="button"
-                                        className={`btn btn-outline-${colorClass} btn-sm w-100 d-flex align-items-center justify-content-center gap-2`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleAddPOI(poi);
-                                        }}
+                                        {poi.name}
+                                      </h6>
+
+                                      {/* Tipo - badge */}
+                                      <div className="mb-2">
+                                        <span
+                                          className="badge"
+                                          style={{
+                                            fontSize: "0.7rem",
+                                            backgroundColor: `var(--bs-${colorClass})`,
+                                            color: "white",
+                                          }}
+                                        >
+                                          {poi.type}
+                                        </span>
+                                      </div>
+
+                                      {/* Dirección con altura fija */}
+                                      <div
                                         style={{
-                                          fontWeight: "600",
-                                          padding: "0.5rem",
+                                          fontSize: "0.8rem",
+                                          color: "#6c757d",
+                                          lineHeight: "1.3",
+                                          height: "3.9rem",
+                                          overflow: "hidden",
+                                          marginBottom: "0.5rem",
+                                          display: "-webkit-box",
+                                          WebkitLineClamp: 3,
+                                          WebkitBoxOrient: "vertical",
                                         }}
                                       >
-                                        <Plus size={16} />
-                                        Agregar
-                                      </button>
-                                    )}
+                                        {poi.address ? (
+                                          <>📍 {poi.address}</>
+                                        ) : (
+                                          <span className="text-muted fst-italic">
+                                            Sin dirección disponible
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* Botón siempre al final - con margin-top auto */}
+                                      <div className="mt-auto">
+                                        {isSelected ? (
+                                          <button
+                                            type="button"
+                                            className="btn btn-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleRemovePOI(poi.id);
+                                            }}
+                                            style={{
+                                              fontWeight: "600",
+                                              padding: "0.5rem",
+                                            }}
+                                          >
+                                            <Check size={16} />
+                                            Seleccionado
+                                          </button>
+                                        ) : (
+                                          <button
+                                            type="button"
+                                            className={`btn btn-outline-${colorClass} btn-sm w-100 d-flex align-items-center justify-content-center gap-2`}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleAddPOI(poi);
+                                            }}
+                                            style={{
+                                              fontWeight: "600",
+                                              padding: "0.5rem",
+                                            }}
+                                          >
+                                            <Plus size={16} />
+                                            Agregar
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Controles de Paginación */}
-                      {getTotalPages() > 1 && (
-                        <div className="d-flex justify-content-center align-items-center gap-3 mb-3">
-                          <button
-                            type="button"
-                            className="btn btn-outline-primary"
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                          >
-                            <ChevronLeft size={20} />
-                            Anterior
-                          </button>
-
-                          <div className="d-flex gap-2">
-                            {Array.from(
-                              { length: getTotalPages() },
-                              (_, i) => i + 1
-                            ).map((page) => {
-                              // Mostrar solo páginas cercanas a la actual
-                              if (
-                                page === 1 ||
-                                page === getTotalPages() ||
-                                (page >= currentPage - 1 &&
-                                  page <= currentPage + 1)
-                              ) {
-                                return (
-                                  <button
-                                    key={page}
-                                    type="button"
-                                    className={`btn ${
-                                      page === currentPage
-                                        ? "btn-primary"
-                                        : "btn-outline-primary"
-                                    }`}
-                                    onClick={() => handlePageChange(page)}
-                                    style={{ minWidth: "40px" }}
-                                  >
-                                    {page}
-                                  </button>
-                                );
-                              } else if (
-                                page === currentPage - 2 ||
-                                page === currentPage + 2
-                              ) {
-                                return (
-                                  <span key={page} className="px-2">
-                                    ...
-                                  </span>
-                                );
-                              }
-                              return null;
+                              );
                             })}
                           </div>
 
-                          <button
-                            type="button"
-                            className="btn btn-outline-primary"
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === getTotalPages()}
-                          >
-                            Siguiente
-                            <ChevronRight size={20} />
-                          </button>
+                          {/* Controles de Paginación */}
+                          {getTotalPages() > 1 && (
+                            <div className="d-flex justify-content-center align-items-center gap-3 mb-3">
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary"
+                                onClick={() =>
+                                  handlePageChange(currentPage - 1)
+                                }
+                                disabled={currentPage === 1}
+                              >
+                                <ChevronLeft size={20} />
+                                Anterior
+                              </button>
+
+                              <div className="d-flex gap-2">
+                                {Array.from(
+                                  { length: getTotalPages() },
+                                  (_, i) => i + 1
+                                ).map((page) => {
+                                  // Mostrar solo páginas cercanas a la actual
+                                  if (
+                                    page === 1 ||
+                                    page === getTotalPages() ||
+                                    (page >= currentPage - 1 &&
+                                      page <= currentPage + 1)
+                                  ) {
+                                    return (
+                                      <button
+                                        key={page}
+                                        type="button"
+                                        className={`btn ${
+                                          page === currentPage
+                                            ? "btn-primary"
+                                            : "btn-outline-primary"
+                                        }`}
+                                        onClick={() => handlePageChange(page)}
+                                        style={{ minWidth: "40px" }}
+                                      >
+                                        {page}
+                                      </button>
+                                    );
+                                  } else if (
+                                    page === currentPage - 2 ||
+                                    page === currentPage + 2
+                                  ) {
+                                    return (
+                                      <span key={page} className="px-2">
+                                        ...
+                                      </span>
+                                    );
+                                  }
+                                  return null;
+                                })}
+                              </div>
+
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary"
+                                onClick={() =>
+                                  handlePageChange(currentPage + 1)
+                                }
+                                disabled={currentPage === getTotalPages()}
+                              >
+                                Siguiente
+                                <ChevronRight size={20} />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
-                    </div>
+
+                      {/* Mensaje cuando no hay POIs */}
+                      {formState.city &&
+                        !loadingAll.pois &&
+                        suggestions.pois.length === 0 && (
+                          <div className="alert alert-info">
+                            <AlertCircle size={20} className="me-2" />
+                            No se encontraron puntos de interés para esta
+                            categoría. Prueba con otra categoría.
+                          </div>
+                        )}
+
+                      {/* Mensaje cuando no hay resultados de búsqueda */}
+                      {formState.city &&
+                        suggestions.pois.length > 0 &&
+                        getFilteredPOIs().length === 0 && (
+                          <div className="alert alert-warning">
+                            <AlertCircle size={20} className="me-2" />
+                            No se encontraron resultados para "
+                            {searchState.poiQuery}". Intenta con otro término.
+                          </div>
+                        )}
+                    </>
                   )}
 
-                  {/* Mensaje cuando no hay POIs */}
-                  {formState.city &&
-                    !loadingAll.pois &&
-                    suggestions.pois.length === 0 && (
-                      <div className="alert alert-info">
-                        <AlertCircle size={20} className="me-2" />
-                        No se encontraron puntos de interés para esta categoría.
-                        Prueba con otra categoría.
-                      </div>
-                    )}
-
-                  {/* Mensaje cuando no hay resultados de búsqueda */}
-                  {formState.city &&
-                    suggestions.pois.length > 0 &&
-                    getFilteredPOIs().length === 0 && (
-                      <div className="alert alert-warning">
-                        <AlertCircle size={20} className="me-2" />
-                        No se encontraron resultados para "
-                        {searchState.poiQuery}". Intenta con otro término.
-                      </div>
-                    )}
+                  {/* VISTA DE MAPA */}
+                  {viewMode === "map" && formState.city && (
+                    <div className="mb-3">
+                      <CreateRouteMap
+                        center={
+                          formState.coordinates
+                            ? [
+                                formState.coordinates.lat,
+                                formState.coordinates.lon,
+                              ]
+                            : [40.4168, -3.7038]
+                        }
+                        pois={suggestions.pois}
+                        selectedPOIs={formState.points_of_interest}
+                        onPOIClick={(poi) => {
+                          const isSelected = formState.points_of_interest.some(
+                            (p) => p.id === poi.id
+                          );
+                          if (isSelected) {
+                            handleRemovePOI(poi.id);
+                          } else {
+                            handleAddPOI(poi);
+                          }
+                        }}
+                        showRoute={true}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Error */}
