@@ -40,6 +40,7 @@ import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import { STANDARD_ICON_SIZE } from "../utils/constants";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
+import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -649,7 +650,7 @@ const CreateRoute = () => {
         console.error("Error creating route:", error);
         setError(
           error.message ||
-            "No se pudo crear la ruta. Por favor, intenta de nuevo."
+          "No se pudo crear la ruta. Por favor, intenta de nuevo."
         );
       }
     } finally {
@@ -743,6 +744,47 @@ const CreateRoute = () => {
           Usa el autocompletado para seleccionar ubicaciones y puntos de interés
         </p>
       </div>
+      {/* Cards de Países Populares */}
+      {!formState.country && (
+        <div className="mb-4">
+          <h5 className="fw-semibold mb-3">🌍 Países Más Visitados</h5>
+          <div className="row g-3">
+            {POPULAR_COUNTRIES.map((country) => (
+              <div key={country.code} className="col-md-3 col-sm-6">
+                <div
+                  className="card h-100 shadow-sm"
+                  style={{
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  }}
+                  onClick={() => handleSelectCountry(country)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '';
+                  }}
+                >
+                  <img
+                    src={country.image}
+                    className="card-img-top"
+                    alt={country.name}
+                    style={{ height: '120px', objectFit: 'cover' }}
+                  />
+                  <div className="card-body text-center p-2">
+                    <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
+                    <small className="text-muted">{country.visitors} visitantes/año</small>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <hr className="my-4" />
+          <p className="text-center text-muted small">O busca cualquier otro país:</p>
+        </div>
+      )}
 
       {/* Formulario */}
       <div className="row">
@@ -1128,11 +1170,10 @@ const CreateRoute = () => {
                           <button
                             key={category.value}
                             type="button"
-                            className={`btn ${
-                              searchState.poiType === category.value
+                            className={`btn ${searchState.poiType === category.value
                                 ? `btn-${category.color}`
                                 : `btn-outline-${category.color}`
-                            } btn-sm d-flex align-items-center gap-2`}
+                              } btn-sm d-flex align-items-center gap-2`}
                             onClick={() =>
                               setSearchState((prev) => ({
                                 ...prev,
@@ -1266,11 +1307,10 @@ const CreateRoute = () => {
                                   className="col-md-6 col-lg-4 col-xl-3"
                                 >
                                   <div
-                                    className={`card h-100 shadow-sm ${
-                                      isSelected
+                                    className={`card h-100 shadow-sm ${isSelected
                                         ? "border-success border-3"
                                         : ""
-                                    }`}
+                                      }`}
                                     style={{
                                       cursor: "pointer",
                                       transition: "all 0.3s ease",
@@ -1315,7 +1355,7 @@ const CreateRoute = () => {
                                           // Si la imagen falla, usar la imagen por defecto
                                           e.target.src =
                                             DEFAULT_IMAGES[
-                                              searchState.poiType
+                                            searchState.poiType
                                             ] || DEFAULT_IMAGES.attraction;
                                         }}
                                       />
@@ -1499,11 +1539,10 @@ const CreateRoute = () => {
                                       <button
                                         key={page}
                                         type="button"
-                                        className={`btn ${
-                                          page === currentPage
+                                        className={`btn ${page === currentPage
                                             ? "btn-primary"
                                             : "btn-outline-primary"
-                                        }`}
+                                          }`}
                                         onClick={() => handlePageChange(page)}
                                         style={{ minWidth: "40px" }}
                                       >
@@ -1571,9 +1610,9 @@ const CreateRoute = () => {
                         center={
                           formState.coordinates
                             ? [
-                                formState.coordinates.lat,
-                                formState.coordinates.lon,
-                              ]
+                              formState.coordinates.lat,
+                              formState.coordinates.lon,
+                            ]
                             : [40.4168, -3.7038]
                         }
                         pois={suggestions.pois}
