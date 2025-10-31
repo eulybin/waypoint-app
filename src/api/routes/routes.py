@@ -6,6 +6,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 import requests
 import os
 from datetime import datetime
+from api.routes.external_api import external_api
 import json
 from api.routes import (
     register_login,
@@ -23,7 +24,7 @@ api = Blueprint("api", __name__)
 
 # Allow CORS requests to this API
 # CORS(api)
-
+api.register_blueprint(external_api, url_prefix="/external")
 
 # AUTENTICACIÓN Y REGISTRO
 

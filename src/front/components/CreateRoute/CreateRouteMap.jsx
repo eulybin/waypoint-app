@@ -1,3 +1,5 @@
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 import {
   MapContainer,
   TileLayer,
@@ -7,7 +9,22 @@ import {
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
-import { MapPin, Check, Plus, AlertCircle } from "lucide-react";
+import {
+  MapPin,
+  Check,
+  Plus,
+  AlertCircle,
+  Compass,
+  Building2,
+  UtensilsCrossed,
+  Coffee,
+  Beer,
+  Trees,
+  Landmark,
+  Church,
+  Hotel,
+  Mountain,
+} from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "./CreateRouteMap.css";
 
@@ -25,48 +42,98 @@ L.Icon.Default.mergeOptions({
 // ============================================================================
 // ICONOS PERSONALIZADOS POR CATEGORÍA Y ESTADO
 // ============================================================================
-const getMarkerIcon = (type, isSelected) => {
-  const iconMap = {
-    restaurant: { default: "🍴", selected: "🍽️" },
-    cafe: { default: "☕", selected: "☕" },
-    bar: { default: "🍺", selected: "🍻" },
-    museum: { default: "🏛️", selected: "🏛️" },
-    park: { default: "🌲", selected: "🌳" },
-    monument: { default: "🗿", selected: "🗽" },
-    church: { default: "⛪", selected: "⛪" },
-    hotel: { default: "🏨", selected: "🏨" },
-    attraction: { default: "🎯", selected: "⭐" },
-    viewpoint: { default: "🔭", selected: "👁️" },
-  };
+// Mapeo de tipos a iconos de Lucide React
+const iconComponentMap = {
+  restaurant: UtensilsCrossed,
+  cafe: Coffee,
+  bar: Beer,
+  museum: Building2,
+  park: Trees,
+  monument: Landmark,
+  church: Church,
+  hotel: Hotel,
+  attraction: Compass,
+  viewpoint: Mountain,
+};
 
-  const emoji = iconMap[type] || { default: "📍", selected: "✅" };
-  const icon = isSelected ? emoji.selected : emoji.default;
+// Mapeo de tipos a colores Bootstrap
+const iconColorMap = {
+  attraction: '#0d6efd',    // primary
+  museum: '#0dcaf0',        // info
+  restaurant: '#dc3545',    // danger
+  cafe: '#ffc107',          // warning
+  bar: '#198754',           // success
+  park: '#198754',          // success
+  monument: '#6c757d',      // secondary
+  church: '#0dcaf0',        // info
+  hotel: '#0d6efd',         // primary
+  viewpoint: '#198754',     // success
+};
+
+const getMarkerIcon = (type, isSelected) => {
+  const IconComponent = iconComponentMap[type] || Compass;
+  const iconColor = iconColorMap[type] || '#0d6efd';
+
+  // Si está seleccionado, mostrar chincheta roja
+  if (isSelected) {
+    return L.divIcon({
+      html: `
+        <div style="
+          position: relative;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+          transform: scale(1.2);
+          z-index: 1000;
+        ">
+          <!-- Chincheta roja -->
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
+                  fill="#dc3545" 
+                  stroke="white" 
+                  stroke-width="2"/>
+            <circle cx="12" cy="9" r="3" fill="white"/>
+          </svg>
+        </div>
+      `,
+      className: 'custom-marker-selected',
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+      popupAnchor: [0, -40],
+    });
+  }
+
+  // Si NO está seleccionado, mostrar icono de la categoría
+  const iconSvg = ReactDOMServer.renderToString(
+    <IconComponent size={20} strokeWidth={2.5} color="white" />
+  );
 
   return L.divIcon({
     html: `
       <div style="
-        font-size: 40px;
+        position: relative;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
-        filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
-        transform: ${isSelected ? "scale(1.2)" : "scale(1)"};
-        transition: all 0.3s ease;
-        cursor: pointer;
-        background: ${isSelected ? "rgba(25, 135, 84, 0.2)" : "transparent"};
+        background-color: ${iconColor};
         border-radius: 50%;
-        width: 100%;
-        height: 100%;
-        position: relative;
-        z-index: ${isSelected ? "1000" : "999"};
+        border: 3px solid white;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
       ">
-        ${icon}
+        ${iconSvg}
       </div>
     `,
-    className: "custom-marker-icon",
-    iconSize: [60, 60],
-    iconAnchor: [30, 60],
-    popupAnchor: [0, -60],
+    className: 'custom-marker-icon',
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor: [0, -36],
   });
 };
 
@@ -136,13 +203,61 @@ const CreateRouteMap = ({
 
         {/* Línea de la ruta (conecta POIs seleccionados) */}
         {showRoute && routeCoordinates.length > 1 && (
-          <Polyline
-            positions={routeCoordinates}
-            color="#1427fdff"
-            weight={4}
-            opacity={0.7}
-            dashArray="10, 10"
-          />
+          <>
+            {/* Línea de conexión entre POIs */}
+            <Polyline
+              positions={routeCoordinates}
+              color="#0d6efd"
+              weight={3}
+              opacity={0.6}
+            />
+
+            {/* Puntos azules numerados en cada POI seleccionado */}
+            {selectedPOIs
+              .filter((poi) => poi && poi.lat != null && poi.lon != null)
+              .map((poi, index) => (
+                <Marker
+                  key={`route-point-${poi.id}-${index}`}
+                  position={[poi.lat, poi.lon]}
+                  icon={L.divIcon({
+                    html: `
+              <div style="
+                width: 20px;
+                height: 20px;
+                background-color: #0d6efd;
+                border: 4px solid white;
+                border-radius: 50%;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+                position: relative;
+                z-index: 2000 !important;
+              ">
+                <div style="
+                  position: absolute;
+                  top: -30px;
+                  left: 50%;
+                  transform: translateX(-50%);
+                  background: #0d6efd;
+                  color: white;
+                  padding: 3px 8px;
+                  border-radius: 12px;
+                  font-size: 12px;
+                  font-weight: bold;
+                  white-space: nowrap;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                  border: 2px solid white;
+                ">
+                  ${index + 1}
+                </div>
+              </div>
+            `,
+                    className: 'route-point-marker',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10],
+                  })}
+                  zIndexOffset={2000}
+                />
+              ))}
+          </>
         )}
 
         {/* Markers con clustering */}
@@ -205,9 +320,8 @@ const CreateRouteMap = ({
                     {/* Botón de selección */}
                     <button
                       type="button"
-                      className={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-2 ${
-                        isSelected ? "btn-success" : "btn-primary"
-                      }`}
+                      className={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-2 ${isSelected ? "btn-success" : "btn-primary"
+                        }`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
