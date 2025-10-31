@@ -31,7 +31,9 @@ if db_url is not None:
         "postgres://", "postgresql://"
     )
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
+    # Base de datos SQLite persistente en el directorio del proyecto
+    db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "waypoint.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -57,7 +59,7 @@ CORS(
     app,
     resources={
         r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
         }

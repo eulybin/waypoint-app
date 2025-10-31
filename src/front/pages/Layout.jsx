@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom/dist";
-import HorizontalNavbar from "../components/HorizontalNavbar";
-import Navbar from "../components/Navbar";
+import HorizontalNavbar from "../components/Navbars/HorizontalNavbar";
+import VerticalNavbar from "../components/Navbars/VerticalNavbar";
 import useAuth from "../hooks/useAuth";
 import Loader from "../components/Loader";
 
@@ -9,11 +9,14 @@ const Layout = () => {
     if (loading) return <Loader />;
 
 
-    const Navigation = isAuthenticated ? Navbar : HorizontalNavbar;
+    const Navigation = isAuthenticated ? VerticalNavbar : HorizontalNavbar;
+    const hasSidebar = isAuthenticated;
     return (
         <>
             <Navigation />
-            <Outlet />
+            <main className={hasSidebar ? "with-sidebar" : undefined}>
+                <Outlet />
+            </main>
         </>
     );
 };

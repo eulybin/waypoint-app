@@ -16,6 +16,7 @@ from api.routes import (
     coordinates,
     admin_user,
     weather,
+    favorites
 )
 
 api = Blueprint("api", __name__)
@@ -183,6 +184,19 @@ def handle_hello():
         },
     }
     return jsonify(response_body), 200
+
+# Sistema de favoritos
+@api.route("/routes/<int:route_id>/favorite", methods=["POST"])
+@jwt_required()
+def toggle_route_favorite(route_id):
+    """Endpoint para añadir/quitar una ruta de favoritos."""
+    return favorites.toggle_favorite(route_id)
+
+@api.route("/users/<int:user_id>/favorites", methods=["GET"])
+@jwt_required()
+def get_user_favorite_routes(user_id):
+    """Endpoint para obtener las rutas favoritas de un usuario."""
+    return favorites.get_user_favorites(user_id)
 
 
 # APIS EXTERNAS
