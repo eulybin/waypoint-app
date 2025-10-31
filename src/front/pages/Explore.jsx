@@ -2,9 +2,17 @@ import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopular
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
 import { normalizeText } from "../utils/constants";
 import { useState, useEffect } from "react";
-import { Search, MapPin, Globe, Loader } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Globe,
+  Loader,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
+import { totalPages, startIndex, endIndexm, currentRoutes, goToNextPage, goToPrevPage, goToPage } from "../utils/constants";
 
 const Explore = () => {
   // ========== ESTADOS ==========
@@ -15,7 +23,8 @@ const Explore = () => {
   const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [currentPage, setCurrentPage] = useState(1); // Página actual
+  const ITEMS_PER_PAGE = 3; // 3 rutas por página
 
   // ========== OBTENER RUTAS DE LA BD ==========
   useEffect(() => {
@@ -73,6 +82,7 @@ const Explore = () => {
     }
 
     setFilteredRoutes(filtered);
+    setCurrentPage(1); // Reset a página 1 cuando cambian los filtros
   }, [selectedCountry, selectedCity, searchTerm, allRoutes]);
 
   // ========== HANDLERS ==========
@@ -115,6 +125,31 @@ const Explore = () => {
   const citiesForSelectedCountry = selectedCountry
     ? POPULAR_CITIES_BY_COUNTRY[selectedCountry.code] || []
     : [];
+
+  // ========== PAGINACIÓN ==========
+  const totalPages = Math.ceil(filteredRoutes.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentRoutes = filteredRoutes.slice(startIndex, endIndex);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      
+    }
+  };
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    
+  };
 
   return (
     <div className="container py-4">
@@ -247,13 +282,66 @@ const Explore = () => {
             No se encontraron rutas con los filtros seleccionados.
           </div>
         ) : (
-          <div className="row g-4">
-            {filteredRoutes.map((route) => (
-              <div key={route.id} className="col-md-4 col-sm-6">
-                <RouteCard route={route} />
+          <>
+            <div className="row g-4">
+              {currentRoutes.map((route) => (
+                <div key={route.id} className="col-md-4 col-sm-6">
+                  <RouteCard route={route} />
+                </div>
+              ))}
+            </div>
+
+            {/* PAGINACIÓN */}
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center align-items-center gap-3 mt-5">
+                {/* Botón Anterior */}
+                <button
+                  className="btn btn-outline-primary"
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft size={20} />
+                  Anterior
+                </button>
+
+                {/* Números de página */}
+                <div className="d-flex gap-2">
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    return (
+                      <button
+                        key={pageNumber}
+                        className={`btn ${currentPage === pageNumber ? "btn-primary" : "btn-outline-primary"}`}
+                        onClick={() => goToPage(pageNumber)}
+                        style={{ minWidth: "40px" }}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Botón Siguiente */}
+                <button
+                  className="btn btn-outline-primary"
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Siguiente
+                  <ChevronRight size={20} />
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+
+            {/* Info de paginación */}
+            <div className="text-center text-muted mt-3">
+              <small>
+                Mostrando {startIndex + 1} -{" "}
+                {Math.min(endIndex, filteredRoutes.length)} de{" "}
+                {filteredRoutes.length} rutas
+              </small>
+            </div>
+          </>
         )}
       </section>
     </div>

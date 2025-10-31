@@ -72,3 +72,29 @@ export const normalizeText = (text) => {
     .normalize("NFD") // Descomponer caracteres con tildes
     .replace(/[\u0300-\u036f]/g, ""); // Eliminar marcas diacríticas (tildes)
 };
+
+// CONSTANTE PARA PAGINACION 
+
+export const totalPages = Math.ceil(filteredRoutes.length / ITEMS_PER_PAGE);
+export const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+export const endIndex = startIndex + ITEMS_PER_PAGE;
+export const currentRoutes = filteredRoutes.slice(startIndex, endIndex);
+
+export const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      
+    }
+  };
+
+export const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      
+    }
+  };
+
+export const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    
+  };
