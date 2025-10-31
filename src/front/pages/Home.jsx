@@ -21,8 +21,7 @@ const Home = () => {
             <img
               src={store.isDarkMode ? brandNameDark : brandNameLight}
               alt="Waypoint Brand Name"
-              className="ms-2 align-middle"
-              style={{ height: 114 }}
+              className="ms-2 align-middle waypoint-brand"
             />
           </h1>
           <p className="lead text-body mb-4 fst-italic">
