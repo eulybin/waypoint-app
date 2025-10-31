@@ -1,10 +1,10 @@
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
 import { normalizeText } from "../utils/constants";
-import { useState, useEffect } from 'react';
-import { Search, MapPin, Globe, Loader } from 'lucide-react';
-import RouteCard from '../components/RouteCard';
-import { API_ENDPOINTS, getAuthHeaders } from '../utils/apiConfig';
+import { useState, useEffect } from "react";
+import { Search, MapPin, Globe, Loader } from "lucide-react";
+import RouteCard from "../components/RouteCard";
+import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
 
 const Explore = () => {
   // ========== ESTADOS ==========
@@ -12,9 +12,10 @@ const Explore = () => {
   const [filteredRoutes, setFilteredRoutes] = useState([]); // Rutas después de filtrar
   const [selectedCountry, setSelectedCountry] = useState(null); // País seleccionado
   const [selectedCity, setSelectedCity] = useState(null); // Ciudad seleccionada
-  const [searchTerm, setSearchTerm] = useState(''); // Término de búsqueda
+  const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
 
   // ========== OBTENER RUTAS DE LA BD ==========
   useEffect(() => {
@@ -25,11 +26,11 @@ const Explore = () => {
     try {
       setLoading(true);
       const response = await fetch(API_ENDPOINTS.ROUTES, {
-        method: 'GET',
+        method: "GET",
         headers: getAuthHeaders(),
       });
 
-      if (!response.ok) throw new Error('Error al cargar rutas');
+      if (!response.ok) throw new Error("Error al cargar rutas");
 
       const data = await response.json();
       setAllRoutes(data);
@@ -45,27 +46,29 @@ const Explore = () => {
   useEffect(() => {
     let filtered = [...allRoutes];
 
-    // Filtro por país
+    // Filtro por país (comparamos con el nombre del país)
     if (selectedCountry) {
       filtered = filtered.filter(
-        route => normalizeText(route.country) === normalizeText(selectedCountry)
+        (route) =>
+          normalizeText(route.country) === normalizeText(selectedCountry.name)
       );
     }
 
     // Filtro por ciudad
     if (selectedCity) {
       filtered = filtered.filter(
-        route => normalizeText(route.city) === normalizeText(selectedCity)
+        (route) => normalizeText(route.city) === normalizeText(selectedCity)
       );
     }
 
     // Filtro por búsqueda manual
     if (searchTerm.trim()) {
       const searchNormalized = normalizeText(searchTerm);
-      filtered = filtered.filter(route => 
-        normalizeText(route.country).includes(searchNormalized) ||
-        normalizeText(route.city).includes(searchNormalized) ||
-        normalizeText(route.locality || '').includes(searchNormalized)
+      filtered = filtered.filter(
+        (route) =>
+          normalizeText(route.country).includes(searchNormalized) ||
+          normalizeText(route.city).includes(searchNormalized) ||
+          normalizeText(route.locality || "").includes(searchNormalized)
       );
     }
 
@@ -73,21 +76,22 @@ const Explore = () => {
   }, [selectedCountry, selectedCity, searchTerm, allRoutes]);
 
   // ========== HANDLERS ==========
-  const handleCountryClick = (countryName) => {
-    setSelectedCountry(countryName);
+  const handleCountryClick = (country) => {
+    // Guardamos el objeto completo del país para tener acceso al código
+    setSelectedCountry(country);
     setSelectedCity(null); // Reset ciudad cuando cambias de país
-    setSearchTerm(''); // Limpiar búsqueda
+    setSearchTerm(""); // Limpiar búsqueda
   };
 
   const handleCityClick = (cityName) => {
     setSelectedCity(cityName);
-    setSearchTerm(''); // Limpiar búsqueda
+    setSearchTerm(""); // Limpiar búsqueda
   };
 
   const handleResetFilters = () => {
     setSelectedCountry(null);
     setSelectedCity(null);
-    setSearchTerm('');
+    setSearchTerm("");
   };
 
   // ========== RENDER ==========
@@ -107,9 +111,9 @@ const Explore = () => {
     );
   }
 
-  // Obtener ciudades del país seleccionado
-  const citiesForSelectedCountry = selectedCountry 
-    ? POPULAR_CITIES_BY_COUNTRY[selectedCountry] || []
+  // Obtener ciudades del país seleccionado usando el código del país
+  const citiesForSelectedCountry = selectedCountry
+    ? POPULAR_CITIES_BY_COUNTRY[selectedCountry.code] || []
     : [];
 
   return (
@@ -138,7 +142,7 @@ const Explore = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {(searchTerm || selectedCountry || selectedCity) && (
-              <button 
+              <button
                 className="btn btn-outline-secondary"
                 onClick={handleResetFilters}
               >
@@ -156,8 +160,8 @@ const Explore = () => {
           <div className="d-flex gap-2 flex-wrap">
             {selectedCountry && (
               <span className="badge bg-primary fs-6">
-                País: {selectedCountry}
-                <button 
+                País: {selectedCountry.name}
+                <button
                   className="btn-close btn-close-white ms-2"
                   onClick={() => setSelectedCountry(null)}
                 ></button>
@@ -166,7 +170,7 @@ const Explore = () => {
             {selectedCity && (
               <span className="badge bg-info fs-6">
                 Ciudad: {selectedCity}
-                <button 
+                <button
                   className="btn-close btn-close-white ms-2"
                   onClick={() => setSelectedCity(null)}
                 ></button>
@@ -185,16 +189,16 @@ const Explore = () => {
         <div className="row g-3">
           {POPULAR_COUNTRIES.map((country) => (
             <div key={country.name} className="col-md-3 col-sm-6">
-              <div 
-                className={`card h-100 cursor-pointer ${selectedCountry === country.name ? 'border-primary border-3' : ''}`}
-                onClick={() => handleCountryClick(country.name)}
-                style={{ cursor: 'pointer' }}
+              <div
+                className={`card h-100 cursor-pointer ${selectedCountry?.name === country.name ? "border-primary border-3" : ""}`}
+                onClick={() => handleCountryClick(country)}
+                style={{ cursor: "pointer" }}
               >
-                <img 
-                  src={country.image} 
-                  className="card-img-top" 
+                <img
+                  src={country.image}
+                  className="card-img-top"
                   alt={country.name}
-                  style={{ height: '150px', objectFit: 'cover' }}
+                  style={{ height: "150px", objectFit: "cover" }}
                 />
                 <div className="card-body text-center">
                   <h5 className="card-title">{country.name}</h5>
@@ -209,22 +213,20 @@ const Explore = () => {
       {/* SECCIÓN DE CIUDADES (Solo si hay país seleccionado) */}
       {selectedCountry && citiesForSelectedCountry.length > 0 && (
         <section className="mb-5">
-          <h2 className="mb-4">
-            Ciudades de {selectedCountry}
-          </h2>
+          <h2 className="mb-4">Ciudades de {selectedCountry.name}</h2>
           <div className="row g-3">
             {citiesForSelectedCountry.map((city) => (
               <div key={city.name} className="col-md-3 col-sm-6">
-                <div 
-                  className={`card h-100 cursor-pointer ${selectedCity === city.name ? 'border-info border-3' : ''}`}
+                <div
+                  className={`card h-100 cursor-pointer ${selectedCity === city.name ? "border-info border-3" : ""}`}
                   onClick={() => handleCityClick(city.name)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img 
-                    src={city.image} 
-                    className="card-img-top" 
+                  <img
+                    src={city.image}
+                    className="card-img-top"
                     alt={city.name}
-                    style={{ height: '120px', objectFit: 'cover' }}
+                    style={{ height: "120px", objectFit: "cover" }}
                   />
                   <div className="card-body text-center">
                     <h6 className="card-title">{city.name}</h6>
@@ -238,10 +240,8 @@ const Explore = () => {
 
       {/* SECCIÓN DE RUTAS FILTRADAS */}
       <section>
-        <h2 className="mb-4">
-          Rutas Disponibles ({filteredRoutes.length})
-        </h2>
-        
+        <h2 className="mb-4">Rutas Disponibles ({filteredRoutes.length})</h2>
+
         {filteredRoutes.length === 0 ? (
           <div className="alert alert-info">
             No se encontraron rutas con los filtros seleccionados.
