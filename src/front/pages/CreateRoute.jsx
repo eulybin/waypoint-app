@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
-
 // ============================================================================
 // PÁGINA: CreateRoute - VERSIÓN PROFESIONAL 2025 ✨
 // ============================================================================
@@ -103,11 +102,11 @@ const initialFormState = {
 };
 
 const normalizeText = (text) => {
-  if (!text) return '';
+  if (!text) return "";
   return text
     .toLowerCase()
-    .normalize('NFD') // Descomponer caracteres con tildes
-    .replace(/[\u0300-\u036f]/g, ''); // Eliminar marcas diacríticas (tildes)
+    .normalize("NFD") // Descomponer caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, ""); // Eliminar marcas diacríticas (tildes)
 };
 
 const loadingAll = {
@@ -212,9 +211,12 @@ const CreateRoute = () => {
 
       const countries = results
         .filter((r) => {
-          const isCountry = r.addresstype === "country" || r.type === "administrative";
+          const isCountry =
+            r.addresstype === "country" || r.type === "administrative";
           const displayName = r.display_name.split(",")[0];
-          return isCountry && normalizeText(displayName).includes(normalizedQuery);
+          return (
+            isCountry && normalizeText(displayName).includes(normalizedQuery)
+          );
         })
         .map((r) => ({
           name: r.display_name.split(",")[0],
@@ -375,6 +377,7 @@ const CreateRoute = () => {
 
     setLoadingAll((prev) => ({ ...prev, pois: true }));
     setSuggestions((prev) => ({ ...prev, pois: [] }));
+    setError(""); // Limpiar errores previos
 
     try {
       // Buscar todos los POIs de la categoría en un radio de 10km
@@ -385,10 +388,18 @@ const CreateRoute = () => {
         10000 // 10km de radio
       );
 
-      setSuggestions((prev) => ({ ...prev, pois }));
+      if (pois.length === 0) {
+        setError(
+          "⏳ No se encontraron puntos de interés. Puede que el servidor esté ocupado. Intenta de nuevo en 1 minuto."
+        );
+      } else {
+        setSuggestions((prev) => ({ ...prev, pois }));
+      }
     } catch (error) {
       console.error("Error loading POIs:", error);
-      setError("Error al cargar los puntos de interés");
+      setError(
+        "❌ Error al cargar puntos de interés. Por favor, espera 1-2 minutos e intenta de nuevo."
+      );
     } finally {
       setLoadingAll((prev) => ({ ...prev, pois: false }));
     }
@@ -662,7 +673,7 @@ const CreateRoute = () => {
         console.error("Error creating route:", error);
         setError(
           error.message ||
-          "No se pudo crear la ruta. Por favor, intenta de nuevo."
+            "No se pudo crear la ruta. Por favor, intenta de nuevo."
         );
       }
     } finally {
@@ -766,35 +777,40 @@ const CreateRoute = () => {
                 <div
                   className="card h-100 shadow-sm"
                   style={{
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    cursor: "pointer",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
                   }}
                   onClick={() => handleSelectCountry(country)}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.transform = "translateY(-5px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 20px rgba(0,0,0,0.15)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '';
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "";
                   }}
                 >
                   <img
                     src={country.image}
                     className="card-img-top"
                     alt={country.name}
-                    style={{ height: '120px', objectFit: 'cover' }}
+                    style={{ height: "120px", objectFit: "cover" }}
                   />
                   <div className="card-body text-center p-2">
                     <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
-                    <small className="text-muted">{country.visitors} visitantes/año</small>
+                    <small className="text-muted">
+                      {country.visitors} visitantes/año
+                    </small>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           <hr className="my-4" />
-          <p className="text-center text-muted small">O busca cualquier otro país:</p>
+          <p className="text-center text-muted small">
+            O busca cualquier otro país:
+          </p>
         </div>
       )}
 
@@ -901,36 +917,47 @@ const CreateRoute = () => {
                         🏙️ Ciudades Más Visitadas de {formState.country}
                       </h5>
                       <div className="row g-3">
-                        {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map((city) => (
-                          <div key={city.name} className="col-md-3 col-sm-6">
-                            <div
-                              className="card h-100 shadow-sm"
-                              style={{
-                                cursor: 'pointer',
-                                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                              }}
-                              onClick={() => handleSelectCity(city)}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-5px)';
-                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '';
-                              }}
-                            >
-                              <img
-                                src={city.image}
-                                className="card-img-top"
-                                alt={city.name}
-                                style={{ height: '100px', objectFit: 'cover' }}
-                              />
-                              <div className="card-body text-center p-2">
-                                <h6 className="card-title mb-0 fw-bold small">{city.name}</h6>
+                        {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map(
+                          (city) => (
+                            <div key={city.name} className="col-md-3 col-sm-6">
+                              <div
+                                className="card h-100 shadow-sm"
+                                style={{
+                                  cursor: "pointer",
+                                  transition:
+                                    "transform 0.2s ease, box-shadow 0.2s ease",
+                                }}
+                                onClick={() => handleSelectCity(city)}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform =
+                                    "translateY(-5px)";
+                                  e.currentTarget.style.boxShadow =
+                                    "0 8px 20px rgba(0,0,0,0.15)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform =
+                                    "translateY(0)";
+                                  e.currentTarget.style.boxShadow = "";
+                                }}
+                              >
+                                <img
+                                  src={city.image}
+                                  className="card-img-top"
+                                  alt={city.name}
+                                  style={{
+                                    height: "100px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                                <div className="card-body text-center p-2">
+                                  <h6 className="card-title mb-0 fw-bold small">
+                                    {city.name}
+                                  </h6>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                       <hr className="my-4" />
                       <p className="text-center text-muted small">
@@ -1229,10 +1256,11 @@ const CreateRoute = () => {
                           <button
                             key={category.value}
                             type="button"
-                            className={`btn ${searchState.poiType === category.value
-                              ? `btn-${category.color}`
-                              : `btn-outline-${category.color}`
-                              } btn-sm d-flex align-items-center gap-2`}
+                            className={`btn ${
+                              searchState.poiType === category.value
+                                ? `btn-${category.color}`
+                                : `btn-outline-${category.color}`
+                            } btn-sm d-flex align-items-center gap-2`}
                             onClick={() =>
                               setSearchState((prev) => ({
                                 ...prev,
@@ -1366,10 +1394,11 @@ const CreateRoute = () => {
                                   className="col-md-6 col-lg-4 col-xl-3"
                                 >
                                   <div
-                                    className={`card h-100 shadow-sm ${isSelected
-                                      ? "border-success border-3"
-                                      : ""
-                                      }`}
+                                    className={`card h-100 shadow-sm ${
+                                      isSelected
+                                        ? "border-success border-3"
+                                        : ""
+                                    }`}
                                     style={{
                                       cursor: "pointer",
                                       transition: "all 0.3s ease",
@@ -1414,7 +1443,7 @@ const CreateRoute = () => {
                                           // Si la imagen falla, usar la imagen por defecto
                                           e.target.src =
                                             DEFAULT_IMAGES[
-                                            searchState.poiType
+                                              searchState.poiType
                                             ] || DEFAULT_IMAGES.attraction;
                                         }}
                                       />
@@ -1598,10 +1627,11 @@ const CreateRoute = () => {
                                       <button
                                         key={page}
                                         type="button"
-                                        className={`btn ${page === currentPage
-                                          ? "btn-primary"
-                                          : "btn-outline-primary"
-                                          }`}
+                                        className={`btn ${
+                                          page === currentPage
+                                            ? "btn-primary"
+                                            : "btn-outline-primary"
+                                        }`}
                                         onClick={() => handlePageChange(page)}
                                         style={{ minWidth: "40px" }}
                                       >
@@ -1669,9 +1699,9 @@ const CreateRoute = () => {
                         center={
                           formState.coordinates
                             ? [
-                              formState.coordinates.lat,
-                              formState.coordinates.lon,
-                            ]
+                                formState.coordinates.lat,
+                                formState.coordinates.lon,
+                              ]
                             : [40.4168, -3.7038]
                         }
                         pois={suggestions.pois}

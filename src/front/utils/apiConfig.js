@@ -19,7 +19,8 @@ export const API_ENDPOINTS = {
 
   // Favoritos
   ADD_FAVORITE: (routeId) => `${API_BASE_URL}/api/routes/${routeId}/favorite`,
-  REMOVE_FAVORITE: (routeId) => `${API_BASE_URL}/api/routes/${routeId}/favorite`,
+  REMOVE_FAVORITE: (routeId) =>
+    `${API_BASE_URL}/api/routes/${routeId}/favorite`,
   USER_FAVORITES: (userId) => `${API_BASE_URL}/api/users/${userId}/favorites`,
 
   // Votos
@@ -51,6 +52,49 @@ export const getAuthHeaders = () => {
 };
 
 // ============================================================================
+// SISTEMA DE CACHÉ EN MEMORIA
+// ============================================================================
+const cache = {
+  locations: new Map(),
+  pois: new Map(),
+  images: new Map(),
+};
+
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutos (aumentado de 5)
+
+// Sistema de control de peticiones para evitar rate limiting
+let lastOverpassRequest = 0;
+const MIN_OVERPASS_INTERVAL = 2000; // 2 segundos mínimo entre peticiones
+
+const getCacheKey = (prefix, ...args) => {
+  return `${prefix}_${args.join("_")}`;
+};
+
+const getFromCache = (key) => {
+  const cached =
+    cache.locations.get(key) || cache.pois.get(key) || cache.images.get(key);
+  if (!cached) return null;
+
+  const isExpired = Date.now() - cached.timestamp > CACHE_DURATION;
+  if (isExpired) {
+    cache.locations.delete(key);
+    cache.pois.delete(key);
+    cache.images.delete(key);
+    return null;
+  }
+
+  console.log(`✅ Usando caché para: ${key.split("_")[0]}`);
+  return cached.data;
+};
+
+const setInCache = (key, data, type = "locations") => {
+  cache[type].set(key, {
+    data,
+    timestamp: Date.now(),
+  });
+};
+
+// ============================================================================
 // SERVICIOS DE AUTOCOMPLETADO - USANDO APIS REALES
 // ============================================================================
 
@@ -61,11 +105,19 @@ export const getAuthHeaders = () => {
 export const searchLocations = async (query, options = {}) => {
   const { countryCode, type, limit = 10 } = options;
 
+  // Verificar caché
+  const cacheKey = getCacheKey("location", query, countryCode, type, limit);
+  const cached = getFromCache(cacheKey);
+  if (cached) {
+    console.log("✅ Ubicaciones desde caché:", query);
+    return cached;
+  }
+
   const params = new URLSearchParams({
     q: query,
     format: "json",
     addressdetails: 1,
-    limit: limit, // Usar el límite pasado como parámetro
+    limit: limit,
     "accept-language": "es",
   });
 
@@ -73,28 +125,43 @@ export const searchLocations = async (query, options = {}) => {
     params.append("countrycodes", countryCode);
   }
 
-  // Filtrar por tipo (country, city, town, etc.)
   if (type) {
     params.append("featuretype", type);
   }
 
   try {
+    // Añadir timeout de 10 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?${params}`,
       {
         headers: {
           "User-Agent": "WaypointApp/1.0",
         },
+        signal: controller.signal,
       }
     );
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error("Error fetching locations");
     }
 
-    return await response.json();
+    const data = await response.json();
+
+    // Guardar en caché
+    setInCache(cacheKey, data, "locations");
+
+    return data;
   } catch (error) {
-    console.error("Error searching locations:", error);
+    if (error.name === "AbortError") {
+      console.error("Timeout buscando ubicaciones:", query);
+    } else {
+      console.error("Error searching locations:", error);
+    }
     return [];
   }
 };
@@ -165,16 +232,45 @@ const getWikipediaImage = async (wikipediaTag) => {
 };
 
 /**
+ * Versiones con caché de las funciones de imágenes
+ */
+const getWikimediaImageCached = async (wikimediaCommons) => {
+  const cacheKey = getCacheKey("wikimedia", wikimediaCommons);
+  const cached = getFromCache(cacheKey);
+  if (cached) return cached;
+
+  const imageUrl = await getWikimediaImage(wikimediaCommons);
+  if (imageUrl) {
+    setInCache(cacheKey, imageUrl, "images");
+  }
+  return imageUrl;
+};
+
+const getWikipediaImageCached = async (wikipediaTag) => {
+  const cacheKey = getCacheKey("wikipedia", wikipediaTag);
+  const cached = getFromCache(cacheKey);
+  if (cached) return cached;
+
+  const imageUrl = await getWikipediaImage(wikipediaTag);
+  if (imageUrl) {
+    setInCache(cacheKey, imageUrl, "images");
+  }
+  return imageUrl;
+};
+
+/**
  * Calcular centroide de un polígono o way
  */
 const calculateCentroid = (nodes) => {
   if (!nodes || nodes.length === 0) return null;
 
-  const validNodes = nodes.filter(n => n.lat != null && n.lon != null);
+  const validNodes = nodes.filter((n) => n.lat != null && n.lon != null);
   if (validNodes.length === 0) return null;
 
-  const lat = validNodes.reduce((sum, node) => sum + node.lat, 0) / validNodes.length;
-  const lon = validNodes.reduce((sum, node) => sum + node.lon, 0) / validNodes.length;
+  const lat =
+    validNodes.reduce((sum, node) => sum + node.lat, 0) / validNodes.length;
+  const lon =
+    validNodes.reduce((sum, node) => sum + node.lon, 0) / validNodes.length;
 
   return { lat, lon };
 };
@@ -183,7 +279,13 @@ const calculateCentroid = (nodes) => {
  * Usado para encontrar museos, restaurantes, monumentos, etc.
  */
 export const searchPointsOfInterest = async (lat, lon, type, radius = 5000) => {
-  // Mapeo de tipos a tags de OSM
+  // Verificar caché PRIMERO - Evita peticiones innecesarias
+  const cacheKey = getCacheKey("poi", lat, lon, type, radius);
+  const cached = getFromCache(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const osmTags = {
     museum: "tourism=museum",
     restaurant: "amenity=restaurant",
@@ -199,112 +301,158 @@ export const searchPointsOfInterest = async (lat, lon, type, radius = 5000) => {
 
   const osmQuery = osmTags[type] || "tourism=attraction";
 
-  // Query Overpass API
+  // Query OPTIMIZADA - Solo campos necesarios, timeout reducido
   const query = `
-  [out:json][timeout:25];
+  [out:json][timeout:15];
   (
     node["${osmQuery.split("=")[0]}"="${osmQuery.split("=")[1]}"](around:${radius},${lat},${lon});
     way["${osmQuery.split("=")[0]}"="${osmQuery.split("=")[1]}"](around:${radius},${lat},${lon});
-    relation["${osmQuery.split("=")[0]}"="${osmQuery.split("=")[1]}"](around:${radius},${lat},${lon});
   );
-  out center body;
-  >;
-  out skel qt;
+  out center 50;
 `;
 
-  try {
-    const response = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      body: query,
-    });
+  // Lista de servidores Overpass alternativos
+  const overpassServers = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.openstreetmap.ru/api/interpreter",
+  ];
 
-    if (!response.ok) {
-      throw new Error("Error fetching POIs");
-    }
-
-    const data = await response.json();
-
-    // Procesar y formatear resultados
-    // Procesar y formatear resultados con mejor manejo de coordenadas
-    const pois = data.elements
-      .filter((el) => el.tags && el.tags.name)
-      .map((el) => {
-        let poiLat = null;
-        let poiLon = null;
-
-        // Estrategia de obtención de coordenadas (en orden de prioridad):
-
-        // 1. Si es un nodo, tiene lat/lon directamente
-        if (el.lat != null && el.lon != null) {
-          poiLat = el.lat;
-          poiLon = el.lon;
-        }
-        // 2. Si es un way o relation con center calculado por Overpass
-        else if (el.center?.lat != null && el.center?.lon != null) {
-          poiLat = el.center.lat;
-          poiLon = el.center.lon;
-        }
-        // 3. Si hay bounds (límites), usar el centro del bounding box
-        else if (el.bounds) {
-          poiLat = (el.bounds.minlat + el.bounds.maxlat) / 2;
-          poiLon = (el.bounds.minlon + el.bounds.maxlon) / 2;
-        }
-        // 4. Calcular centroide de los nodos (para ways sin center)
-        else if (el.nodes && data.elements) {
-          const wayNodes = el.nodes
-            .map(nodeId => data.elements.find(e => e.id === nodeId))
-            .filter(n => n && n.lat != null && n.lon != null);
-
-          if (wayNodes.length > 0) {
-            const centroid = calculateCentroid(wayNodes);
-            if (centroid) {
-              poiLat = centroid.lat;
-              poiLon = centroid.lon;
-            }
-          }
-        }
-
-        return {
-          id: el.id,
-          name: el.tags.name,
-          type: el.tags[osmQuery.split("=")[0]],
-          lat: poiLat,
-          lon: poiLon,
-          address: el.tags["addr:street"] || "",
-          city: el.tags["addr:city"] || "",
-          wikimedia: el.tags["wikimedia_commons"] || null,
-          wikipedia: el.tags["wikipedia"] || null,
-          image: null, // Se llenará después
-          elementType: el.type, // Añadir tipo de elemento para debug
-        };
-      })
-      .filter((poi) => poi.lat != null && poi.lon != null) // ✅ CRUCIAL: Filtrar POIs sin coordenadas
-      .slice(0, 50); // Limitar a 50 resultados
-
-
-    // Obtener imágenes de Wikimedia/Wikipedia en paralelo (solo las primeras 20 para optimizar)
-    const poisWithImages = await Promise.all(
-      pois.slice(0, 20).map(async (poi) => {
-        let imageUrl = null;
-
-        // Intentar primero con Wikimedia Commons
-        if (poi.wikimedia) {
-          imageUrl = await getWikimediaImage(poi.wikimedia);
-        }
-
-        // Si no hay imagen, intentar con Wikipedia
-        if (!imageUrl && poi.wikipedia) {
-          imageUrl = await getWikipediaImage(poi.wikipedia);
-        }
-
-        return { ...poi, image: imageUrl };
-      })
-    );
-
-    // Combinar POIs con imágenes y sin imágenes
-    return [...poisWithImages, ...pois.slice(20)];
-  } catch (error) {
-    console.error("Error searching POIs:", error);
-    return [];
+  // CONTROL DE RATE LIMITING - Esperar entre peticiones
+  const now = Date.now();
+  const timeSinceLastRequest = now - lastOverpassRequest;
+  if (timeSinceLastRequest < MIN_OVERPASS_INTERVAL) {
+    const waitTime = MIN_OVERPASS_INTERVAL - timeSinceLastRequest;
+    console.log(`⏳ Esperando ${waitTime}ms para evitar rate limiting...`);
+    await new Promise((resolve) => setTimeout(resolve, waitTime));
   }
+  lastOverpassRequest = Date.now();
+
+  // Intentar con múltiples servidores si uno falla
+  let lastError = null;
+  for (
+    let serverIndex = 0;
+    serverIndex < overpassServers.length;
+    serverIndex++
+  ) {
+    const server = overpassServers[serverIndex];
+
+    try {
+      console.log(
+        `🌐 Intentando servidor ${serverIndex + 1}/${overpassServers.length}: ${server}`
+      );
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 segundos
+
+      const response = await fetch(server, {
+        method: "POST",
+        body: query,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 429) {
+        console.warn(
+          `⚠️ Rate limit en servidor ${serverIndex + 1}, probando siguiente...`
+        );
+        lastError = new Error(`Rate limit (429)`);
+        // Esperar más tiempo antes del siguiente intento
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Procesamiento OPTIMIZADO
+      const pois = data.elements
+        .filter((el) => el.tags && el.tags.name)
+        .map((el) => {
+          let poiLat = null;
+          let poiLon = null;
+
+          if (el.lat != null && el.lon != null) {
+            poiLat = el.lat;
+            poiLon = el.lon;
+          } else if (el.center?.lat != null && el.center?.lon != null) {
+            poiLat = el.center.lat;
+            poiLon = el.center.lon;
+          } else if (el.bounds) {
+            poiLat = (el.bounds.minlat + el.bounds.maxlat) / 2;
+            poiLon = (el.bounds.minlon + el.bounds.maxlon) / 2;
+          }
+
+          return {
+            id: el.id,
+            name: el.tags.name,
+            type: el.tags[osmQuery.split("=")[0]],
+            lat: poiLat,
+            lon: poiLon,
+            address: el.tags["addr:street"] || "",
+            city: el.tags["addr:city"] || "",
+            wikimedia: el.tags["wikimedia_commons"] || null,
+            wikipedia: el.tags["wikipedia"] || null,
+            image: null,
+          };
+        })
+        .filter((poi) => poi.lat != null && poi.lon != null)
+        .slice(0, 50);
+
+      console.log(`✅ Encontrados ${pois.length} POIs de tipo "${type}"`);
+
+      // Obtener imágenes SOLO para los primeros 8 (reducido para más velocidad)
+      const poisWithImages = await Promise.all(
+        pois.slice(0, 8).map(async (poi) => {
+          let imageUrl = null;
+
+          if (poi.wikimedia) {
+            imageUrl = await getWikimediaImageCached(poi.wikimedia);
+          }
+
+          if (!imageUrl && poi.wikipedia) {
+            imageUrl = await getWikipediaImageCached(poi.wikipedia);
+          }
+
+          return { ...poi, image: imageUrl };
+        })
+      );
+
+      const result = [...poisWithImages, ...pois.slice(8)];
+
+      // Guardar en caché - IMPORTANTE
+      setInCache(cacheKey, result, "pois");
+
+      return result;
+    } catch (error) {
+      lastError = error;
+
+      if (error.name === "AbortError") {
+        console.error(`⏱️ Timeout en servidor ${serverIndex + 1}`);
+      } else {
+        console.error(
+          `❌ Error en servidor ${serverIndex + 1}:`,
+          error.message
+        );
+      }
+
+      // Si no es el último servidor, continuar con el siguiente
+      if (serverIndex < overpassServers.length - 1) {
+        console.log(`🔄 Probando siguiente servidor...`);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        continue;
+      }
+    }
+  }
+
+  // Si todos los servidores fallaron
+  console.error("❌ Todos los servidores Overpass fallaron");
+  console.error("💡 Sugerencia: Espera 1-2 minutos antes de intentar de nuevo");
+
+  // Retornar array vacío en lugar de lanzar error
+  return [];
 };
