@@ -62,3 +62,13 @@ export const WEATHER_WIDGET_Z_INDEX = 1100;
 //----------- IMAGES ----------------
 
 // export const BRAND_NAME_SVG_HEIGHT = '90';
+
+// CONSTANTE PARA OMITIR LAS TILDES Y MAYÚSCULAS/ MINÚSCULAS EN STRINGS
+
+export const normalizeText = (text) => {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .normalize("NFD") // Descomponer caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, ""); // Eliminar marcas diacríticas (tildes)
+};
