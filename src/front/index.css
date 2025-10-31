@@ -357,8 +357,8 @@ body.compact-mode .with-sidebar {
 
 /* Add to index.css after line 200 */
 
-/* Activate compact mode when height < 550px on mobile screens */
-@media (max-width: 767.98px) and (max-height: 550px) {
+/* Activate compact mode when height < 515px on mobile screens */
+@media (max-width: 767.98px) and (max-height: 515px) {
   .navbar-mobile {
     display: none !important;
   }
