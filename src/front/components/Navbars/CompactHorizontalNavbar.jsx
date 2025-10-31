@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Home, Compass, User, TrendingUp, MapPinPlus, Menu, Sun, Moon, LogOut, MessageSquareWarning } from 'lucide-react';
 import useGlobalReducer from '../../hooks/useGlobalReducer';
 import { actionTypes } from '../../store';
-import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE } from '../../utils/constants';
+import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_Z_INDEX } from '../../utils/constants';
 import useAuth from '../../hooks/useAuth';
 import { navRouteLinks } from './navRouteLinks';
 import { useState } from 'react';
@@ -31,7 +31,6 @@ const CompactHorizontalNavbar = () => {
             key={idx}
             to={item.path}
             className="d-flex align-items-center justify-content-center text-body text-decoration-none p-2 rounded-4 compact-nav-item"
-            style={{ minWidth: '48px', minHeight: '48px' }}
             aria-label={item.label}
             title={item.label}
           >
@@ -45,7 +44,6 @@ const CompactHorizontalNavbar = () => {
         <button
           className="btn btn-link text-body p-2 d-flex align-items-center justify-content-center text-decoration-none rounded-4 compact-nav-item"
           onClick={() => setShowMenu(!showMenu)}
-          style={{ minWidth: '48px', minHeight: '48px' }}
           aria-label="More options"
           title="More"
         >
@@ -54,26 +52,16 @@ const CompactHorizontalNavbar = () => {
 
         {showMenu && (
           <>
-            {/* Backdrop to close menu when clicking outside */}
-            <div
-              className="position-fixed top-0 start-0 w-100 h-100"
-              style={{ zIndex: -1 }}
-              onClick={() => setShowMenu(false)}
-            />
-
-            {/* Horizontal popup menu - positioned to the left of the More button */}
             <div 
-              className="position-absolute end-100 bg-body border rounded-3 shadow-lg d-flex me-2"
+              className="position-absolute end-100 bg-body border rounded-3 d-flex p-1 me-5"
               style={{ 
-                bottom: '0',
-                zIndex: 1001
+                zIndex: NAVBAR_Z_INDEX
               }}
             >
               {/* Appearance Toggle */}
               <button
                 onClick={() => dispatch({ type: actionTypes.TOGGLE_DARK_MODE })}
                 className="d-flex align-items-center justify-content-center text-body p-2 border-0 bg-transparent sidebar-item rounded-start-3"
-                style={{ minWidth: '48px', minHeight: '48px' }}
                 aria-label={store.isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 title={store.isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
@@ -87,7 +75,6 @@ const CompactHorizontalNavbar = () => {
                   setShowMenu(false);
                 }}
                 className="d-flex align-items-center justify-content-center text-body p-2 border-0 bg-transparent sidebar-item"
-                style={{ minWidth: '48px', minHeight: '48px' }}
                 aria-label="Report a Problem"
                 title="Report a Problem"
               >
@@ -98,7 +85,6 @@ const CompactHorizontalNavbar = () => {
               <button
                 onClick={handleLogout}
                 className="d-flex align-items-center justify-content-center text-body p-2 border-0 bg-transparent logout-item rounded-end-3"
-                style={{ minWidth: '48px', minHeight: '48px' }}
                 aria-label="Logout"
                 title="Logout"
               >
@@ -113,11 +99,6 @@ const CompactHorizontalNavbar = () => {
       <Link
         to="/create-route"
         className="d-flex align-items-center justify-content-center text-decoration-none p-2 rounded-4 badge-orange-dark text-white"
-        style={{ 
-          minWidth: '48px', 
-          minHeight: '48px',
-          transition: 'all 0.3s ease'
-        }}
         aria-label="Create Route"
         title="Create Route"
       >
