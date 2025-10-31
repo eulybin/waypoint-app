@@ -75,11 +75,6 @@ export const normalizeText = (text) => {
 
 // CONSTANTE PARA PAGINACION 
 
-export const totalPages = Math.ceil(filteredRoutes.length / ITEMS_PER_PAGE);
-export const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-export const endIndex = startIndex + ITEMS_PER_PAGE;
-export const currentRoutes = filteredRoutes.slice(startIndex, endIndex);
-
 export const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);

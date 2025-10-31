@@ -9,10 +9,11 @@ import {
   Loader,
   ChevronLeft,
   ChevronRight,
+  Compass
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-import { totalPages, startIndex, endIndexm, currentRoutes, goToNextPage, goToPrevPage, goToPage } from "../utils/constants";
+import {goToNextPage, goToPrevPage, goToPage } from "../utils/constants";
 
 const Explore = () => {
   // ========== ESTADOS ==========
@@ -155,7 +156,7 @@ const Explore = () => {
     <div className="container py-4">
       {/* HEADER */}
       <div className="text-center mb-5">
-        <Globe size={64} className="text-primary mb-3" />
+        <Compass size={64} className="text-primary mb-3" />
         <h1 className="display-4 fw-bold">Explorar Rutas</h1>
         <p className="lead text-muted">
           Descubre rutas turísticas creadas por la comunidad
@@ -275,7 +276,9 @@ const Explore = () => {
 
       {/* SECCIÓN DE RUTAS FILTRADAS */}
       <section>
-        <h2 className="mb-4">Rutas Disponibles ({filteredRoutes.length})</h2>
+        <h2 className="mb-4">
+          <Compass /> Rutas Disponibles ({filteredRoutes.length})
+        </h2>
 
         {filteredRoutes.length === 0 ? (
           <div className="alert alert-info">
