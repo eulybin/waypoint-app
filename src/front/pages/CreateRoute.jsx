@@ -1,6 +1,4 @@
-
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
-
 
 // ============================================================================
 // PÁGINA: CreateRoute - VERSIÓN PROFESIONAL 2025 ✨
@@ -40,6 +38,8 @@ import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import { STANDARD_ICON_SIZE } from "../utils/constants";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
+import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
+import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -99,6 +99,14 @@ const initialFormState = {
   city: "",
   coordinates: null,
   points_of_interest: [],
+};
+
+const normalizeText = (text) => {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .normalize("NFD") // Descomponer caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, ""); // Eliminar marcas diacríticas (tildes)
 };
 
 const loadingAll = {
@@ -200,10 +208,16 @@ const CreateRoute = () => {
       const results = await searchLocations(query, { type: "country" });
 
       // Filtrar solo países
+
       const countries = results
-        .filter(
-          (r) => r.addresstype === "country" || r.type === "administrative"
-        )
+        .filter((r) => {
+          const isCountry =
+            r.addresstype === "country" || r.type === "administrative";
+          const displayName = r.display_name.split(",")[0];
+          return (
+            isCountry && normalizeText(displayName).includes(normalizedQuery)
+          );
+        })
         .map((r) => ({
           name: r.display_name.split(",")[0],
           code: r.address?.country_code?.toUpperCase() || "",
@@ -349,8 +363,9 @@ const CreateRoute = () => {
     if (!query) {
       return allCities;
     }
+    const normalizedQuery = normalizeText(query);
     return allCities.filter((city) =>
-      city.name.toLowerCase().includes(query.toLowerCase())
+      normalizeText(city.name).includes(normalizedQuery)
     );
   }, []);
 
@@ -362,6 +377,7 @@ const CreateRoute = () => {
 
     setLoadingAll((prev) => ({ ...prev, pois: true }));
     setSuggestions((prev) => ({ ...prev, pois: [] }));
+    setError(""); // Limpiar errores previos
 
     try {
       // Buscar todos los POIs de la categoría en un radio de 10km
@@ -372,10 +388,18 @@ const CreateRoute = () => {
         10000 // 10km de radio
       );
 
-      setSuggestions((prev) => ({ ...prev, pois }));
+      if (pois.length === 0) {
+        setError(
+          "⏳ No se encontraron puntos de interés. Puede que el servidor esté ocupado. Intenta de nuevo en 1 minuto."
+        );
+      } else {
+        setSuggestions((prev) => ({ ...prev, pois }));
+      }
     } catch (error) {
       console.error("Error loading POIs:", error);
-      setError("Error al cargar los puntos de interés");
+      setError(
+        "❌ Error al cargar puntos de interés. Por favor, espera 1-2 minutos e intenta de nuevo."
+      );
     } finally {
       setLoadingAll((prev) => ({ ...prev, pois: false }));
     }
@@ -743,6 +767,52 @@ const CreateRoute = () => {
           Usa el autocompletado para seleccionar ubicaciones y puntos de interés
         </p>
       </div>
+      {/* Cards de Países Populares */}
+      {!formState.country && (
+        <div className="mb-4">
+          <h5 className="fw-semibold mb-3">🌍 Países Más Visitados</h5>
+          <div className="row g-3">
+            {POPULAR_COUNTRIES.map((country) => (
+              <div key={country.code} className="col-md-3 col-sm-6">
+                <div
+                  className="card h-100 shadow-sm"
+                  style={{
+                    cursor: "pointer",
+                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  }}
+                  onClick={() => handleSelectCountry(country)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-5px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 20px rgba(0,0,0,0.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "";
+                  }}
+                >
+                  <img
+                    src={country.image}
+                    className="card-img-top"
+                    alt={country.name}
+                    style={{ height: "120px", objectFit: "cover" }}
+                  />
+                  <div className="card-body text-center p-2">
+                    <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
+                    <small className="text-muted">
+                      {country.visitors} visitantes/año
+                    </small>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <hr className="my-4" />
+          <p className="text-center text-muted small">
+            O busca cualquier otro país:
+          </p>
+        </div>
+      )}
 
       {/* Formulario */}
       <div className="row">
@@ -837,6 +907,64 @@ const CreateRoute = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Cards de Ciudades Populares del País Seleccionado */}
+                {formState.country &&
+                  !formState.city &&
+                  POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
+                    <div className="mb-4">
+                      <h5 className="fw-semibold mb-3">
+                        🏙️ Ciudades Más Visitadas de {formState.country}
+                      </h5>
+                      <div className="row g-3">
+                        {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map(
+                          (city) => (
+                            <div key={city.name} className="col-md-3 col-sm-6">
+                              <div
+                                className="card h-100 shadow-sm"
+                                style={{
+                                  cursor: "pointer",
+                                  transition:
+                                    "transform 0.2s ease, box-shadow 0.2s ease",
+                                }}
+                                onClick={() => handleSelectCity(city)}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform =
+                                    "translateY(-5px)";
+                                  e.currentTarget.style.boxShadow =
+                                    "0 8px 20px rgba(0,0,0,0.15)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform =
+                                    "translateY(0)";
+                                  e.currentTarget.style.boxShadow = "";
+                                }}
+                              >
+                                <img
+                                  src={city.image}
+                                  className="card-img-top"
+                                  alt={city.name}
+                                  style={{
+                                    height: "100px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                                <div className="card-body text-center p-2">
+                                  <h6 className="card-title mb-0 fw-bold small">
+                                    {city.name}
+                                  </h6>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                      <hr className="my-4" />
+                      <p className="text-center text-muted small">
+                        O busca otra ciudad/pueblo:
+                      </p>
+                    </div>
+                  )}
 
                 {/* Ciudad/Localidad con Autocompletado */}
                 <div className="mb-3 position-relative">
