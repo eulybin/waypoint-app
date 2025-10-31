@@ -5,6 +5,7 @@ import ReportProblemModal from "../Modals/ReportProblemModal";
 import ThankYouModal from "../Modals/ThankYouModal";
 import DesktopNavbar from "./DesktopNavbar";
 import MobileNavbar from "./MobileNavbar";
+import CompactHorizontalNavbar from "./CompactHorizontalNavbar";
 
 const VerticalNavbar = () => {
   const { store, dispatch } = useGlobalReducer();
@@ -13,6 +14,7 @@ const VerticalNavbar = () => {
 
   return (
     <>
+      {/* All navbars render, CSS handles visibility */}
       <DesktopNavbar
         showMoreMenu={showMoreMenu}
         setShowMoreMenu={setShowMoreMenu}
@@ -25,6 +27,8 @@ const VerticalNavbar = () => {
         setShowMoreMenu={setShowMoreMenu}
         setShowAppearance={setShowAppearance}
       />
+      <CompactHorizontalNavbar />
+      
       {store.showReportModal && (
         <ReportProblemModal
           onClose={() => dispatch({ type: actionTypes.CLOSE_REPORT_MODAL })}
