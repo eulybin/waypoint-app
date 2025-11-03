@@ -13,7 +13,7 @@ from api.routes.routes import api
 # Cargar variables de entorno desde .env
 load_dotenv()
 # from api.admin import setup_admin  # TODO: Crear este archivo
-# from api.commands import setup_commands  # TODO: Crear este archivo
+from api.commands import setup_commands
 
 # Configuración de variables de entorno
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -73,7 +73,7 @@ CORS(
 # ============================================================================
 app.register_blueprint(api, url_prefix="/api")
 # setup_admin(app)  # TODO: Implementar
-# setup_commands(app)  # TODO: Implementar
+setup_commands(app)
 
 
 # ============================================================================
