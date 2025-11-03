@@ -53,7 +53,7 @@ const CompactHorizontalNavbar = () => {
         {showMenu && (
           <>
             <div 
-              className="position-absolute end-100 bg-body border rounded-3 d-flex p-1 me-5"
+              className="position-absolute end-100 bg-body border rounded-3 d-flex me-5"
               style={{ 
                 zIndex: NAVBAR_Z_INDEX
               }}

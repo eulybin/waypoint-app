@@ -70,7 +70,6 @@ const DesktopNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowA
             className="btn badge-orange-dark text-white rounded-4 w-100 fw-bold py-3 mt-4 d-flex align-items-center justify-content-center gap-2"
             style={{ 
               fontSize: CREATE_ROUTE_FONT_SIZE,
-              transition: 'all 0.3s ease'
             }}
           >
             <MapPinPlus size={NAVBAR_ICON_SIZE} />
