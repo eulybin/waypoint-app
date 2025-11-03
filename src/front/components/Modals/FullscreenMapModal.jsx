@@ -11,8 +11,10 @@ import {
   X,
   Car,
   Footprints,
+  Bike,
   ChevronDown,
   ChevronUp,
+  Clock,
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import RouteMarkers from "../Profile/RouteMarkers";
@@ -29,8 +31,30 @@ const FullscreenMapModal = ({
   useStreetRouting = false,
   streetRoute = null,
   transportMode = "driving",
+  onTransportModeChange,
+  isCalculatingRoute = false,
+  routeInfo = null,
 }) => {
   const [showInfoPanel, setShowInfoPanel] = useState(true);
+
+  // Funciones para formatear duración y distancia
+  const formatDuration = (seconds) => {
+    if (!seconds) return null;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+    return `${minutes} min`;
+  };
+
+  const formatDistance = (meters) => {
+    if (!meters) return null;
+    if (meters >= 1000) {
+      return `${(meters / 1000).toFixed(1)} km`;
+    }
+    return `${Math.round(meters)} m`;
+  };
 
   if (!show) return null;
 
@@ -124,6 +148,109 @@ const FullscreenMapModal = ({
             pointsOfInterest={route.points_of_interest}
           />
         </MapContainer>
+
+        {/* BOTONES DE MODO DE TRANSPORTE en pantalla completa */}
+        {useStreetRouting && onTransportModeChange && (
+          <div
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              zIndex: 1000,
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+            }}
+          >
+            <button
+              onClick={() => onTransportModeChange("driving")}
+              disabled={isCalculatingRoute}
+              className={`btn btn-sm shadow-sm ${transportMode === "driving" ? "btn-primary" : "btn-light"}`}
+              style={{
+                borderRadius: "8px",
+                padding: "8px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+              title="Ruta en coche"
+            >
+              <Car size={18} />
+              <span className="small">Coche</span>
+            </button>
+
+            <button
+              onClick={() => onTransportModeChange("foot")}
+              disabled={isCalculatingRoute}
+              className={`btn btn-sm shadow-sm ${transportMode === "foot" ? "btn-primary" : "btn-light"}`}
+              style={{
+                borderRadius: "8px",
+                padding: "8px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+              title="Ruta caminando"
+            >
+              <Footprints size={18} />
+              <span className="small">Caminando</span>
+            </button>
+
+            <button
+              onClick={() => onTransportModeChange("bike")}
+              disabled={isCalculatingRoute}
+              className={`btn btn-sm shadow-sm ${transportMode === "bike" ? "btn-primary" : "btn-light"}`}
+              style={{
+                borderRadius: "8px",
+                padding: "8px 12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+              title="Ruta en bicicleta"
+            >
+              <Bike size={18} />
+              <span className="small">Bicicleta</span>
+            </button>
+          </div>
+        )}
+
+        {/* INFORMACIÓN DE LA RUTA - Duración y distancia en pantalla completa */}
+        {useStreetRouting && routeInfo && routeInfo.duration && (
+          <div
+            style={{
+              position: "absolute",
+              top: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 1000,
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              padding: "12px 20px",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Clock size={18} style={{ color: "#0d6efd" }} />
+              <span style={{ fontSize: "16px", fontWeight: "600" }}>
+                {formatDuration(routeInfo.duration)}
+              </span>
+            </div>
+            <div
+              style={{
+                width: "1px",
+                height: "20px",
+                backgroundColor: "#dee2e6",
+              }}
+            />
+            <div style={{ fontSize: "16px", fontWeight: "600" }}>
+              {formatDistance(routeInfo.distance)}
+            </div>
+          </div>
+        )}
 
         {/* Info overlay en pantalla completa */}
         {showInfoPanel ? (
