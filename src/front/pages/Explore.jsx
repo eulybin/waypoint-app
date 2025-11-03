@@ -9,11 +9,11 @@ import {
   Loader,
   ChevronLeft,
   ChevronRight,
-  Compass
+  Compass,
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-
+import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE } from "../utils/constants";
 
 const Explore = () => {
   // ========== ESTADOS ==========
@@ -136,27 +136,27 @@ const Explore = () => {
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      
+
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      
+
     }
   };
 
   const goToPage = (pageNumber) => {
     setCurrentPage(pageNumber);
-    
+
   };
 
   return (
     <div className="container py-4">
       {/* HEADER */}
       <div className="text-center mb-5">
-        <Compass size={64} className="text-primary mb-3" />
+        <div className="mb-3 header-icon-badge badge-blue"><Compass size={HEADER_ICON_SIZE} /></div>
         <h1 className="display-4 fw-bold">Explorar Rutas</h1>
         <p className="lead text-muted">
           Descubre rutas turísticas creadas por la comunidad
@@ -218,13 +218,14 @@ const Explore = () => {
 
       {/* SECCIÓN DE PAÍSES */}
       <section className="mb-5">
-        <h2 className="mb-4">
-          <MapPin className="me-2" />
+        <h2 className="mb-4 d-flex align-items-center gap-2">
+          <Globe size={NAVBAR_ICON_SIZE} />
           Países Populares
         </h2>
+
         <div className="row g-3">
           {POPULAR_COUNTRIES.map((country) => (
-            <div key={country.name} className="col-md-3 col-sm-6">
+            <div key={country.name} className="col-lg-3 col-md-6">
               <div
                 className={`card h-100 cursor-pointer ${selectedCountry?.name === country.name ? "border-primary border-3" : ""}`}
                 onClick={() => handleCountryClick(country)}
@@ -276,9 +277,11 @@ const Explore = () => {
 
       {/* SECCIÓN DE RUTAS FILTRADAS */}
       <section>
-        <h2 className="mb-4">
-          <Compass /> Rutas Disponibles ({filteredRoutes.length})
+        <h2 className="mb-4 d-flex align-items-center gap-2">
+          <MapPin size={NAVBAR_ICON_SIZE} />
+          Rutas Disponibles ({filteredRoutes.length})
         </h2>
+
 
         {filteredRoutes.length === 0 ? (
           <div className="alert alert-info">
@@ -288,7 +291,7 @@ const Explore = () => {
           <>
             <div className="row g-4">
               {currentRoutes.map((route) => (
-                <div key={route.id} className="col-md-4 col-sm-6">
+                <div key={route.id} className="col-lg-4 col-md-6">
                   <RouteCard route={route} />
                 </div>
               ))}

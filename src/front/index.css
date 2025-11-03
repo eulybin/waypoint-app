@@ -276,6 +276,16 @@ body.compact-mode .with-sidebar {
   justify-content: center;
   color: #fff;
 }
+
+.header-icon-badge {
+  width: 80px;
+  height: 80px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
 .badge-orange {
   background: linear-gradient(135deg, #ff8a3d, #f36011);
 }
