@@ -10,7 +10,7 @@
 :root {
   --app-border-accent: #212529 !important;
   --navbar-width-desktop: 250px;
-  --navbar-width-mobile: 72px;
+  --navbar-width-mobile: 80px;
   --z-navbar: 1000;
 }
 
@@ -193,6 +193,118 @@ body {
   background-color: #3d3d3d !important;
 }
 
+/* =============================
+   Compact Horizontal Navbar
+   ============================= */
+.navbar-compact-horizontal {
+  height: 60px;
+  z-index: var(--z-navbar);
+  display: none; /* Hidden by default */
+}
+
+/* When body has compact-mode class */
+body.compact-mode main {
+  margin-left: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 60px !important; /* Space at bottom for navbar */
+}
+
+body.compact-mode .with-sidebar {
+  margin-left: 0 !important;
+}
+
+/* Compact nav items hover effect - same as mobile navbar */
+.navbar-compact-horizontal .compact-nav-item {
+  transition: background-color 0.2s ease;
+}
+
+[data-bs-theme='light'] .navbar-compact-horizontal .compact-nav-item:hover {
+  background-color: #dadada !important;
+}
+
+[data-bs-theme='dark'] .navbar-compact-horizontal .compact-nav-item:hover {
+  background-color: #3d3d3d !important;
+}
+
+/* Dropdown menu items hover effect */
+.navbar-compact-horizontal .sidebar-item {
+  transition: background-color 0.2s ease;
+}
+
+.navbar-compact-horizontal .sidebar-item:hover {
+  background-color: #f8f9fa;
+}
+
+[data-bs-theme='dark'] .navbar-compact-horizontal .sidebar-item:hover {
+  background-color: #2d2d2d;
+}
+
+.navbar-compact-horizontal .logout-item:hover {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+[data-bs-theme='dark'] .navbar-compact-horizontal .logout-item:hover {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+/* =============================
+   Home: Visual Pop Cards
+   ============================= */
+.pop-card {
+  border: 1px solid var(--app-border-accent);
+  border-radius: 0.75rem !important; /* rounded-3-ish */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+.pop-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.icon-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.badge-orange {
+  background: linear-gradient(135deg, #ff8a3d, #f36011);
+}
+
+.badge-orange-dark {
+  background: linear-gradient(135deg, #e47a33, #d75610);
+}
+
+.badge-orange-dark:hover {
+  background: linear-gradient(135deg, #d56a28, #c24d0e);
+}
+.badge-blue {
+  background: linear-gradient(135deg, #7aa8ff, #3b82f6);
+}
+.badge-green {
+  background: linear-gradient(135deg, #71d08c, #3fa34d);
+}
+.badge-purple {
+  background: linear-gradient(135deg, #b49bff, #7c3aed);
+}
+.badge-gray {
+  background: linear-gradient(135deg, #9aa0a6, #6b7280);
+}
+
+.badge-crimson {
+  background: linear-gradient(135deg, #ef4444, #991b1b);
+  color: #fff;
+}
+
 .navbar-popup {
   width: 56px;
   z-index: calc(var(--z-navbar) + 5) !important;
@@ -209,6 +321,9 @@ body {
   .navbar-mobile {
     display: none !important;
   }
+  .navbar-compact-horizontal {
+    display: none !important; /* Hide compact on desktop */
+  }
 
   .with-sidebar {
     margin-left: var(--navbar-width-desktop);
@@ -222,9 +337,39 @@ body {
   .navbar-mobile {
     display: flex !important;
   }
+  .navbar-compact-horizontal {
+    display: none !important; /* Hide compact on mobile by default */
+  }
 
   .with-sidebar {
     margin-left: var(--navbar-width-mobile);
+  }
+
+  /* Only show compact navbar when body has compact-mode class */
+  body.compact-mode .navbar-mobile {
+    display: none !important;
+  }
+
+  body.compact-mode .navbar-compact-horizontal {
+    display: flex !important;
+  }
+}
+
+/* Add to index.css after line 200 */
+
+/* Activate compact mode when height < 515px on mobile screens */
+@media (max-width: 767.98px) and (max-height: 515px) {
+  .navbar-mobile {
+    display: none !important;
+  }
+
+  .navbar-compact-horizontal {
+    display: flex !important;
+  }
+
+  .with-sidebar {
+    margin-left: 0 !important;
+    padding-bottom: 60px !important;
   }
 }
 
@@ -248,4 +393,35 @@ body {
   background: rgba(0, 0, 0, 0.3);
   z-index: 1;
   pointer-events: none;
+}
+
+.btn-circle {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.profile-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+/* Waypoint brand responsive sizing */
+.waypoint-brand {
+  height: 114px;
+  width: auto;
+}
+
+@media (max-width: 767.98px) {
+  .waypoint-brand {
+    height: auto;
+    max-height: 114px;
+    max-width: 100%;
+  }
 }
