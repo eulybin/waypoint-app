@@ -17,6 +17,7 @@ import { Trophy, TrendingUp, Star, Award } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import Loader from "../components/Loader";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
+import { HEADER_ICON_SIZE } from "../utils/constants";
 
 const Trending = () => {
   // ==================== ESTADOS ====================
@@ -194,7 +195,7 @@ const Trending = () => {
       <div className="text-center mb-5">
         {/* Icono principal */}
         <div className="mb-3">
-          <TrendingUp size={64} className="text-warning" />
+          <div className="mb-3 header-icon-badge badge-purple"><TrendingUp size={HEADER_ICON_SIZE} /></div>
         </div>
 
         {/* Título */}
