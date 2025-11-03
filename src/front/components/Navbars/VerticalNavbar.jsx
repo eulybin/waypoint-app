@@ -27,8 +27,13 @@ const VerticalNavbar = () => {
         setShowMoreMenu={setShowMoreMenu}
         setShowAppearance={setShowAppearance}
       />
-      <CompactHorizontalNavbar />
-      
+      <CompactHorizontalNavbar
+        showMoreMenu={showMoreMenu}
+        setShowMoreMenu={setShowMoreMenu}
+        showAppearance={showAppearance && !showMoreMenu}
+        setShowAppearance={setShowAppearance}
+      />
+
       {store.showReportModal && (
         <ReportProblemModal
           onClose={() => dispatch({ type: actionTypes.CLOSE_REPORT_MODAL })}
