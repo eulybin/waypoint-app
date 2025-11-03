@@ -9,11 +9,13 @@ import {
   Loader,
   ChevronLeft,
   ChevronRight,
-  Compass
+  Compass,
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
+import WeatherWidget from "../components/WeatherWidget";
+import { fetchWeather } from "../services/weatherService";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-
+import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE } from "../utils/constants";
 
 const Explore = () => {
   // ========== ESTADOS ==========
@@ -27,9 +29,20 @@ const Explore = () => {
   const [currentPage, setCurrentPage] = useState(1); // Página actual
   const ITEMS_PER_PAGE = 3; // 3 rutas por página
 
+  // ========== WEATHER STATES ==========
+  const [weatherCity, setWeatherCity] = useState("Madrid");
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherAttention, setWeatherAttention] = useState(false);
+
   // ========== OBTENER RUTAS DE LA BD ==========
   useEffect(() => {
     fetchAllRoutes();
+  }, []);
+
+  // ========== FETCH INITIAL WEATHER ==========
+  useEffect(() => {
+    handleWeatherUpdate(weatherCity);
   }, []);
 
   const fetchAllRoutes = async () => {
@@ -86,6 +99,15 @@ const Explore = () => {
     setCurrentPage(1); // Reset a página 1 cuando cambian los filtros
   }, [selectedCountry, selectedCity, searchTerm, allRoutes]);
 
+  // ========== SYNC WEATHER WITH SELECTED CITY ==========
+  useEffect(() => {
+    if (selectedCity) {
+      handleWeatherUpdate(selectedCity);
+      // Trigger attention animation when city is selected
+      setWeatherAttention(prev => !prev); // Toggle to trigger re-animation each time
+    }
+  }, [selectedCity]);
+
   // ========== HANDLERS ==========
   const handleCountryClick = (country) => {
     // Guardamos el objeto completo del país para tener acceso al código
@@ -103,6 +125,16 @@ const Explore = () => {
     setSelectedCountry(null);
     setSelectedCity(null);
     setSearchTerm("");
+  };
+
+  // ========== WEATHER HANDLER ==========
+  const handleWeatherUpdate = async (city) => {
+    if (!city) return;
+    setWeatherCity(city);
+    setWeatherLoading(true);
+    const data = await fetchWeather(city);
+    setWeather(data);
+    setWeatherLoading(false);
   };
 
   // ========== RENDER ==========
@@ -136,27 +168,41 @@ const Explore = () => {
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      
+
     }
   };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      
+
     }
   };
 
   const goToPage = (pageNumber) => {
     setCurrentPage(pageNumber);
-    
+
   };
 
   return (
     <div className="container py-4">
+      {/* FIXED WEATHER WIDGET - TOP RIGHT */}
+      <div
+        className="position-fixed top-0 end-0 mt-4 me-4"
+        style={{ zIndex: 999, opacity: 0.90 }}
+      >
+        <WeatherWidget
+          weather={weather}
+          city={weatherCity}
+          loading={weatherLoading}
+          onChangeCity={handleWeatherUpdate}
+          triggerAttention={weatherAttention}
+        />
+      </div>
+
       {/* HEADER */}
-      <div className="text-center mb-5">
-        <Compass size={64} className="text-primary mb-3" />
+      <div className="text-center mb-5 mt-5 pt-5">
+        <div className="mb-3 header-icon-badge badge-blue"><Compass size={HEADER_ICON_SIZE} /></div>
         <h1 className="display-4 fw-bold">Explorar Rutas</h1>
         <p className="lead text-muted">
           Descubre rutas turísticas creadas por la comunidad
@@ -218,13 +264,14 @@ const Explore = () => {
 
       {/* SECCIÓN DE PAÍSES */}
       <section className="mb-5">
-        <h2 className="mb-4">
-          <MapPin className="me-2" />
+        <h2 className="mb-4 d-flex align-items-center gap-2">
+          <Globe size={NAVBAR_ICON_SIZE} />
           Países Populares
         </h2>
+
         <div className="row g-3">
           {POPULAR_COUNTRIES.map((country) => (
-            <div key={country.name} className="col-md-3 col-sm-6">
+            <div key={country.name} className="col-lg-3 col-md-6">
               <div
                 className={`card h-100 cursor-pointer ${selectedCountry?.name === country.name ? "border-primary border-3" : ""}`}
                 onClick={() => handleCountryClick(country)}
@@ -276,9 +323,11 @@ const Explore = () => {
 
       {/* SECCIÓN DE RUTAS FILTRADAS */}
       <section>
-        <h2 className="mb-4">
-          <Compass /> Rutas Disponibles ({filteredRoutes.length})
+        <h2 className="mb-4 d-flex align-items-center gap-2">
+          <MapPin size={NAVBAR_ICON_SIZE} />
+          Rutas Disponibles ({filteredRoutes.length})
         </h2>
+
 
         {filteredRoutes.length === 0 ? (
           <div className="alert alert-info">
@@ -288,7 +337,7 @@ const Explore = () => {
           <>
             <div className="row g-4">
               {currentRoutes.map((route) => (
-                <div key={route.id} className="col-md-4 col-sm-6">
+                <div key={route.id} className="col-lg-4 col-md-6">
                   <RouteCard route={route} />
                 </div>
               ))}

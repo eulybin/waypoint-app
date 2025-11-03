@@ -5,20 +5,20 @@ import { actionTypes } from '../../store';
 import { NAVBAR_ICON_SIZE, STANDARD_ICON_SIZE, NAVBAR_Z_INDEX } from '../../utils/constants';
 import useAuth from '../../hooks/useAuth';
 import { navRouteLinks } from './navRouteLinks';
-import { useState } from 'react';
 
 const iconMap = { Home, Compass, User, TrendingUp };
 
-const CompactHorizontalNavbar = () => {
+const CompactHorizontalNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowAppearance }) => {
   const { store, dispatch } = useGlobalReducer();
   const { logoutUser } = useAuth();
   const navigate = useNavigate();
-  const [showMenu, setShowMenu] = useState(false);
+
+  const isMoreOpen = showMoreMenu || showAppearance;
 
   const handleLogout = () => {
     logoutUser();
     navigate('/search');
-    setShowMenu(false);
+    setShowMoreMenu(false);
   };
 
   return (
@@ -42,20 +42,27 @@ const CompactHorizontalNavbar = () => {
       {/* More Menu */}
       <div className="position-relative d-flex align-items-center">
         <button
-          className="btn btn-link text-body p-2 d-flex align-items-center justify-content-center text-decoration-none rounded-4 compact-nav-item"
-          onClick={() => setShowMenu(!showMenu)}
+          className={`btn btn-link text-body p-2 d-flex align-items-center justify-content-center text-decoration-none rounded-4 compact-nav-item ${isMoreOpen ? 'active' : ''}`}
+          onClick={() => {
+            if (showAppearance) {
+              setShowAppearance(false);
+              setShowMoreMenu(false);
+            } else {
+              setShowMoreMenu((prev) => !prev);
+            }
+          }}
           aria-label="More options"
           title="More"
         >
           <Menu size={NAVBAR_ICON_SIZE} />
         </button>
 
-        {showMenu && (
+        {isMoreOpen && (
           <>
-            <div 
+            <div
               className="position-absolute end-100 bg-body border rounded-3 d-flex me-5"
-              style={{ 
-                zIndex: NAVBAR_Z_INDEX
+              style={{
+                zIndex: NAVBAR_Z_INDEX,
               }}
             >
               {/* Appearance Toggle */}
@@ -72,7 +79,7 @@ const CompactHorizontalNavbar = () => {
               <button
                 onClick={() => {
                   dispatch({ type: actionTypes.OPEN_REPORT_MODAL });
-                  setShowMenu(false);
+                  setShowMoreMenu(false);
                 }}
                 className="d-flex align-items-center justify-content-center text-body p-2 border-0 bg-transparent sidebar-item"
                 aria-label="Report a Problem"
