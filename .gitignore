@@ -81,5 +81,7 @@ database.database
 database.db
 diagram.png
 __pycache__/
+/instance
 
-instance
+
+
