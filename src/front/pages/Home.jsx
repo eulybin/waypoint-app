@@ -91,8 +91,9 @@ const Home = () => {
       </div>
 
       {/* {FOOTER} */}
-      <section className="mt-5 pt-5 pb-5 border-top px-5 bg-body">
+      <footer className="mt-5 pt-5 pb-5 border-top px-4 px-md-5 bg-body">
         <h5 className="text-body mb-4">Connect with the developers:</h5>
+
         <div className="row g-4">
           <div className="col-12 col-lg-6">
             <a
@@ -103,11 +104,7 @@ const Home = () => {
               aria-label="Open GitHub profile: eulybin"
             >
               <div className="card-body p-4 d-flex align-items-center gap-3">
-                <img
-                  src={egorPp}
-                  alt="Egor profile"
-                  className="profile-img"
-                />
+                <img src={egorPp} alt="Egor profile" className="profile-img" />
                 <div>
                   <h6 className="fw-semibold mb-1">GitHub • eulybin</h6>
                   <p className="text-muted mb-0 d-flex align-items-center gap-2 small flex-wrap">
@@ -150,7 +147,13 @@ const Home = () => {
             </a>
           </div>
         </div>
-      </section>
+        {/* COPYRIGHT */}
+        <div className="mt-5 pt-3 border-top text-center">
+          <small className="text-muted">
+            © {new Date().getFullYear()} Waypoint App. All rights reserved.
+          </small>
+        </div>
+      </footer>
     </>
   );
 };
