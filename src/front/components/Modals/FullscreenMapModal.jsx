@@ -1,12 +1,19 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 // COMPONENTE: FullscreenMapModal
 // Modal de pantalla completa para visualizar el mapa de una ruta
 // Incluye información detallada, puntuación y puntos de interés
 
 import { MapContainer, TileLayer, Polyline, Popup } from "react-leaflet";
-import { MapPin, Star, X, Car, Footprints } from "lucide-react";
+import {
+  MapPin,
+  Star,
+  X,
+  Car,
+  Footprints,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import RouteMarkers from "../Profile/RouteMarkers";
 
@@ -23,6 +30,8 @@ const FullscreenMapModal = ({
   streetRoute = null,
   transportMode = "driving",
 }) => {
+  const [showInfoPanel, setShowInfoPanel] = useState(true);
+
   if (!show) return null;
 
   return (
@@ -57,12 +66,14 @@ const FullscreenMapModal = ({
         }}
       >
         <div>
-          <h4 className="mb-1">
+          <h4 className="mb-1" style={{ color: "#000" }}>
             <MapPin size={24} className="me-2" style={{ color: lineColor }} />
             {route.city}, {route.country}
           </h4>
           {route.locality && (
-            <p className="text-muted small mb-0">{route.locality}</p>
+            <p className="mb-0" style={{ color: "#000", fontSize: "14px" }}>
+              {route.locality}
+            </p>
           )}
         </div>
         <button
@@ -88,7 +99,7 @@ const FullscreenMapModal = ({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
           <Polyline
-            key={`fullscreen-${route.id}-${transportMode}-${useStreetRouting ? 'street' : 'direct'}`}
+            key={`fullscreen-${route.id}-${transportMode}-${useStreetRouting ? "street" : "direct"}`}
             positions={
               useStreetRouting && streetRoute ? streetRoute : coordinates
             }
@@ -115,97 +126,143 @@ const FullscreenMapModal = ({
         </MapContainer>
 
         {/* Info overlay en pantalla completa */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "20px",
-            left: "20px",
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-            maxWidth: "400px",
-            zIndex: 1000,
-          }}
-        >
-          <h6 className="mb-2">Información de la ruta</h6>
-          <div className="mb-2">
-            <span className="badge bg-light text-dark border me-2">
-              {coordinates.length} puntos de interés
-            </span>
-            <span
-              className={`badge ${type === "created" ? "bg-primary" : "bg-warning"}`}
-            >
-              {typeLabel}
-            </span>
-            {useStreetRouting && (
-              <span className="badge bg-success text-white ms-2">
-                {transportMode === "driving" ? (
-                  <>
-                    <Car size={14} className="me-1" />
-                    En coche
-                  </>
-                ) : (
-                  <>
-                    <Footprints size={14} className="me-1" />
-                    Caminando
-                  </>
-                )}
-              </span>
-            )}
-          </div>
-
-          {/* Puntuación en fullscreen - SIEMPRE VISIBLE */}
-          <div className="mt-3 pt-3 border-top">
-            <small className="text-muted d-block mb-2">Puntuación:</small>
-            <div className="d-flex align-items-center gap-2">
-              <div className="d-flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={18}
-                    fill={
-                      star <= Math.round(route.average_rating || 0)
-                        ? "#ffc107"
-                        : "none"
-                    }
-                    color={
-                      star <= Math.round(route.average_rating || 0)
-                        ? "#ffc107"
-                        : "#6c757d"
-                    }
-                  />
-                ))}
-              </div>
-              <span className="fw-bold">
-                {(route.average_rating || 0).toFixed(1)}
-              </span>
-              <span className="text-muted small">
-                ({route.total_votes || 0}{" "}
-                {(route.total_votes || 0) === 1 ? "voto" : "votos"})
-              </span>
+        {showInfoPanel ? (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "20px",
+              left: "20px",
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "12px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+              maxWidth: "400px",
+              zIndex: 1000,
+            }}
+          >
+            {/* Header del panel con botón de cerrar integrado */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h6 className="mb-0" style={{ color: "#000" }}>
+                Información de la ruta
+              </h6>
+              <button
+                onClick={() => setShowInfoPanel(false)}
+                className="btn btn-sm btn-light"
+                style={{
+                  borderRadius: "6px",
+                  padding: "4px 8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+                title="Ocultar información"
+              >
+                <ChevronDown size={16} />
+              </button>
             </div>
-          </div>
 
-          {/* Puntos de interés */}
-          {route.points_of_interest && route.points_of_interest.length > 0 && (
-            <div className="mt-3">
-              <small className="text-muted d-block mb-2">
-                Lugares destacados:
+            <div className="mb-2">
+              <span className="badge bg-light text-dark border me-2">
+                {coordinates.length} puntos de interés
+              </span>
+              <span
+                className={`badge ${type === "created" ? "bg-primary" : "bg-warning"}`}
+              >
+                {typeLabel}
+              </span>
+              {useStreetRouting && (
+                <span className="badge bg-success text-white ms-2">
+                  {transportMode === "driving" ? (
+                    <>
+                      <Car size={14} className="me-1" />
+                      En coche
+                    </>
+                  ) : (
+                    <>
+                      <Footprints size={14} className="me-1" />
+                      Caminando
+                    </>
+                  )}
+                </span>
+              )}
+            </div>
+
+            {/* Puntuación en fullscreen - SIEMPRE VISIBLE */}
+            <div className="mt-3 pt-3 border-top">
+              <small className="d-block mb-2" style={{ color: "#000" }}>
+                Puntuación:
               </small>
-              <div className="d-flex flex-wrap gap-1">
-                {route.points_of_interest.map((poi, index) => (
-                  <span
-                    key={index}
-                    className="badge bg-light text-dark border small"
-                  >
-                    {poi}
-                  </span>
-                ))}
+              <div className="d-flex align-items-center gap-2">
+                <div className="d-flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={18}
+                      fill={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "none"
+                      }
+                      color={
+                        star <= Math.round(route.average_rating || 0)
+                          ? "#ffc107"
+                          : "#6c757d"
+                      }
+                    />
+                  ))}
+                </div>
+                <span className="fw-bold" style={{ color: "#000" }}>
+                  {(route.average_rating || 0).toFixed(1)}
+                </span>
+                <span className="small" style={{ color: "#000" }}>
+                  ({route.total_votes || 0}{" "}
+                  {(route.total_votes || 0) === 1 ? "voto" : "votos"})
+                </span>
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Puntos de interés */}
+            {route.points_of_interest &&
+              route.points_of_interest.length > 0 && (
+                <div className="mt-3">
+                  <small className="d-block mb-2" style={{ color: "#000" }}>
+                    Lugares destacados:
+                  </small>
+                  <div className="d-flex flex-wrap gap-1">
+                    {route.points_of_interest.map((poi, index) => (
+                      <span
+                        key={index}
+                        className="badge bg-light text-dark border small"
+                      >
+                        {poi}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+          </div>
+        ) : (
+          /* Botón flotante pequeño para mostrar el panel cuando está oculto */
+          <button
+            onClick={() => setShowInfoPanel(true)}
+            className="btn btn-light shadow"
+            style={{
+              position: "absolute",
+              bottom: "20px",
+              left: "20px",
+              zIndex: 1000,
+              borderRadius: "8px",
+              padding: "10px 15px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+            title="Mostrar información"
+          >
+            <ChevronUp size={18} />
+            Mostrar info
+          </button>
+        )}
       </div>
     </div>
   );
