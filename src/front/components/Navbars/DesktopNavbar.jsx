@@ -67,8 +67,10 @@ const DesktopNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowA
 
           <Link
             to="/create-route"
-            className="btn bg-orange text-white rounded-4 w-100 fw-bold py-3 mt-4 d-flex align-items-center justify-content-center gap-2"
-            style={{ fontSize: CREATE_ROUTE_FONT_SIZE }}
+            className="btn badge-orange-dark text-white rounded-4 w-100 fw-bold py-3 mt-4 d-flex align-items-center justify-content-center gap-2"
+            style={{ 
+              fontSize: CREATE_ROUTE_FONT_SIZE,
+            }}
           >
             <MapPinPlus size={NAVBAR_ICON_SIZE} />
             <span className="nav-label">Create Route</span>
@@ -97,7 +99,7 @@ const DesktopNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowA
                 <span>Report a Problem</span>
               </button>
               <button
-                className="d-flex align-items-center gap-3 text-body p-3 w-100 border-0 bg-transparent text-start logout-item rounded-bottom-3"
+                className="d-flex align-items-center gap-3 text-body p-3 w-100 border-0 bg-transparent text-start rounded-bottom-3 logout-item"
                 onClick={handleLogout}
               >
                 <LogOut size={STANDARD_ICON_SIZE} />
