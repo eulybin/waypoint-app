@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-import {goToNextPage, goToPrevPage, goToPage } from "../utils/constants";
+
 
 const Explore = () => {
   // ========== ESTADOS ==========

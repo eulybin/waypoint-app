@@ -1,7 +1,4 @@
-
-
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
-
 
 // ============================================================================
 // PÁGINA: CreateRoute - VERSIÓN PROFESIONAL 2025 ✨
@@ -178,7 +175,6 @@ const CreateRoute = () => {
 
   // Estado para imágenes de POIs
   const [poiImages, setPoiImages] = useState({});
-
 
   // ========== REFS PARA DEBOUNCING ==========
   const countryDebounceRef = useRef(null);
@@ -721,7 +717,6 @@ const CreateRoute = () => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-
     // Cargar imágenes de los POIs de la nueva página
     const startIndex = (newPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -738,7 +733,7 @@ const CreateRoute = () => {
         }));
       }
     }
-
+  };
 
   // ============================================================================
   // FUNCIÓN: Obtener icono según tipo de POI
@@ -1232,7 +1227,7 @@ const CreateRoute = () => {
                     <label className="form-label small fw-semibold">
                       Selecciona una categoría:
                     </label>
-                    <div className="d-flex flex-wrap gap-2 STANDARD_ICON_SIZE">
+                    <div className="d-flex flex-wrap gap-2">
                       {[
                         {
                           value: "attraction",
@@ -1807,6 +1802,6 @@ const CreateRoute = () => {
       </div>
     </div>
   );
-};}
+};
 
 export default CreateRoute;
