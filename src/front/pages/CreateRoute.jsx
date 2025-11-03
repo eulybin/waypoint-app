@@ -1,11 +1,3 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useState, useEffect, useRef, useCallback } from 'react';
-
-import { useState, useEffect, useRef, useCallback } from 'react';
-
-
-import { Alert } from 'react-native';
-
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
 
@@ -187,9 +179,6 @@ const CreateRoute = () => {
   // Estado para imágenes de POIs
   const [poiImages, setPoiImages] = useState({});
 
-  // Estado para imágenes de POIs
-  const [poiImages, setPoiImages] = useState({});
-
   // ========== REFS PARA DEBOUNCING ==========
   const countryDebounceRef = useRef(null);
   const cityDebounceRef = useRef(null);
@@ -210,7 +199,6 @@ const CreateRoute = () => {
     setLoadingAll((prev) => ({ ...prev, countries: true }));
 
     try {
-      const normalizedQuery = normalizeText(query);
       const normalizedQuery = normalizeText(query);
       const results = await searchLocations(query, { type: "country" });
 
@@ -755,11 +743,7 @@ const CreateRoute = () => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // Cargar imágenes de los POIs de la nueva página
-    const startIndex = (newPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const filtered = getFilteredPOIs();
-    const paginatedPOIs = filtered.slice(startIndex, endIndex);
+ 
 
     // Cargar imágenes de los POIs visibles
     for (const poi of paginatedPOIs) {
@@ -1869,5 +1853,6 @@ const CreateRoute = () => {
     </div>
   );
 };
+}
 
 export default CreateRoute;
