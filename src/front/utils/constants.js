@@ -10,11 +10,9 @@ export const CLOSE_WEATHER_ICON_SIZE = 21;
 
 export const STANDARD_ICON_SIZE = 20;
 
-export const HIDE_OR_SHOW_PASSWORD_ICON_SIZE = 18;
-
 export const WEATHER_ICON_SIZE = 16;
 
-export const FOOTER_ICON_SIZE = 14;
+export const HIDE_OR_SHOW_PASSWORD_ICON_SIZE = 18;
 
 export const FORGOT_PASS_HEADER_ICON_SIZE = 40;
 

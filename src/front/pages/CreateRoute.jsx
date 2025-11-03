@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
+
+import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 
 
 // ============================================================================
@@ -13,7 +14,6 @@ import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 // ============================================================================
 
 import { useNavigate } from "react-router-dom";
-import { getPlaceImage } from "../services/imageService";
 import { getPlaceImage } from "../services/imageService";
 import {
   MapPin,
@@ -178,6 +178,7 @@ const CreateRoute = () => {
 
   // Estado para imágenes de POIs
   const [poiImages, setPoiImages] = useState({});
+
 
   // ========== REFS PARA DEBOUNCING ==========
   const countryDebounceRef = useRef(null);
@@ -596,28 +597,6 @@ const CreateRoute = () => {
   }, [suggestions.pois]);
 
   // ============================================================================
-  // EFFECT: Cargar imágenes de POIs cuando cambian las sugerencias
-  // ============================================================================
-  useEffect(() => {
-    if (suggestions.pois.length > 0) {
-      // Cargar imágenes de los primeros 8 POIs (los que se ven en la primera página)
-      const loadImages = async () => {
-        const firstPOIs = suggestions.pois.slice(0, 8);
-        for (const poi of firstPOIs) {
-          if (!poiImages[poi.id] && !poi.image) {
-            const imageUrl = await getPlaceImage(poi.name);
-            setPoiImages((prev) => ({
-              ...prev,
-              [poi.id]: imageUrl,
-            }));
-          }
-        }
-      };
-      loadImages();
-    }
-  }, [suggestions.pois]);
-
-  // ============================================================================
   // EFFECT: Reset página cuando cambia la búsqueda
   // ============================================================================
   useEffect(() => {
@@ -739,22 +718,9 @@ const CreateRoute = () => {
   };
 
   const handlePageChange = async (newPage) => {
-  const handlePageChange = async (newPage) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
- 
-
-    // Cargar imágenes de los POIs visibles
-    for (const poi of paginatedPOIs) {
-      if (!poiImages[poi.id] && !poi.image) {
-        const imageUrl = await getPlaceImage(poi.name);
-        setPoiImages((prev) => ({
-          ...prev,
-          [poi.id]: imageUrl,
-        }));
-      }
-    }
 
     // Cargar imágenes de los POIs de la nueva página
     const startIndex = (newPage - 1) * ITEMS_PER_PAGE;
@@ -772,7 +738,7 @@ const CreateRoute = () => {
         }));
       }
     }
-  };
+
 
   // ============================================================================
   // FUNCIÓN: Obtener icono según tipo de POI
@@ -818,16 +784,7 @@ const CreateRoute = () => {
   // ============================================================================
   // FUNCIÓN: Obtener imagen del POI (de la API o por defecto)
   // ============================================================================
-  // ============================================================================
-  // FUNCIÓN: Obtener imagen del POI (de la API o por defecto)
-  // ============================================================================
   const getPOIImage = (poi, poiType) => {
-    // 1. Prioridad: Imagen cargada desde Wikimedia/Pexels API
-    if (poiImages[poi.id]) {
-      return poiImages[poi.id];
-    }
-
-    // 2. Si el POI tiene imagen de Overpass API (Wikimedia/Wikipedia), usarla
     // 1. Prioridad: Imagen cargada desde Wikimedia/Pexels API
     if (poiImages[poi.id]) {
       return poiImages[poi.id];
@@ -837,8 +794,6 @@ const CreateRoute = () => {
     if (poi.image) {
       return poi.image;
     }
-
-    // 3. Si no, usar imagen por defecto según el tipo
 
     // 3. Si no, usar imagen por defecto según el tipo
     return DEFAULT_IMAGES[poiType] || DEFAULT_IMAGES.attraction;
@@ -1852,7 +1807,6 @@ const CreateRoute = () => {
       </div>
     </div>
   );
-};
-}
+};}
 
 export default CreateRoute;

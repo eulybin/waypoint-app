@@ -89,11 +89,11 @@ const MobileNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowAp
         {/* CREATE ROUTE */}
         <Link
           to="/create-route"
-          className="mobile-nav-item d-inline-flex align-items-center justify-content-center text-decoration-none my-3 p-3 rounded-4 mx-2 badge-orange-dark text-light"
+          className="mobile-nav-item d-inline-flex align-items-center justify-content-center text-body text-decoration-none my-3 p-3 rounded-4 sidebar-item mx-2"
           aria-label="Create Route"
           title="Create Route"
         >
-          <MapPinPlus size={NAVBAR_ICON_SIZE} />
+          <MapPinPlus className='text-orange' size={NAVBAR_ICON_SIZE} />
         </Link>
       </div>
     </div>

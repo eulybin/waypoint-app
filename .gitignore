@@ -1,6 +1,9 @@
+# ignore all files starting with .
+.*
 
 # track this file .gitignore (i.e. do NOT ignore it)
 !.gitignore
+!.github
 php_errorlog
 .log
 
@@ -63,7 +66,6 @@ node_modules/
 dist/*
 !public/
 !public/*
-instance/*
 
 # ignore the dist directory were our bundle files are going to be
 !.gitkeep
@@ -78,13 +80,3 @@ database.database
 database.db
 diagram.png
 __pycache__/
-<<<<<<< HEAD
-<<<<<<< HEAD
-waypoint.db
-=======
-
-/instancesrc/instance/waypoint.db
->>>>>>> 66c7f56 (Ignorar base de datos local)
-=======
-waypoint.db
->>>>>>> 6da38a6 (Omitir db)

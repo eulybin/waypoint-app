@@ -6,15 +6,15 @@ import Loader from "../components/Loader";
 
 const Layout = () => {
     const { isAuthenticated, loading } = useAuth();
-
     if (loading) return <Loader />;
 
+
     const Navigation = isAuthenticated ? VerticalNavbar : HorizontalNavbar;
-    
+    const hasSidebar = isAuthenticated;
     return (
         <>
             <Navigation />
-            <main className={isAuthenticated ? "with-sidebar" : undefined}>
+            <main className={hasSidebar ? "with-sidebar" : undefined}>
                 <Outlet />
             </main>
         </>

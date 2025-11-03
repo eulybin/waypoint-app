@@ -71,15 +71,13 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
 
         <button
           type="button"
-          className="btn btn-sm text-light border-light border btn-circle rotate-on-hover"
+          className="btn btn-sm text-light border-light border rounded-circle p-1 rotate-on-hover"
           onClick={handleToggle}
           aria-label="Close weather"
           title="Close weather"
         >
           <X size={CLOSE_WEATHER_ICON_SIZE} />
         </button>
-
-
       </div>
     </div>
   );
