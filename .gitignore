@@ -82,8 +82,4 @@ database.db
 diagram.png
 __pycache__/
 /instance
-
-
-
-
-instance
+src/instance/waypoint.db
