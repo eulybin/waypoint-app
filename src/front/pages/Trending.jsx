@@ -120,8 +120,10 @@ const Trending = () => {
         return "🥈"; // Plata
       case 3:
         return "🥉"; // Bronce
+      case 4:
+        return "⬆️";
       default:
-        return `#${position}`; // Número para posiciones 4 y 5
+        return "⬇️"; // Número para posiciones 4 y 5
     }
   };
 
@@ -139,7 +141,7 @@ const Trending = () => {
       case 3:
         return "bg-danger"; // Bronce/Rojo
       default:
-        return "bg-primary"; // Azul para el resto
+        return "bg-success"; // Verde para el resto
     }
   };
 
@@ -192,12 +194,11 @@ const Trending = () => {
       <div className="text-center mb-5">
         {/* Icono principal */}
         <div className="mb-3">
-          <Trophy size={64} className="text-warning" />
+          <TrendingUp size={64} className="text-warning" />
         </div>
 
         {/* Título */}
         <h1 className="display-4 fw-bold mb-3">
-          <TrendingUp className="me-2" />
           Rutas en Tendencia
         </h1>
 
@@ -228,12 +229,12 @@ const Trending = () => {
                     zIndex: 10,
                     fontSize: "1.2rem",
                     padding: "10px 20px",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    boxShadow: "0 4px 8px `rgba(0, 0, 0, 1)",
                   }}
                 >
                   <Award size={18} className="me-2" />
                   <span className="fw-bold">{getMedalEmoji(position)}</span>
-                  {position > 3 && <span className="ms-2">Posición</span>}
+                  {position > 3 && <span className="ms-2"></span>}
                 </div>
 
                 {/* Tarjeta de la ruta con efecto hover especial para top 3 */}
@@ -259,7 +260,7 @@ const Trending = () => {
                       {/* Columna izquierda: Información del ranking */}
                       <div className="col-md-2 text-center border-end">
                         {/* Número de posición grande */}
-                        <div className="display-1 fw-bold text-muted opacity-25">
+                        <div className="display-1 fw-bold text-muted ">
                           {position}
                         </div>
 

@@ -292,7 +292,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             </div>
 
             {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
-            <div className="mb-3 p-3 bg-light rounded">
+            <div className="mb-3 p-3">
               <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex align-items-center gap-1">
@@ -424,7 +424,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             </div>
 
             {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
-            <div className="mb-3 p-3 bg-light rounded">
+            <div className="mb-3 p-3">
               <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex align-items-center gap-1">
