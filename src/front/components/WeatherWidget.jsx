@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThermometerSun, CloudRain, Wind, Droplets, X, Search } from 'lucide-react';
 import { NAVBAR_ICON_SIZE, WEATHER_ICON_SIZE, WEATHER_WIDGET_WIDTH, SEARCH_ICON_SIZE, CLOSE_WEATHER_ICON_SIZE } from '../utils/constants';
 import { weatherThemes } from '../utils/weatherThemes';
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
-const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = false }) => {
+const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = false, triggerAttention = false }) => {
 
   const { store } = useGlobalReducer();
   const textMutedClass = !store.isDarkMode ? "text-light" : "text-muted";
@@ -12,6 +12,33 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
   const [open, setOpen] = useState(defaultOpen);
   const [searchMode, setSearchMode] = useState(!city);
   const [query, setQuery] = useState(city || '');
+  const [shouldPulse, setShouldPulse] = useState(false);
+  const [pulseKey, setPulseKey] = useState(0);
+  const [lastTrigger, setLastTrigger] = useState(null);
+
+  // Trigger pulse animation when triggerAttention changes
+  useEffect(() => {
+    // Only trigger if triggerAttention actually changed and widget is closed
+    if (triggerAttention !== lastTrigger && !open) {
+      setLastTrigger(triggerAttention);
+      setShouldPulse(false); // Reset first
+      setPulseKey(prev => prev + 1); // Change key to force re-animation
+      setTimeout(() => {
+        setShouldPulse(true);
+      }, 10); // Small delay to ensure animation restarts
+      const timer = setTimeout(() => {
+        setShouldPulse(false);
+      }, 1900); // Animation lasts 1.9 seconds (0.6s * 3 repeats + buffer)
+      return () => clearTimeout(timer);
+    }
+  }, [triggerAttention, lastTrigger]); // Removed 'open' from dependencies
+
+  // Stop animation when widget opens
+  useEffect(() => {
+    if (open) {
+      setShouldPulse(false);
+    }
+  }, [open]);
 
   const current = weather?.current;
   const forecast3 = weather?.forecast?.slice(0, 3) || [];
@@ -41,8 +68,9 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
   // --- RENDER HELPERS ---
   const renderCollapsedButton = () => (
     <button
+      key={pulseKey}
       type="button"
-      className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm border weather-btn"
+      className={`btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm border weather-btn ${shouldPulse ? 'weather-pulse-attention' : ''}`}
       onClick={handleToggle}
       aria-label="Open weather"
     >
@@ -90,7 +118,7 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
       <div className="position-relative flex-grow-1">
         <input
           className="form-control"
-          placeholder="Enter city…"
+          placeholder="Enter city name"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

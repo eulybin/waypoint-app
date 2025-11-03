@@ -390,6 +390,26 @@ body.compact-mode .with-sidebar {
   height: 48px;
 }
 
+/* Weather widget pulse attention animation */
+@keyframes weather-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.9);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 0 30px 15px rgba(13, 110, 253, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.9);
+  }
+}
+
+.weather-pulse-attention {
+  animation: weather-pulse 0.6s ease-in-out 2;
+}
+
 .rotate-on-hover {
   transition: transform 0.25s ease;
 }

@@ -33,6 +33,7 @@ const Explore = () => {
   const [weatherCity, setWeatherCity] = useState("Madrid");
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherAttention, setWeatherAttention] = useState(false);
 
   // ========== OBTENER RUTAS DE LA BD ==========
   useEffect(() => {
@@ -102,6 +103,8 @@ const Explore = () => {
   useEffect(() => {
     if (selectedCity) {
       handleWeatherUpdate(selectedCity);
+      // Trigger attention animation when city is selected
+      setWeatherAttention(prev => !prev); // Toggle to trigger re-animation each time
     }
   }, [selectedCity]);
 
@@ -193,6 +196,7 @@ const Explore = () => {
           city={weatherCity}
           loading={weatherLoading}
           onChangeCity={handleWeatherUpdate}
+          triggerAttention={weatherAttention}
         />
       </div>
 
