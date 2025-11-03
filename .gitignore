@@ -82,8 +82,12 @@ database.db
 diagram.png
 __pycache__/
 <<<<<<< HEAD
+<<<<<<< HEAD
 waypoint.db
 =======
 
 /instancesrc/instance/waypoint.db
 >>>>>>> 66c7f56 (Ignorar base de datos local)
+=======
+waypoint.db
+>>>>>>> 6da38a6 (Omitir db)
