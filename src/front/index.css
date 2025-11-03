@@ -397,6 +397,15 @@ body.compact-mode .with-sidebar {
 .rotate-on-hover:hover {
   transform: rotate(90deg);
 }
+
+.scale-on-hover {
+  transition: transform 0.2s ease;
+}
+
+.scale-on-hover:hover {
+  transform: scale(1.15);
+}
+
 .weather-overlay {
   position: absolute;
   inset: 0;

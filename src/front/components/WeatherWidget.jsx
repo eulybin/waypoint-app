@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ThermometerSun, CloudRain, Wind, Droplets, X, Settings } from 'lucide-react';
-import { NAVBAR_ICON_SIZE, WEATHER_ICON_SIZE, WEATHER_WIDGET_WIDTH, SETTINGS_ICON_SIZE, CLOSE_WEATHER_ICON_SIZE } from '../utils/constants';
+import { ThermometerSun, CloudRain, Wind, Droplets, X, Search } from 'lucide-react';
+import { NAVBAR_ICON_SIZE, WEATHER_ICON_SIZE, WEATHER_WIDGET_WIDTH, SEARCH_ICON_SIZE, CLOSE_WEATHER_ICON_SIZE } from '../utils/constants';
 import { weatherThemes } from '../utils/weatherThemes';
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
@@ -60,12 +60,12 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
       <div className="d-flex align-items-center gap-1">
         <button
           type="button"
-          className="btn btn-sm text-light p-1 rotate-on-hover"
+          className="btn btn-sm text-light p-1 scale-on-hover"
           onClick={handleChangeCity}
           aria-label="Search another city"
           title="Search another city"
         >
-          <Settings size={SETTINGS_ICON_SIZE} />
+          <Search size={SEARCH_ICON_SIZE - 2} />
         </button>
 
 

@@ -12,6 +12,8 @@ import {
   Compass,
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
+import WeatherWidget from "../components/WeatherWidget";
+import { fetchWeather } from "../services/weatherService";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
 import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE } from "../utils/constants";
 
@@ -27,9 +29,19 @@ const Explore = () => {
   const [currentPage, setCurrentPage] = useState(1); // Página actual
   const ITEMS_PER_PAGE = 3; // 3 rutas por página
 
+  // ========== WEATHER STATES ==========
+  const [weatherCity, setWeatherCity] = useState("Madrid");
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+
   // ========== OBTENER RUTAS DE LA BD ==========
   useEffect(() => {
     fetchAllRoutes();
+  }, []);
+
+  // ========== FETCH INITIAL WEATHER ==========
+  useEffect(() => {
+    handleWeatherUpdate(weatherCity);
   }, []);
 
   const fetchAllRoutes = async () => {
@@ -86,6 +98,13 @@ const Explore = () => {
     setCurrentPage(1); // Reset a página 1 cuando cambian los filtros
   }, [selectedCountry, selectedCity, searchTerm, allRoutes]);
 
+  // ========== SYNC WEATHER WITH SELECTED CITY ==========
+  useEffect(() => {
+    if (selectedCity) {
+      handleWeatherUpdate(selectedCity);
+    }
+  }, [selectedCity]);
+
   // ========== HANDLERS ==========
   const handleCountryClick = (country) => {
     // Guardamos el objeto completo del país para tener acceso al código
@@ -103,6 +122,16 @@ const Explore = () => {
     setSelectedCountry(null);
     setSelectedCity(null);
     setSearchTerm("");
+  };
+
+  // ========== WEATHER HANDLER ==========
+  const handleWeatherUpdate = async (city) => {
+    if (!city) return;
+    setWeatherCity(city);
+    setWeatherLoading(true);
+    const data = await fetchWeather(city);
+    setWeather(data);
+    setWeatherLoading(false);
   };
 
   // ========== RENDER ==========
@@ -154,8 +183,21 @@ const Explore = () => {
 
   return (
     <div className="container py-4">
+      {/* FIXED WEATHER WIDGET - TOP RIGHT */}
+      <div
+        className="position-fixed top-0 end-0 mt-4 me-4"
+        style={{ zIndex: 999, opacity: 0.90 }}
+      >
+        <WeatherWidget
+          weather={weather}
+          city={weatherCity}
+          loading={weatherLoading}
+          onChangeCity={handleWeatherUpdate}
+        />
+      </div>
+
       {/* HEADER */}
-      <div className="text-center mb-5">
+      <div className="text-center mb-5 mt-5 pt-5">
         <div className="mb-3 header-icon-badge badge-blue"><Compass size={HEADER_ICON_SIZE} /></div>
         <h1 className="display-4 fw-bold">Explorar Rutas</h1>
         <p className="lead text-muted">
