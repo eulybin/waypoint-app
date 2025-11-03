@@ -11,6 +11,7 @@ import { useState, useEffect, useRef, useCallback, useReducer } from "react";
 // ============================================================================
 
 import { useNavigate } from "react-router-dom";
+import { getPlaceImage } from "../services/imageService";
 import {
   MapPin,
   Plus,
@@ -102,13 +103,6 @@ const initialFormState = {
   points_of_interest: [],
 };
 
-
-const loadingAll = {
-  countries: false,
-  cities: false,
-  pois: false,
-};
-
 // ============================================================================
 // CONSTANTES PARA PAGINACIÓN
 // ============================================================================
@@ -179,6 +173,9 @@ const CreateRoute = () => {
   // ========== ESTADO PARA VISTA (MAPA O CARDS) ==========
   const [viewMode, setViewMode] = useState("cards"); // "cards" o "map"
 
+  // Estado para imágenes de POIs
+  const [poiImages, setPoiImages] = useState({});
+
   // ========== REFS PARA DEBOUNCING ==========
   const countryDebounceRef = useRef(null);
   const cityDebounceRef = useRef(null);
@@ -199,10 +196,10 @@ const CreateRoute = () => {
     setLoadingAll((prev) => ({ ...prev, countries: true }));
 
     try {
+      const normalizedQuery = normalizeText(query);
       const results = await searchLocations(query, { type: "country" });
 
       // Filtrar solo países
-
       const countries = results
         .filter((r) => {
           const isCountry =
@@ -574,6 +571,28 @@ const CreateRoute = () => {
   }, [searchState.poiType, formState.coordinates, loadAllPOIsForCategory]);
 
   // ============================================================================
+  // EFFECT: Cargar imágenes de POIs cuando cambian las sugerencias
+  // ============================================================================
+  useEffect(() => {
+    if (suggestions.pois.length > 0) {
+      // Cargar imágenes de los primeros 8 POIs (los que se ven en la primera página)
+      const loadImages = async () => {
+        const firstPOIs = suggestions.pois.slice(0, 8);
+        for (const poi of firstPOIs) {
+          if (!poiImages[poi.id] && !poi.image) {
+            const imageUrl = await getPlaceImage(poi.name);
+            setPoiImages((prev) => ({
+              ...prev,
+              [poi.id]: imageUrl,
+            }));
+          }
+        }
+      };
+      loadImages();
+    }
+  }, [suggestions.pois]);
+
+  // ============================================================================
   // EFFECT: Reset página cuando cambia la búsqueda
   // ============================================================================
   useEffect(() => {
@@ -694,9 +713,26 @@ const CreateRoute = () => {
     return Math.ceil(filtered.length / ITEMS_PER_PAGE);
   };
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = async (newPage) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Cargar imágenes de los POIs de la nueva página
+    const startIndex = (newPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const filtered = getFilteredPOIs();
+    const paginatedPOIs = filtered.slice(startIndex, endIndex);
+
+    // Cargar imágenes de los POIs visibles
+    for (const poi of paginatedPOIs) {
+      if (!poiImages[poi.id] && !poi.image) {
+        const imageUrl = await getPlaceImage(poi.name);
+        setPoiImages((prev) => ({
+          ...prev,
+          [poi.id]: imageUrl,
+        }));
+      }
+    }
   };
 
   // ============================================================================
@@ -740,12 +776,21 @@ const CreateRoute = () => {
   // ============================================================================
   // FUNCIÓN: Obtener imagen del POI (de la API o por defecto)
   // ============================================================================
+  // ============================================================================
+  // FUNCIÓN: Obtener imagen del POI (de la API o por defecto)
+  // ============================================================================
   const getPOIImage = (poi, poiType) => {
-    // Si el POI tiene imagen de Wikimedia/Wikipedia, usarla
+    // 1. Prioridad: Imagen cargada desde Wikimedia/Pexels API
+    if (poiImages[poi.id]) {
+      return poiImages[poi.id];
+    }
+
+    // 2. Si el POI tiene imagen de Overpass API (Wikimedia/Wikipedia), usarla
     if (poi.image) {
       return poi.image;
     }
-    // Si no, usar imagen por defecto según el tipo
+
+    // 3. Si no, usar imagen por defecto según el tipo
     return DEFAULT_IMAGES[poiType] || DEFAULT_IMAGES.attraction;
   };
 
@@ -1182,7 +1227,7 @@ const CreateRoute = () => {
                     <label className="form-label small fw-semibold">
                       Selecciona una categoría:
                     </label>
-                    <div className="d-flex flex-wrap gap-2 STANDARD_ICON_SIZE">
+                    <div className="d-flex flex-wrap gap-2">
                       {[
                         {
                           value: "attraction",

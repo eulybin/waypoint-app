@@ -134,11 +134,16 @@ export const searchLocations = async (query, options = {}) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+    // Añadir delay para respetar rate limits de Nominatim (1 petición por segundo)
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?${params}`,
       {
         headers: {
-          "User-Agent": "WaypointApp/1.0",
+          "User-Agent": "WaypointApp/1.0 (contact@waypoint.com)", // Email de contacto
+          Accept: "application/json",
+          "Accept-Language": "es",
         },
         signal: controller.signal,
       }
@@ -147,7 +152,33 @@ export const searchLocations = async (query, options = {}) => {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error("Error fetching locations");
+      if (response.status === 403) {
+        console.warn("⚠️ Nominatim bloqueó la petición. Esperando...");
+        // Esperar 2 segundos y reintentar
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Segundo intento
+        const retryResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?${params}`,
+          {
+            headers: {
+              "User-Agent": "WaypointApp/1.0 (contact@waypoint.com)",
+              Accept: "application/json",
+              "Accept-Language": "es",
+            },
+          }
+        );
+
+        if (!retryResponse.ok) {
+          throw new Error(`Error fetching locations: ${retryResponse.status}`);
+        }
+
+        const retryData = await retryResponse.json();
+        setInCache(cacheKey, retryData, "locations");
+        return retryData;
+      }
+
+      throw new Error(`Error fetching locations: ${response.status}`);
     }
 
     const data = await response.json();
