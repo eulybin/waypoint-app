@@ -83,3 +83,4 @@ diagram.png
 __pycache__/
 /instance
 src/instance/waypoint.db
+waypoint.db
