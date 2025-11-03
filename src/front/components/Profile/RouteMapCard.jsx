@@ -10,6 +10,10 @@ import {
   Route as RouteIcon,
   Car,
   Footprints,
+  Bike,
+  ChevronDown,
+  ChevronUp,
+  Clock,
 } from "lucide-react";
 import DeleteRouteModal from "../Modals/DeleteRouteModal";
 import FullscreenMapModal from "../Modals/FullscreenMapModal";
@@ -37,15 +41,18 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showAllPOIs, setShowAllPOIs] = useState(false); // ← NUEVO ESTADO para expandir POIs
   // Nuevo estado para las coordenadas con ruta calculada por calles
   const [useStreetRouting, setUseStreetRouting] = useState(false); // Toggle para activar/desactivar routing
   const [streetRoute, setStreetRoute] = useState(null); // Guarda la ruta calculada por calles
+  const [routeInfo, setRouteInfo] = useState(null); // Guarda duración y distancia
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false); // Loading state
-  const [transportMode, setTransportMode] = useState("driving"); // 'driving' (coche) o 'foot' (caminando)
+  const [transportMode, setTransportMode] = useState("driving"); // 'driving' (coche), 'foot' (caminando) o 'bike' (bicicleta)
 
   //EFECTO: Limpiar ruta calculada si cambian las coordenadas
   useEffect(() => {
     setStreetRoute(null);
+    setRouteInfo(null);
     setUseStreetRouting(false);
     setTransportMode("driving");
   }, [route.id]); // Se ejecuta cuando cambia la ruta
@@ -92,11 +99,9 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
 
       try {
         // Llamamos al servicio OSRM para calcular la ruta con el modo de transporte seleccionado
-        const calculatedRoute = await getRouteFromOSRM(
-          coordinates,
-          transportMode
-        );
-        setStreetRoute(calculatedRoute); // Guardamos la ruta calculada
+        const result = await getRouteFromOSRM(coordinates, transportMode);
+        setStreetRoute(result.coordinates); // Guardamos la ruta calculada
+        setRouteInfo({ duration: result.duration, distance: result.distance }); // Guardamos info
         setUseStreetRouting(true); // Activamos el modo routing
       } catch (error) {
         console.error("Error al calcular ruta:", error);
@@ -123,16 +128,21 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
 
       try {
         console.log(`📍 Calculando nueva ruta para modo: ${newMode}`);
-        const calculatedRoute = await getRouteFromOSRM(coordinates, newMode);
+        const result = await getRouteFromOSRM(coordinates, newMode);
         console.log(
-          `✅ Nueva ruta calculada con ${calculatedRoute.length} puntos`
+          `✅ Nueva ruta calculada con ${result.coordinates.length} puntos`
         );
 
         // Forzar actualización limpiando primero el estado
         setStreetRoute(null);
+        setRouteInfo(null);
         // Usar setTimeout para asegurar que React detecte el cambio
         setTimeout(() => {
-          setStreetRoute(calculatedRoute);
+          setStreetRoute(result.coordinates);
+          setRouteInfo({
+            duration: result.duration,
+            distance: result.distance,
+          });
         }, 0);
       } catch (error) {
         console.error("Error al calcular ruta:", error);
@@ -141,6 +151,29 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
         setIsCalculatingRoute(false);
       }
     }
+  };
+
+  // Función para formatear el tiempo de duración
+  const formatDuration = (seconds) => {
+    if (!seconds) return null;
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`;
+    }
+    return `${minutes} min`;
+  };
+
+  // Función para formatear la distancia
+  const formatDistance = (meters) => {
+    if (!meters) return null;
+
+    if (meters >= 1000) {
+      return `${(meters / 1000).toFixed(1)} km`;
+    }
+    return `${Math.round(meters)} m`;
   };
 
   // Función para extraer las coordenadas de la ruta
@@ -255,16 +288,41 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             <div className="mb-3">
               <h6 className="text-muted small mb-2">Puntos de Interés:</h6>
               <div className="d-flex flex-wrap gap-1">
-                {route.points_of_interest?.map((poi, index) => (
+                {/* Mostrar 3 o todos según el estado */}
+                {(showAllPOIs
+                  ? route.points_of_interest
+                  : route.points_of_interest?.slice(0, 3)
+                )?.map((poi, index) => (
                   <span key={index} className="badge bg-light text-dark border">
                     {poi}
                   </span>
                 ))}
+
+                {/* Botón para expandir/colapsar si hay más de 3 */}
+                {route.points_of_interest?.length > 3 && (
+                  <button
+                    className="badge bg-primary text-white border-0"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setShowAllPOIs(!showAllPOIs)}
+                  >
+                    {showAllPOIs ? (
+                      <>
+                        <ChevronUp size={12} className="me-1" />
+                        Ver menos
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown size={12} className="me-1" />+
+                        {route.points_of_interest.length - 3} más
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
             {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
-            <div className="mb-3 p-3 bg-light rounded">
+            <div className="mb-3 p-3">
               <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex align-items-center gap-1">
@@ -362,16 +420,41 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                 Puntos de Interés ({coordinates.length}):
               </h6>
               <div className="d-flex flex-wrap gap-1">
-                {route.points_of_interest?.map((poi, index) => (
+                {/* Mostrar 3 o todos según el estado */}
+                {(showAllPOIs
+                  ? route.points_of_interest
+                  : route.points_of_interest?.slice(0, 3)
+                )?.map((poi, index) => (
                   <span key={index} className="badge bg-light text-dark border">
                     {poi}
                   </span>
                 ))}
+
+                {/* Botón para expandir/colapsar si hay más de 3 */}
+                {route.points_of_interest?.length > 3 && (
+                  <button
+                    className="badge bg-primary text-white border-0"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setShowAllPOIs(!showAllPOIs)}
+                  >
+                    {showAllPOIs ? (
+                      <>
+                        <ChevronUp size={12} className="me-1" />
+                        Ver menos
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown size={12} className="me-1" />+
+                        {route.points_of_interest.length - 3} más
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
             {/* SECCIÓN DE PUNTUACIÓN - SIEMPRE VISIBLE */}
-            <div className="mb-3 p-3 bg-light rounded">
+            <div className="mb-3 p-3">
               <h6 className="text-muted small mb-2">Puntuación de la ruta:</h6>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex align-items-center gap-1">
@@ -516,6 +599,66 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                     <Footprints size={18} />
                     <span className="small">Caminando</span>
                   </button>
+
+                  <button
+                    onClick={() => handleTransportModeChange("bike")}
+                    disabled={isCalculatingRoute}
+                    className={`btn btn-sm shadow-sm ${transportMode === "bike" ? "btn-primary" : "btn-light"}`}
+                    style={{
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    title="Ruta en bicicleta"
+                  >
+                    <Bike size={18} />
+                    <span className="small">Bicicleta</span>
+                  </button>
+                </div>
+              )}
+
+              {/* INFORMACIÓN DE LA RUTA - Duración y distancia */}
+              {useStreetRouting && routeInfo && routeInfo.duration && (
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "10px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    zIndex: 900,
+                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <Clock size={16} style={{ color: "#0d6efd" }} />
+                    <span style={{ fontSize: "14px", fontWeight: "500" }}>
+                      {formatDuration(routeInfo.duration)}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      width: "1px",
+                      height: "16px",
+                      backgroundColor: "#dee2e6",
+                    }}
+                  />
+                  <div style={{ fontSize: "14px", fontWeight: "500" }}>
+                    {formatDistance(routeInfo.distance)}
+                  </div>
                 </div>
               )}
 
@@ -582,6 +725,9 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
         useStreetRouting={useStreetRouting}
         streetRoute={streetRoute}
         transportMode={transportMode}
+        onTransportModeChange={handleTransportModeChange}
+        isCalculatingRoute={isCalculatingRoute}
+        routeInfo={routeInfo}
       />
     </>
   );
