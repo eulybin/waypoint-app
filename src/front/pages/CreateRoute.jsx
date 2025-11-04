@@ -1,15 +1,4 @@
 import { useState, useEffect, useRef, useCallback, useReducer } from "react";
-
-// ============================================================================
-// PÁGINA: CreateRoute - VERSIÓN PROFESIONAL 2025 ✨
-// ============================================================================
-// ✅ Al seleccionar país → Muestra ciudades Y localidades (Carmona, Utrera, etc.)
-// ✅ Al seleccionar ciudad/localidad → Muestra TODOS los POIs disponibles
-// ✅ Permite seleccionar MÚLTIPLES POIs para una ruta
-// ✅ Flujo simplificado: País → Ciudad/Localidad → POIs
-// ✅ Sistema de CARDS con paginación (12 por página)
-// ============================================================================
-
 import { useNavigate } from "react-router-dom";
 import { getPlaceImage } from "../services/imageService";
 import {
@@ -176,16 +165,23 @@ const CreateRoute = () => {
   // Estado para imágenes de POIs
   const [poiImages, setPoiImages] = useState({});
 
-  // ========== REFS PARA DEBOUNCING ==========
+  // ========== REFS PARA DEBOUNCING Y CANCELACIÓN OPTIMIZADA ==========
   const countryDebounceRef = useRef(null);
   const cityDebounceRef = useRef(null);
   const poiDebounceRef = useRef(null);
-  const abortControllerRef = useRef(null);
+
+  // ✅ OPTIMIZACIÓN: Gestión centralizada de AbortControllers
+  const abortControllersRef = useRef({
+    countries: null,
+    cities: null,
+    pois: null,
+    submit: null,
+  });
 
   const navigate = useNavigate();
 
   // ============================================================================
-  // FUNCIÓN: Buscar países con debouncing (solo para filtrar mientras escribe)
+  // FUNCIÓN: Buscar países con debouncing OPTIMIZADO
   // ============================================================================
   const handleSearchCountries = useCallback(async (query) => {
     if (query.length < 2) {
@@ -193,11 +189,26 @@ const CreateRoute = () => {
       return;
     }
 
+    // ✅ OPTIMIZACIÓN: Cancelar request anterior si existe
+    if (abortControllersRef.current.countries) {
+      abortControllersRef.current.countries.abort();
+    }
+
+    // ✅ OPTIMIZACIÓN: Crear nuevo AbortController para este request
+    const controller = new AbortController();
+    abortControllersRef.current.countries = controller;
+
     setLoadingAll((prev) => ({ ...prev, countries: true }));
 
     try {
       const normalizedQuery = normalizeText(query);
-      const results = await searchLocations(query, { type: "country" });
+      const results = await searchLocations(query, {
+        type: "country",
+        signal: controller.signal, // ✅ OPTIMIZACIÓN: Pasar signal para cancelación
+      });
+
+      // ✅ OPTIMIZACIÓN: Verificar si el request fue cancelado
+      if (controller.signal.aborted) return;
 
       // Filtrar solo países
       const countries = results
@@ -223,11 +234,24 @@ const CreateRoute = () => {
         return acc;
       }, []);
 
-      setSuggestions((prev) => ({ ...prev, countries: uniqueCountries }));
+      // ✅ OPTIMIZACIÓN: Solo actualizar si no fue cancelado
+      if (!controller.signal.aborted) {
+        setSuggestions((prev) => ({ ...prev, countries: uniqueCountries }));
+      }
     } catch (error) {
-      console.error("Error searching countries:", error);
+      // ✅ OPTIMIZACIÓN: No mostrar error si fue cancelado intencionalmente
+      if (error.name !== "AbortError") {
+        console.error("Error searching countries:", error);
+      }
     } finally {
-      setLoadingAll((prev) => ({ ...prev, countries: false }));
+      // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
+      if (!controller.signal.aborted) {
+        setLoadingAll((prev) => ({ ...prev, countries: false }));
+      }
+      // Limpiar referencia si es el mismo controller
+      if (abortControllersRef.current.countries === controller) {
+        abortControllersRef.current.countries = null;
+      }
     }
   }, []);
 
@@ -240,6 +264,15 @@ const CreateRoute = () => {
   // ============================================================================
   const loadAllCitiesForCountry = useCallback(
     async (countryCode, countryName) => {
+      // ✅ OPTIMIZACIÓN: Cancelar request anterior de ciudades si existe
+      if (abortControllersRef.current.cities) {
+        abortControllersRef.current.cities.abort();
+      }
+
+      // ✅ OPTIMIZACIÓN: Crear nuevo AbortController
+      const controller = new AbortController();
+      abortControllersRef.current.cities = controller;
+
       setLoadingAll((prev) => ({ ...prev, cities: true }));
       setSuggestions((prev) => ({ ...prev, cities: [] }));
 
@@ -248,88 +281,106 @@ const CreateRoute = () => {
           `[loadAllCitiesForCountry] 🔍 Cargando sugerencias para ${countryName}...`
         );
 
-        // Estrategia mejorada: Más queries específicas para capturar MÁS pueblos
+        // ✅ OPTIMIZACIÓN: Reducir queries simultáneas para mejor rendimiento
         const queries = [
           // Ciudades principales
           searchLocations("city", {
             countryCode: countryCode.toLowerCase(),
-            limit: 50,
+            limit: 30, // ✅ Reducido de 50 a 30
+            signal: controller.signal,
           }),
           // Pueblos grandes
           searchLocations("town", {
             countryCode: countryCode.toLowerCase(),
-            limit: 50,
-          }),
-          // Pueblos pequeños
-          searchLocations("village", {
-            countryCode: countryCode.toLowerCase(),
-            limit: 50,
-          }),
-          // Municipios
-          searchLocations("municipality", {
-            countryCode: countryCode.toLowerCase(),
-            limit: 50,
+            limit: 30, // ✅ Reducido de 50 a 30
+            signal: controller.signal,
           }),
           // Búsqueda por nombre del país (captura más resultados)
           searchLocations(countryName, {
             countryCode: countryCode.toLowerCase(),
-            limit: 50,
+            limit: 40, // ✅ Reducido de 50 a 40
+            signal: controller.signal,
           }),
         ];
 
-        // Ejecutar todas las búsquedas en paralelo
+        // Ejecutar búsquedas en paralelo con cancelación
         const allResults = await Promise.all(queries);
+
+        // ✅ OPTIMIZACIÓN: Verificar cancelación antes de continuar
+        if (controller.signal.aborted) return;
+
         const combinedResults = allResults.flat();
 
         console.log(
           `[loadAllCitiesForCountry] 📊 Total resultados: ${combinedResults.length}`
         );
 
-        // Filtrar y formatear ciudades + localidades
-        const citiesAndLocalities = combinedResults
+        // ✅ OPTIMIZACIÓN: Filtrado más eficiente con Set para eliminar duplicados
+        const validTypes = new Set([
+          "city",
+          "town",
+          "village",
+          "municipality",
+          "locality",
+          "hamlet",
+        ]);
+
+        const addressTypes = new Set([
+          "city",
+          "town",
+          "village",
+          "municipality",
+        ]);
+
+        // Usar Map para eliminar duplicados de forma más eficiente
+        const citiesMap = new Map();
+
+        combinedResults
           .filter(
             (r) =>
               r &&
-              ([
-                "city",
-                "town",
-                "village",
-                "municipality",
-                "locality",
-                "hamlet",
-              ].includes(r.type) ||
-                r.addresstype === "city" ||
-                r.addresstype === "town" ||
-                r.addresstype === "village" ||
-                r.addresstype === "municipality" ||
+              (validTypes.has(r.type) ||
+                addressTypes.has(r.addresstype) ||
                 r.class === "place")
           )
-          .map((r) => ({
-            name:
+          .forEach((r) => {
+            const name =
               r.name ||
               r.address?.city ||
               r.address?.town ||
               r.address?.village ||
               r.address?.municipality ||
               r.address?.locality ||
-              r.display_name?.split(",")[0],
-            lat: parseFloat(r.lat),
-            lon: parseFloat(r.lon),
-            displayName: r.display_name,
-            type: r.type || r.addresstype,
-          }))
-          .filter((city) => city.name && city.lat && city.lon) // Eliminar inválidos
-          .filter(
-            (city, index, self) =>
-              // Eliminar duplicados por nombre
-              index === self.findIndex((c) => c.name === city.name)
-          )
-          .sort((a, b) => a.name.localeCompare(b.name, "es"));
+              r.display_name?.split(",")[0];
+
+            const lat = parseFloat(r.lat);
+            const lon = parseFloat(r.lon);
+
+            // Solo agregar si tiene datos válidos y no existe ya
+            if (name && !isNaN(lat) && !isNaN(lon) && !citiesMap.has(name)) {
+              citiesMap.set(name, {
+                name,
+                lat,
+                lon,
+                displayName: r.display_name,
+                type: r.type || r.addresstype,
+              });
+            }
+          });
+
+        // Convertir Map a Array y ordenar
+        const citiesAndLocalities = Array.from(citiesMap.values()).sort(
+          (a, b) => a.name.localeCompare(b.name, "es")
+        );
 
         console.log(
           `[loadAllCitiesForCountry] ✅ Lugares únicos: ${citiesAndLocalities.length}`
         );
-        setSuggestions((prev) => ({ ...prev, cities: citiesAndLocalities }));
+
+        // ✅ OPTIMIZACIÓN: Solo actualizar si no fue cancelado
+        if (!controller.signal.aborted) {
+          setSuggestions((prev) => ({ ...prev, cities: citiesAndLocalities }));
+        }
 
         // Mensaje informativo en lugar de error
         if (citiesAndLocalities.length === 0) {
@@ -338,10 +389,22 @@ const CreateRoute = () => {
           );
         }
       } catch (error) {
-        console.error("Error loading cities:", error);
-        setError("Error al cargar sugerencias. Puedes buscar manualmente.");
+        // ✅ OPTIMIZACIÓN: No mostrar error si fue cancelado
+        if (error.name !== "AbortError") {
+          console.error("Error loading cities:", error);
+          if (!controller.signal.aborted) {
+            setError("Error al cargar sugerencias. Puedes buscar manualmente.");
+          }
+        }
       } finally {
-        setLoadingAll((prev) => ({ ...prev, cities: false }));
+        // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
+        if (!controller.signal.aborted) {
+          setLoadingAll((prev) => ({ ...prev, cities: false }));
+        }
+        // Limpiar referencia si es el mismo controller
+        if (abortControllersRef.current.cities === controller) {
+          abortControllersRef.current.cities = null;
+        }
       }
     },
     []
@@ -361,38 +424,70 @@ const CreateRoute = () => {
   }, []);
 
   // ============================================================================
-  // FUNCIÓN: Al seleccionar categoría POI → Cargar TODOS los POIs automáticamente
+  // FUNCIÓN: Cargar POIs OPTIMIZADA con cancelación y caché básico
   // ============================================================================
   const loadAllPOIsForCategory = useCallback(async (category, coordinates) => {
     if (!coordinates) return;
+
+    // ✅ OPTIMIZACIÓN: Cancelar request anterior de POIs si existe
+    if (abortControllersRef.current.pois) {
+      abortControllersRef.current.pois.abort();
+    }
+
+    // ✅ OPTIMIZACIÓN: Crear nuevo AbortController
+    const controller = new AbortController();
+    abortControllersRef.current.pois = controller;
 
     setLoadingAll((prev) => ({ ...prev, pois: true }));
     setSuggestions((prev) => ({ ...prev, pois: [] }));
     setError(""); // Limpiar errores previos
 
     try {
-      // Buscar todos los POIs de la categoría en un radio de 10km
+      // ✅ OPTIMIZACIÓN: Reducir radio de búsqueda para mejor rendimiento
       const pois = await searchPointsOfInterest(
         coordinates.lat,
         coordinates.lon,
         category,
-        10000 // 10km de radio
+        5000, // ✅ Reducido de 10km a 5km para mejor rendimiento
+        controller.signal // ✅ Pasar signal para cancelación
       );
 
+      // ✅ OPTIMIZACIÓN: Verificar cancelación antes de continuar
+      if (controller.signal.aborted) return;
+
       if (pois.length === 0) {
-        setError(
-          "⏳ No se encontraron puntos de interés. Puede que el servidor esté ocupado. Intenta de nuevo en 1 minuto."
-        );
+        if (!controller.signal.aborted) {
+          setError(
+            "⏳ No se encontraron puntos de interés. Puede que el servidor esté ocupado. Intenta de nuevo en 1 minuto."
+          );
+        }
       } else {
-        setSuggestions((prev) => ({ ...prev, pois }));
+        // ✅ OPTIMIZACIÓN: Limitar número de POIs para mejor rendimiento
+        const limitedPois = pois.slice(0, 50); // ✅ Máximo 50 POIs
+
+        if (!controller.signal.aborted) {
+          setSuggestions((prev) => ({ ...prev, pois: limitedPois }));
+        }
       }
     } catch (error) {
-      console.error("Error loading POIs:", error);
-      setError(
-        "❌ Error al cargar puntos de interés. Por favor, espera 1-2 minutos e intenta de nuevo."
-      );
+      // ✅ OPTIMIZACIÓN: No mostrar error si fue cancelado
+      if (error.name !== "AbortError") {
+        console.error("Error loading POIs:", error);
+        if (!controller.signal.aborted) {
+          setError(
+            "❌ Error al cargar puntos de interés. Por favor, espera 1-2 minutos e intenta de nuevo."
+          );
+        }
+      }
     } finally {
-      setLoadingAll((prev) => ({ ...prev, pois: false }));
+      // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
+      if (!controller.signal.aborted) {
+        setLoadingAll((prev) => ({ ...prev, pois: false }));
+      }
+      // Limpiar referencia si es el mismo controller
+      if (abortControllersRef.current.pois === controller) {
+        abortControllersRef.current.pois = null;
+      }
     }
   }, []);
 
@@ -600,6 +695,31 @@ const CreateRoute = () => {
   }, [searchState.poiQuery]);
 
   // ============================================================================
+  // EFFECT: Cleanup OPTIMIZADO - Cancelar todos los requests al desmontar
+  // ============================================================================
+  useEffect(() => {
+    return () => {
+      // ✅ OPTIMIZACIÓN: Cancelar todos los requests pendientes al desmontar
+      Object.values(abortControllersRef.current).forEach((controller) => {
+        if (controller) {
+          controller.abort();
+        }
+      });
+
+      // ✅ OPTIMIZACIÓN: Limpiar todos los timers de debounce
+      if (countryDebounceRef.current) {
+        clearTimeout(countryDebounceRef.current);
+      }
+      if (cityDebounceRef.current) {
+        clearTimeout(cityDebounceRef.current);
+      }
+      if (poiDebounceRef.current) {
+        clearTimeout(poiDebounceRef.current);
+      }
+    };
+  }, []);
+
+  // ============================================================================
   // HANDLERS: Selección de sugerencias
   // ============================================================================
   const handleSelectCountry = (country) => {
@@ -652,7 +772,7 @@ const CreateRoute = () => {
   };
 
   // ============================================================================
-  // HANDLER: Submit
+  // HANDLER: Submit OPTIMIZADO
   // ============================================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -668,29 +788,44 @@ const CreateRoute = () => {
       return;
     }
 
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+    // ✅ OPTIMIZACIÓN: Cancelar request anterior de submit si existe
+    if (abortControllersRef.current.submit) {
+      abortControllersRef.current.submit.abort();
     }
 
+    // ✅ OPTIMIZACIÓN: Usar el nuevo sistema de AbortControllers
     const controller = new AbortController();
-    abortControllerRef.current = controller;
+    abortControllersRef.current.submit = controller;
 
     setIsSubmitting(true);
     setError("");
 
     try {
       await createRoute(formState, controller.signal);
-      navigate("/profile");
+
+      // ✅ OPTIMIZACIÓN: Solo navegar si no fue cancelado
+      if (!controller.signal.aborted) {
+        navigate("/profile");
+      }
     } catch (error) {
       if (error.name !== "AbortError") {
         console.error("Error creating route:", error);
-        setError(
-          error.message ||
+        if (!controller.signal.aborted) {
+          setError(
+            error.message ||
             "No se pudo crear la ruta. Por favor, intenta de nuevo."
-        );
+          );
+        }
       }
     } finally {
-      setIsSubmitting(false);
+      // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
+      if (!controller.signal.aborted) {
+        setIsSubmitting(false);
+      }
+      // Limpiar referencia si es el mismo controller
+      if (abortControllersRef.current.submit === controller) {
+        abortControllersRef.current.submit = null;
+      }
     }
   };
 
@@ -802,57 +937,8 @@ const CreateRoute = () => {
       {/* Header */}
       <div className="mb-4">
         <h1 className="display-4 fw-bold mb-2">Crear Nueva Ruta</h1>
-        <p className="text-muted">
-          Usa el autocompletado para seleccionar ubicaciones y puntos de interés
-        </p>
-      </div>
-      {/* Cards de Países Populares */}
-      {!formState.country && (
-        <div className="mb-4">
-          <h5 className="fw-semibold mb-3">🌍 Países Más Visitados</h5>
-          <div className="row g-3">
-            {POPULAR_COUNTRIES.map((country) => (
-              <div key={country.code} className="col-md-3 col-sm-6">
-                <div
-                  className="card h-100 shadow-sm"
-                  style={{
-                    cursor: "pointer",
-                    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                  }}
-                  onClick={() => handleSelectCountry(country)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-5px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 8px 20px rgba(0,0,0,0.15)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "";
-                  }}
-                >
-                  <img
-                    src={country.image}
-                    className="card-img-top"
-                    alt={country.name}
-                    style={{ height: "120px", objectFit: "cover" }}
-                  />
-                  <div className="card-body text-center p-2">
-                    <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
-                    <small className="text-muted">
-                      {country.visitors} visitantes/año
-                    </small>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <hr className="my-4" />
-          <p className="text-center text-muted small">
-            O busca cualquier otro país:
-          </p>
-        </div>
-      )}
 
+      </div>
       {/* Formulario */}
       <div className="row">
         <div className="col-12">
@@ -909,6 +995,7 @@ const CreateRoute = () => {
                         style={{ right: 12, top: 12 }}
                       />
                     )}
+
                   </div>
 
                   {/* Sugerencias de países */}
@@ -947,63 +1034,7 @@ const CreateRoute = () => {
                   )}
                 </div>
 
-                {/* Cards de Ciudades Populares del País Seleccionado */}
-                {formState.country &&
-                  !formState.city &&
-                  POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
-                    <div className="mb-4">
-                      <h5 className="fw-semibold mb-3">
-                        🏙️ Ciudades Más Visitadas de {formState.country}
-                      </h5>
-                      <div className="row g-3">
-                        {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map(
-                          (city) => (
-                            <div key={city.name} className="col-md-3 col-sm-6">
-                              <div
-                                className="card h-100 shadow-sm"
-                                style={{
-                                  cursor: "pointer",
-                                  transition:
-                                    "transform 0.2s ease, box-shadow 0.2s ease",
-                                }}
-                                onClick={() => handleSelectCity(city)}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform =
-                                    "translateY(-5px)";
-                                  e.currentTarget.style.boxShadow =
-                                    "0 8px 20px rgba(0,0,0,0.15)";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform =
-                                    "translateY(0)";
-                                  e.currentTarget.style.boxShadow = "";
-                                }}
-                              >
-                                <img
-                                  src={city.image}
-                                  className="card-img-top"
-                                  alt={city.name}
-                                  style={{
-                                    height: "100px",
-                                    objectFit: "cover",
-                                  }}
-                                />
-                                <div className="card-body text-center p-2">
-                                  <h6 className="card-title mb-0 fw-bold small">
-                                    {city.name}
-                                  </h6>
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                      <hr className="my-4" />
-                      <p className="text-center text-muted small">
-                        O busca otra ciudad/pueblo:
-                      </p>
-                    </div>
-                  )}
+
 
                 {/* Ciudad/Localidad con Autocompletado */}
                 <div className="mb-3 position-relative">
@@ -1181,6 +1212,116 @@ const CreateRoute = () => {
                   )}
                 </div>
 
+                {/* Cards de Países Populares */}
+                {!formState.country && (
+                  <div className="mb-4">
+                    <h5 className="fw-semibold mb-3">🌍 Países Más Visitados</h5>
+                    <div className="row g-3">
+                      {POPULAR_COUNTRIES.map((country) => (
+                        <div key={country.code} className="col-md-3 col-sm-6">
+                          <div
+                            className="card h-100 shadow-sm"
+                            style={{
+                              cursor: "pointer",
+                              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                            }}
+                            onClick={() => handleSelectCountry(country)}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = "translateY(-5px)";
+                              e.currentTarget.style.boxShadow =
+                                "0 8px 20px rgba(0,0,0,0.15)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.boxShadow = "";
+                            }}
+                          >
+                            <img
+                              src={country.image}
+                              className="card-img-top"
+                              alt={country.name}
+                              style={{ height: "120px", objectFit: "cover" }}
+                            />
+                            <div className="card-body text-center p-2">
+                              <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
+                              <small className="text-muted">
+                                {country.visitors} visitantes/año
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <hr className="my-4" />
+                    <p className="text-center text-muted small">
+                      O busca cualquier otro país:
+                    </p>
+                  </div>
+                )}
+
+                {/* Cards de Ciudades Populares del País Seleccionado */}
+                {formState.country &&
+                  !formState.city &&
+                  POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
+                    <div className="mb-4">
+                      <h5 className="fw-semibold mb-3">
+                        🏙️ Ciudades Más Visitadas de {formState.country}
+                      </h5>
+                      <div className="row g-3">
+                        {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map(
+                          (city) => (
+                            <div key={city.name} className="col-md-3 col-sm-6">
+                              <div
+                                className="card h-100 shadow-sm"
+                                style={{
+                                  cursor: "pointer",
+                                  transition:
+                                    "transform 0.2s ease, box-shadow 0.2s ease",
+                                }}
+                                onClick={() => handleSelectCity(city)}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.transform =
+                                    "translateY(-5px)";
+                                  e.currentTarget.style.boxShadow =
+                                    "0 8px 20px rgba(0,0,0,0.15)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.transform =
+                                    "translateY(0)";
+                                  e.currentTarget.style.boxShadow = "";
+                                }}
+                              >
+                                <img
+                                  src={city.image}
+                                  className="card-img-top"
+                                  alt={city.name}
+                                  style={{
+                                    height: "100px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                                <div className="card-body text-center p-2">
+                                  <h6 className="card-title mb-0 fw-bold small">
+                                    {city.name}
+                                  </h6>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                      <hr className="my-4" />
+                      <p className="text-center text-muted small">
+                        O busca otra ciudad/pueblo:
+                      </p>
+                    </div>
+                  )}
+
+
+
+
+
+
                 {/* Puntos de Interés - MÚLTIPLES SELECCIONES CON CARDS */}
                 <div className="mb-3">
                   <label className="form-label fw-semibold">
@@ -1295,11 +1436,10 @@ const CreateRoute = () => {
                           <button
                             key={category.value}
                             type="button"
-                            className={`btn ${
-                              searchState.poiType === category.value
+                            className={`btn ${searchState.poiType === category.value
                                 ? `btn-${category.color}`
                                 : `btn-outline-${category.color}`
-                            } btn-sm d-flex align-items-center gap-2`}
+                              } btn-sm d-flex align-items-center gap-2`}
                             onClick={() =>
                               setSearchState((prev) => ({
                                 ...prev,
@@ -1433,11 +1573,10 @@ const CreateRoute = () => {
                                   className="col-md-6 col-lg-4 col-xl-3"
                                 >
                                   <div
-                                    className={`card h-100 shadow-sm ${
-                                      isSelected
+                                    className={`card h-100 shadow-sm ${isSelected
                                         ? "border-success border-3"
                                         : ""
-                                    }`}
+                                      }`}
                                     style={{
                                       cursor: "pointer",
                                       transition: "all 0.3s ease",
@@ -1482,7 +1621,7 @@ const CreateRoute = () => {
                                           // Si la imagen falla, usar la imagen por defecto
                                           e.target.src =
                                             DEFAULT_IMAGES[
-                                              searchState.poiType
+                                            searchState.poiType
                                             ] || DEFAULT_IMAGES.attraction;
                                         }}
                                       />
@@ -1666,11 +1805,10 @@ const CreateRoute = () => {
                                       <button
                                         key={page}
                                         type="button"
-                                        className={`btn ${
-                                          page === currentPage
+                                        className={`btn ${page === currentPage
                                             ? "btn-primary"
                                             : "btn-outline-primary"
-                                        }`}
+                                          }`}
                                         onClick={() => handlePageChange(page)}
                                         style={{ minWidth: "40px" }}
                                       >
@@ -1738,9 +1876,9 @@ const CreateRoute = () => {
                         center={
                           formState.coordinates
                             ? [
-                                formState.coordinates.lat,
-                                formState.coordinates.lon,
-                              ]
+                              formState.coordinates.lat,
+                              formState.coordinates.lon,
+                            ]
                             : [40.4168, -3.7038]
                         }
                         pois={suggestions.pois}
