@@ -1,34 +1,35 @@
 /**
- * PÁGINA: ROUTE DETAIL
+ * PAGE: ROUTE DETAIL
  * 
- * Vista simplificada y estética del detalle de una ruta
- * Solo muestra:
- * - Sistema de votación elegante
- * - Card del mapa con todas las funcionalidades
+ * Simplified and aesthetic view of route details
+ * Only shows:
+ * - Elegant voting system
+ * - Map card with all functionalities
  */
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, Heart } from "lucide-react";
+import { ArrowLeft, Star, Heart, Check } from "lucide-react";
 import Loader from "../components/Loader";
 import RouteMapCard from "../components/Profile/RouteMapCard";
 import StarRating from "../components/StarRating";
 import useAuth from "../hooks/useAuth";
+import { NAVBAR_ICON_SIZE } from "../utils/constants";
 
-// Servicios
+// Services
 import { getRouteDetail } from "../services/routesService";
 import { voteRoute, getUserVotes } from "../services/votesService";
 import { addFavorite, removeFavorite, getUserFavorites } from "../services/favoritesService";
 
 const RouteDetail = () => {
   // ==================== HOOKS ====================
-  
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // ==================== ESTADOS ====================
-  
+  // ==================== STATE ====================
+
   const [route, setRoute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,8 +38,8 @@ const RouteDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
-  // ==================== EFECTOS ====================
-  
+  // ==================== EFFECTS ====================
+
   useEffect(() => {
     if (!id || !user) return;
 
@@ -48,8 +49,8 @@ const RouteDetail = () => {
     return () => controller.abort();
   }, [id, user]);
 
-  // ==================== FUNCIONES ====================
-  
+  // ==================== FUNCTIONS ====================
+
   const fetchData = async (signal) => {
     try {
       setLoading(true);
@@ -71,8 +72,8 @@ const RouteDetail = () => {
 
     } catch (err) {
       if (err.name !== 'AbortError') {
-        console.error("Error al cargar datos:", err);
-        setError(err.message || "No se pudo cargar la ruta");
+        console.error("Error loading data:", err);
+        setError(err.message || "Could not load route");
       }
     } finally {
       setLoading(false);
@@ -84,12 +85,12 @@ const RouteDetail = () => {
       setIsVoting(true);
       await voteRoute(parseInt(id), rating);
       setUserVote(rating);
-      
+
       const updatedRoute = await getRouteDetail(id);
       setRoute(updatedRoute);
     } catch (err) {
-      console.error("Error al votar:", err);
-      alert(err.message || "No se pudo registrar tu voto");
+      console.error("Error voting:", err);
+      alert(err.message || "Could not register your vote");
     } finally {
       setIsVoting(false);
     }
@@ -107,15 +108,15 @@ const RouteDetail = () => {
         setIsFavorite(true);
       }
     } catch (err) {
-      console.error("Error con favoritos:", err);
-      alert(err.message || "No se pudo actualizar favoritos");
+      console.error("Error with favorites:", err);
+      alert(err.message || "Could not update favorites");
     } finally {
       setIsTogglingFavorite(false);
     }
   };
 
-  // ==================== RENDERIZADO ====================
-  
+  // ==================== RENDERING ====================
+
   if (loading) {
     return (
       <div className="container py-5">
@@ -131,10 +132,10 @@ const RouteDetail = () => {
       <div className="container py-5">
         <div className="alert alert-danger">
           <h4>Error</h4>
-          <p>{error || "Ruta no encontrada"}</p>
+          <p>{error || "Route not found"}</p>
           <button className="btn btn-danger mt-3" onClick={() => navigate(-1)}>
             <ArrowLeft size={18} className="me-2" />
-            Volver
+            Go back
           </button>
         </div>
       </div>
@@ -145,26 +146,26 @@ const RouteDetail = () => {
 
   return (
     <div className="container py-5">
-      {/* Botón volver minimalista */}
+      {/* Minimalist back button */}
       <button
         className="btn btn-link text-muted mb-3 p-0"
         onClick={() => navigate(-1)}
         style={{ textDecoration: 'none' }}
       >
         <ArrowLeft size={18} className="me-2" />
-        Volver
+        Go back
       </button>
 
-      {/* Panel de votación flotante y elegante */}
+      {/* Elegant floating voting panel */}
       <div className="card shadow-lg border-0 mb-4" style={{ borderRadius: '15px' }}>
         <div className="card-body p-4">
           <div className="row align-items-center">
-            {/* Puntuación visual grande */}
+            {/* Large visual rating */}
             <div className="col-md-4 text-center border-end">
               <div className="mb-3">
-                <div 
-                  className="display-3 fw-bold mb-2" 
-                  style={{ 
+                <div
+                  className="display-3 fw-bold mb-2"
+                  style={{
                     color: '#ffc107',
                     textShadow: '0 2px 4px rgba(255,193,7,0.2)'
                   }}
@@ -183,17 +184,24 @@ const RouteDetail = () => {
                   ))}
                 </div>
                 <p className="text-muted mb-0">
-                  <strong>{route.total_votes || 0}</strong> {route.total_votes === 1 ? 'valoración' : 'valoraciones'}
+                  <strong>{route.total_votes || 0}</strong> {route.total_votes === 1 ? 'rating' : 'ratings'}
                 </p>
               </div>
             </div>
 
-            {/* Sistema de votación */}
+            {/* Voting system */}
             <div className="col-md-5 text-center py-3">
               {!isAuthor ? (
                 <>
                   <h5 className="mb-3 text-muted">
-                    {userVote ? "✓ Tu valoración" : "Valora esta ruta"}
+                    {userVote ? (
+                      <>
+                        <Check size={NAVBAR_ICON_SIZE} />
+                        &nbsp; Your rating
+                      </>
+                    ) : (
+                      "Rate this route"
+                    )}
                   </h5>
                   <div className="d-flex justify-content-center">
                     <StarRating
@@ -202,30 +210,24 @@ const RouteDetail = () => {
                       disabled={isVoting}
                     />
                   </div>
-                  {userVote && (
-                    <small className="text-success d-block mt-2">
-                      Has dado {userVote} {userVote === 1 ? 'estrella' : 'estrellas'}
-                    </small>
-                  )}
                 </>
               ) : (
                 <div className="alert alert-light border-0 mb-0">
                   <p className="mb-0 text-muted">
-                    <small>Esta es tu ruta, no puedes votarla</small>
+                    <small>You cannot rate your own routes</small>
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Botón de favoritos */}
+            {/* Favorites button */}
             <div className="col-md-3 text-center">
               <button
-                className={`btn btn-lg w-100 ${
-                  isFavorite ? "btn-danger" : "btn-outline-danger"
-                }`}
+                className={`btn btn-lg w-100 ${isFavorite ? "btn-danger" : "btn-outline-danger"
+                  }`}
                 onClick={toggleFavorite}
                 disabled={isTogglingFavorite}
-                style={{ 
+                style={{
                   borderRadius: '12px',
                   transition: 'all 0.3s ease',
                 }}
@@ -237,19 +239,16 @@ const RouteDetail = () => {
                     size={24}
                     className="me-2"
                     fill={isFavorite ? "currentColor" : "none"}
-                    style={{ 
+                    style={{
                       transition: 'all 0.3s ease',
                       transform: isFavorite ? 'scale(1.1)' : 'scale(1)'
                     }}
                   />
                 )}
-                <div className="d-block">
+                <div className="d-flex align-items-center justify-content-center flex-column">
                   <div className="fw-bold">
-                    {isFavorite ? "En favoritos" : "Favorito"}
+                    {isFavorite ? "In Favorites" : "Add to Favorites"}
                   </div>
-                  <small style={{ fontSize: '0.75rem', opacity: 0.8 }}>
-                    {isFavorite ? "Quitar" : "Agregar"}
-                  </small>
                 </div>
               </button>
             </div>
@@ -257,12 +256,12 @@ const RouteDetail = () => {
         </div>
       </div>
 
-      {/* Card del mapa - Reutilizando RouteMapCard */}
+      {/* Map card - Reusing RouteMapCard */}
       <div className="row">
         <RouteMapCard
           route={route}
-          type="detail" // Tipo especial para vista de detalle (mapa más grande, color azul)
-          onDelete={null} // Sin botón de eliminar
+          type="detail" // Special type for detail view (larger map, blue color)
+          onDelete={null} // No delete button
         />
       </div>
     </div>

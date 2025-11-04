@@ -12,8 +12,8 @@
  * - Responsive design
  */
 
-import React, { useState, useEffect } from "react";
-import { Trophy, TrendingUp, Star, Award } from "lucide-react";
+import { useState, useEffect } from "react";
+import { TrendingUp, Star, Award } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import Loader from "../components/Loader";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
