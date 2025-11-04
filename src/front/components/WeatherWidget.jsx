@@ -15,35 +15,56 @@ const WeatherWidget = ({ weather, city, loading, onChangeCity, defaultOpen = fal
   const [shouldPulse, setShouldPulse] = useState(false);
   const [pulseKey, setPulseKey] = useState(0);
   const [lastTrigger, setLastTrigger] = useState(null);
+  const [wasClosedManually, setWasClosedManually] = useState(false);
 
-  // Trigger pulse animation when triggerAttention changes
   useEffect(() => {
-    // Only trigger if triggerAttention actually changed and widget is closed
     if (triggerAttention !== lastTrigger && !open) {
       setLastTrigger(triggerAttention);
-      setShouldPulse(false); // Reset first
-      setPulseKey(prev => prev + 1); // Change key to force re-animation
+      setShouldPulse(false);
+      setPulseKey(prev => prev + 1);
       setTimeout(() => {
         setShouldPulse(true);
-      }, 10); // Small delay to ensure animation restarts
+      }, 10);
       const timer = setTimeout(() => {
         setShouldPulse(false);
-      }, 1900); // Animation lasts 1.9 seconds (0.6s * 3 repeats + buffer)
+      }, 1900);
       return () => clearTimeout(timer);
     }
-  }, [triggerAttention, lastTrigger]); // Removed 'open' from dependencies
+  }, [triggerAttention, lastTrigger]);
 
-  // Stop animation when widget opens
   useEffect(() => {
     if (open) {
       setShouldPulse(false);
     }
   }, [open]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if ((window.innerWidth < 992 || window.innerHeight < 515) && open) {
+        setOpen(false);
+      } else if (window.innerWidth >= 992 && window.innerHeight >= 515 && !open && !wasClosedManually) {
+        setOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [open, wasClosedManually]);
+
   const current = weather?.current;
   const forecast3 = weather?.forecast?.slice(0, 3) || [];
 
-  const handleToggle = () => setOpen((prev) => !prev);
+  const handleToggle = () => {
+    setOpen((prev) => {
+      const newState = !prev;
+      if (!newState) {
+        setWasClosedManually(true);
+      } else {
+        setWasClosedManually(false);
+      }
+      return newState;
+    });
+  };
 
   const handleSubmitCity = (e) => {
     e.preventDefault();
