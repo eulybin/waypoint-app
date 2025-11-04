@@ -280,7 +280,7 @@ const Profile = () => {
                 <MapPin size={64} className="text-muted mb-3" />
                 <h4 className="text-muted mb-2">No created routes</h4>
                 <p className="text-muted">
-                  Create your first route to start your adventure!
+                  Create your first route and start your adventure!
                 </p>
               </div>
             )}

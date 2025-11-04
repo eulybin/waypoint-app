@@ -10,12 +10,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  Building2
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import WeatherWidget from "../components/WeatherWidget";
 import { fetchWeather } from "../services/weatherService";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE } from "../utils/constants";
+import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE, WEATHER_WIDGET_Z_INDEX, WEATHER_WIDGET_OPACITY, CLOSE_WEATHER_ICON_SIZE, STANDARD_ICON_SIZE } from "../utils/constants";
 
 const Explore = () => {
   // ========== STATES ==========
@@ -189,7 +190,7 @@ const Explore = () => {
       {/* FIXED WEATHER WIDGET - TOP RIGHT */}
       <div
         className="position-fixed top-0 end-0 mt-4 me-4"
-        style={{ zIndex: 999, opacity: 0.90 }}
+        style={{ zIndex: WEATHER_WIDGET_Z_INDEX, opacity: WEATHER_WIDGET_OPACITY }}
       >
         <WeatherWidget
           weather={weather}
@@ -214,7 +215,7 @@ const Explore = () => {
         <div className="col-md-8 mx-auto">
           <div className="input-group input-group-lg">
             <span className="input-group-text">
-              <Search size={24} />
+              <Search size={NAVBAR_ICON_SIZE} />
             </span>
             <input
               type="text"
@@ -241,7 +242,7 @@ const Explore = () => {
           <h5 className="mb-3">Active filters:</h5>
           <div className="d-flex gap-2 flex-wrap">
             {selectedCountry && (
-              <span className="badge bg-primary fs-6">
+              <span className="badge bg-primary fs-6 d-inline-flex align-items-center">
                 Country: {selectedCountry.name}
                 <button
                   className="btn-close btn-close-white ms-2"
@@ -250,7 +251,7 @@ const Explore = () => {
               </span>
             )}
             {selectedCity && (
-              <span className="badge bg-info fs-6">
+              <span className="badge bg-info fs-6 d-inline-flex align-items-center">
                 City: {selectedCity}
                 <button
                   className="btn-close btn-close-white ms-2"
@@ -295,7 +296,10 @@ const Explore = () => {
       {/* CITIES SECTION (Only if country is selected) */}
       {selectedCountry && citiesForSelectedCountry.length > 0 && (
         <section className="mb-5">
-          <h2 className="mb-4">Cities in {selectedCountry.name}</h2>
+          <h2 className="mb-4 d-flex align-items-center gap-2">
+            <Building2 size={CLOSE_WEATHER_ICON_SIZE} />
+            Cities in {selectedCountry.name}
+          </h2>
           <div className="row g-3">
             {citiesForSelectedCountry.map((city) => (
               <div key={city.name} className="col-md-3 col-sm-6">
@@ -350,7 +354,7 @@ const Explore = () => {
                   onClick={goToPrevPage}
                   disabled={currentPage === 1}
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={STANDARD_ICON_SIZE} />
                   Previous
                 </button>
 
@@ -378,7 +382,7 @@ const Explore = () => {
                   disabled={currentPage === totalPages}
                 >
                   Next
-                  <ChevronRight size={20} />
+                  <ChevronRight size={STANDARD_ICON_SIZE} />
                 </button>
               </div>
             )}
