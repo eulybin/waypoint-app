@@ -1,5 +1,5 @@
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
-import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
+import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { normalizeText } from "../utils/constants";
 import { useState, useEffect } from "react";
 import {

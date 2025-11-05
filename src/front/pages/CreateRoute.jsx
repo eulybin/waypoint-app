@@ -28,7 +28,7 @@ import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import { STANDARD_ICON_SIZE } from "../utils/constants";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
-import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
+import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
 import { normalizeText } from "../utils/constants";
 
@@ -1437,8 +1437,8 @@ const CreateRoute = () => {
                             key={category.value}
                             type="button"
                             className={`btn ${searchState.poiType === category.value
-                                ? `btn-${category.color}`
-                                : `btn-outline-${category.color}`
+                              ? `btn-${category.color}`
+                              : `btn-outline-${category.color}`
                               } btn-sm d-flex align-items-center gap-2`}
                             onClick={() =>
                               setSearchState((prev) => ({
@@ -1574,8 +1574,8 @@ const CreateRoute = () => {
                                 >
                                   <div
                                     className={`card h-100 shadow-sm ${isSelected
-                                        ? "border-success border-3"
-                                        : ""
+                                      ? "border-success border-3"
+                                      : ""
                                       }`}
                                     style={{
                                       cursor: "pointer",
@@ -1806,8 +1806,8 @@ const CreateRoute = () => {
                                         key={page}
                                         type="button"
                                         className={`btn ${page === currentPage
-                                            ? "btn-primary"
-                                            : "btn-outline-primary"
+                                          ? "btn-primary"
+                                          : "btn-outline-primary"
                                           }`}
                                         onClick={() => handlePageChange(page)}
                                         style={{ minWidth: "40px" }}
