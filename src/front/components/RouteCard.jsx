@@ -124,7 +124,7 @@ const RouteCard = ({ route }) => {
           </div>
           <span className="text-muted small">
             {route.average_rating?.toFixed(1) || "0.0"} (
-            {route.total_votes || 0} votes)
+            {route.total_votes || 0} {route.total_votes === 1 ? "vote" : "votes"})
           </span>
         </div>
 

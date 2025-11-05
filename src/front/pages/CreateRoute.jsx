@@ -779,12 +779,12 @@ const CreateRoute = () => {
 
     // Validación
     if (formState.points_of_interest.length === 0) {
-      setError("Debes agregar al menos un punto de interés");
+      setError("You must add at least one point of interest");
       return;
     }
 
     if (!formState.country || !formState.city) {
-      setError("Debes seleccionar un país y una ciudad");
+      setError("You must select a country and a city");
       return;
     }
 
@@ -813,7 +813,7 @@ const CreateRoute = () => {
         if (!controller.signal.aborted) {
           setError(
             error.message ||
-            "No se pudo crear la ruta. Por favor, intenta de nuevo."
+            "Could not create the route. Please try again."
           );
         }
       }
@@ -936,7 +936,7 @@ const CreateRoute = () => {
     <div className="container-fluid p-4">
       {/* Header */}
       <div className="mb-4">
-        <h1 className="display-4 fw-bold mb-2">Crear Nueva Ruta</h1>
+        <h1 className="display-4 fw-bold mb-2">Create New Route</h1>
 
       </div>
       {/* Formulario */}
@@ -948,9 +948,9 @@ const CreateRoute = () => {
                 {/* País con Autocompletado */}
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
-                    País *{" "}
+                    Country *{" "}
                     <span className="text-muted small">
-                      (busca y selecciona)
+                      (search and select)
                     </span>
                   </label>
                   <div className="position-relative">
@@ -962,7 +962,7 @@ const CreateRoute = () => {
                     <input
                       type="text"
                       className="form-control ps-5"
-                      placeholder="Buscar país... Ej: España"
+                      placeholder="Search country... Ex: Spain"
                       value={searchState.countryQuery}
                       onChange={(e) =>
                         setSearchState((prev) => ({
@@ -1039,21 +1039,21 @@ const CreateRoute = () => {
                 {/* Ciudad/Localidad con Autocompletado */}
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
-                    Ciudad/Localidad *{" "}
+                    City/Town *{" "}
                     {loadingAll.cities && (
                       <span className="text-primary">
                         <Loader
                           className="d-inline-block animate-spin"
                           size={16}
                         />{" "}
-                        Cargando ciudades y localidades...
+                        Loading cities and towns...
                       </span>
                     )}
                     {!loadingAll.cities &&
                       formState.country &&
                       suggestions.cities.length > 0 && (
                         <span className="text-success small ms-2">
-                          ({suggestions.cities.length} opciones disponibles)
+                          ({suggestions.cities.length} available options)
                         </span>
                       )}
                   </label>
@@ -1068,12 +1068,12 @@ const CreateRoute = () => {
                       className="form-control ps-5"
                       placeholder={
                         !formState.country
-                          ? "Primero selecciona un país"
+                          ? "First select a country"
                           : loadingAll.cities
-                            ? "Buscando..."
+                            ? "Searching..."
                             : suggestions.cities.length > 0
-                              ? "Escribe para buscar más lugares..."
-                              : "Escribe el nombre del pueblo/ciudad (ej: Carmona)"
+                              ? "Type to search more places..."
+                              : "Type the name of the town/city (ex: Carmona)"
                       }
                       value={searchState.cityQuery}
                       onChange={(e) =>
@@ -1109,11 +1109,11 @@ const CreateRoute = () => {
                     !formState.city &&
                     searchState.cityQuery.length === 0 && (
                       <div className="alert alert-info mt-2 mb-0 py-2 small">
-                        💡 <strong>Escribe el nombre</strong> del pueblo o
-                        ciudad que buscas
+                        💡 <strong>Type the name</strong> of the town or
+                        city you are looking for
                         <br />
                         <span className="text-muted">
-                          Ejemplos: Carmona, Dos Hermanas, Utrera...
+                          Examples: Carmona, Dos Hermanas, Utrera...
                         </span>
                       </div>
                     )}
@@ -1123,7 +1123,7 @@ const CreateRoute = () => {
                     loadingAll.cities &&
                     searchState.cityQuery.length >= 3 && (
                       <div className="alert alert-primary mt-2 mb-0 py-2 small">
-                        🔍 Buscando "{searchState.cityQuery}" en{" "}
+                        🔍 Searching "{searchState.cityQuery}" in{" "}
                         {formState.country}...
                       </div>
                     )}
@@ -1134,10 +1134,10 @@ const CreateRoute = () => {
                     suggestions.cities.length === 0 &&
                     searchState.cityQuery.length >= 3 && (
                       <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                        ⚠️ No se encontró "{searchState.cityQuery}".
+                        ⚠️ "{searchState.cityQuery}" not found.
                         <br />
                         <span className="text-muted">
-                          Intenta con otro nombre o verifica la ortografía.
+                          Try another name or check the spelling.
                         </span>
                       </div>
                     )}
@@ -1173,13 +1173,13 @@ const CreateRoute = () => {
                                   {city.type && (
                                     <span className="badge bg-secondary text-white small">
                                       {city.type === "city"
-                                        ? "Ciudad"
+                                        ? "City"
                                         : city.type === "town"
-                                          ? "Pueblo"
+                                          ? "Town"
                                           : city.type === "village"
-                                            ? "Aldea"
+                                            ? "Village"
                                             : city.type === "municipality"
-                                              ? "Municipio"
+                                              ? "Municipality"
                                               : city.type}
                                     </span>
                                   )}
@@ -1215,7 +1215,7 @@ const CreateRoute = () => {
                 {/* Cards de Países Populares */}
                 {!formState.country && (
                   <div className="mb-4">
-                    <h5 className="fw-semibold mb-3">🌍 Países Más Visitados</h5>
+                    <h5 className="fw-semibold mb-3">🌍 Most Visited Countries</h5>
                     <div className="row g-3">
                       {POPULAR_COUNTRIES.map((country) => (
                         <div key={country.code} className="col-md-3 col-sm-6">
@@ -1245,7 +1245,7 @@ const CreateRoute = () => {
                             <div className="card-body text-center p-2">
                               <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
                               <small className="text-muted">
-                                {country.visitors} visitantes/año
+                                {country.visitors} visitors/year
                               </small>
                             </div>
                           </div>
@@ -1254,7 +1254,7 @@ const CreateRoute = () => {
                     </div>
                     <hr className="my-4" />
                     <p className="text-center text-muted small">
-                      O busca cualquier otro país:
+                      Or search for any other country:
                     </p>
                   </div>
                 )}
@@ -1265,7 +1265,7 @@ const CreateRoute = () => {
                   POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
                     <div className="mb-4">
                       <h5 className="fw-semibold mb-3">
-                        🏙️ Ciudades Más Visitadas de {formState.country}
+                        🏙️ Most Visited Cities in {formState.country}
                       </h5>
                       <div className="row g-3">
                         {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map(
@@ -1312,7 +1312,7 @@ const CreateRoute = () => {
                       </div>
                       <hr className="my-4" />
                       <p className="text-center text-muted small">
-                        O busca otra ciudad/pueblo:
+                        Or search for another city/town:
                       </p>
                     </div>
                   )}
@@ -1325,7 +1325,7 @@ const CreateRoute = () => {
                 {/* Puntos de Interés - MÚLTIPLES SELECCIONES CON CARDS */}
                 <div className="mb-3">
                   <label className="form-label fw-semibold">
-                    Puntos de Interés *{" "}
+                    Points of Interest *{" "}
                     {loadingAll.pois && (
                       <Loader
                         className="d-inline-block animate-spin"
@@ -1334,8 +1334,8 @@ const CreateRoute = () => {
                     )}
                     {formState.city && (
                       <span className="text-muted small ms-2">
-                        ({formState.points_of_interest.length} seleccionados,{" "}
-                        {suggestions.pois.length} disponibles)
+                        ({formState.points_of_interest.length} selected,{" "}
+                        {suggestions.pois.length} available)
                       </span>
                     )}
                   </label>
@@ -1349,7 +1349,7 @@ const CreateRoute = () => {
                         onClick={() => setViewMode("cards")}
                       >
                         <LayoutGrid size={18} />
-                        Vista de Cards
+                        Cards View
                       </button>
                       <button
                         type="button"
@@ -1358,7 +1358,7 @@ const CreateRoute = () => {
                         disabled={!formState.city}
                       >
                         <Map size={18} />
-                        Vista de Mapa
+                        Map View
                       </button>
                     </div>
                   </div>
@@ -1366,26 +1366,26 @@ const CreateRoute = () => {
                   {/* Selector de categoría de POI con Botones */}
                   <div className="mb-3">
                     <label className="form-label small fw-semibold">
-                      Selecciona una categoría:
+                      Select a category:
                     </label>
                     <div className="d-flex flex-wrap gap-2">
                       {[
                         {
                           value: "attraction",
                           icon: Compass,
-                          label: "Atracciones",
+                          label: "Attractions",
                           color: "primary",
                         },
                         {
                           value: "museum",
                           icon: Building2,
-                          label: "Museos",
+                          label: "Museums",
                           color: "info",
                         },
                         {
                           value: "restaurant",
                           icon: UtensilsCrossed,
-                          label: "Restaurantes",
+                          label: "Restaurants",
                           color: "danger",
                         },
                         {
@@ -1397,37 +1397,37 @@ const CreateRoute = () => {
                         {
                           value: "bar",
                           icon: Beer,
-                          label: "Bares",
+                          label: "Bars",
                           color: "success",
                         },
                         {
                           value: "park",
                           icon: Trees,
-                          label: "Parques",
+                          label: "Parks",
                           color: "success",
                         },
                         {
                           value: "monument",
                           icon: Landmark,
-                          label: "Monumentos",
+                          label: "Monuments",
                           color: "secondary",
                         },
                         {
                           value: "church",
                           icon: Church,
-                          label: "Iglesias",
+                          label: "Churches",
                           color: "info",
                         },
                         {
                           value: "hotel",
                           icon: Hotel,
-                          label: "Hoteles",
+                          label: "Hotels",
                           color: "primary",
                         },
                         {
                           value: "viewpoint",
                           icon: Mountain,
-                          label: "Miradores",
+                          label: "Viewpoints",
                           color: "success",
                         },
                       ].map((category) => {
@@ -1466,7 +1466,7 @@ const CreateRoute = () => {
                   {formState.points_of_interest.length > 0 && (
                     <div className="mb-3 p-3 bg-light rounded">
                       <div className="small fw-semibold mb-2">
-                        POIs en tu ruta:
+                        POIs in your route:
                       </div>
                       <div className="d-flex flex-wrap gap-2">
                         {formState.points_of_interest.map((poi) => (
@@ -1515,8 +1515,8 @@ const CreateRoute = () => {
                             className="form-control ps-5"
                             placeholder={
                               formState.city
-                                ? "Buscar por nombre..."
-                                : "Primero selecciona una ciudad"
+                                ? "Search by name..."
+                                : "First select a city"
                             }
                             value={searchState.poiQuery}
                             onChange={(e) =>
@@ -1536,16 +1536,16 @@ const CreateRoute = () => {
                           {/* Información de resultados */}
                           <div className="mb-3 d-flex justify-content-between align-items-center">
                             <div className="text-muted small">
-                              Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1}{" "}
+                              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}{" "}
                               -{" "}
                               {Math.min(
                                 currentPage * ITEMS_PER_PAGE,
                                 getFilteredPOIs().length
                               )}{" "}
-                              de {getFilteredPOIs().length} resultados
+                              of {getFilteredPOIs().length} results
                             </div>
                             <div className="text-muted small">
-                              Página {currentPage} de {getTotalPages()}
+                              Page {currentPage} of {getTotalPages()}
                             </div>
                           </div>
 
@@ -1726,7 +1726,7 @@ const CreateRoute = () => {
                                           <>📍 {poi.address}</>
                                         ) : (
                                           <span className="text-muted fst-italic">
-                                            Sin dirección disponible
+                                            No address available
                                           </span>
                                         )}
                                       </div>
@@ -1747,7 +1747,7 @@ const CreateRoute = () => {
                                             }}
                                           >
                                             <Check size={16} />
-                                            Seleccionado
+                                            Selected
                                           </button>
                                         ) : (
                                           <button
@@ -1763,7 +1763,7 @@ const CreateRoute = () => {
                                             }}
                                           >
                                             <Plus size={16} />
-                                            Agregar
+                                            Add
                                           </button>
                                         )}
                                       </div>
@@ -1786,7 +1786,7 @@ const CreateRoute = () => {
                                 disabled={currentPage === 1}
                               >
                                 <ChevronLeft size={20} />
-                                Anterior
+                                Previous
                               </button>
 
                               <div className="d-flex gap-2">
@@ -1837,7 +1837,7 @@ const CreateRoute = () => {
                                 }
                                 disabled={currentPage === getTotalPages()}
                               >
-                                Siguiente
+                                Next
                                 <ChevronRight size={20} />
                               </button>
                             </div>
@@ -1851,8 +1851,8 @@ const CreateRoute = () => {
                         suggestions.pois.length === 0 && (
                           <div className="alert alert-info">
                             <AlertCircle size={20} className="me-2" />
-                            No se encontraron puntos de interés para esta
-                            categoría. Prueba con otra categoría.
+                            No points of interest found for this
+                            category. Try another category.
                           </div>
                         )}
 
@@ -1862,8 +1862,8 @@ const CreateRoute = () => {
                         getFilteredPOIs().length === 0 && (
                           <div className="alert alert-warning">
                             <AlertCircle size={20} className="me-2" />
-                            No se encontraron resultados para "
-                            {searchState.poiQuery}". Intenta con otro término.
+                            No results found for "
+                            {searchState.poiQuery}". Try another search term.
                           </div>
                         )}
                     </>
@@ -1906,7 +1906,7 @@ const CreateRoute = () => {
                     role="alert"
                   >
                     <AlertCircle size={20} />
-                    Necesario Registro
+                    Registration Required
                   </div>
                 )}
 
@@ -1922,7 +1922,7 @@ const CreateRoute = () => {
                       formState.points_of_interest.length === 0
                     }
                   >
-                    {isSubmitting ? "Creando..." : "Crear Ruta"}
+                    {isSubmitting ? "Creating..." : "Create Route"}
                   </button>
                   <button
                     type="button"
@@ -1930,7 +1930,7 @@ const CreateRoute = () => {
                     onClick={() => navigate(-1)}
                     disabled={isSubmitting}
                   >
-                    Cancelar
+                    Cancel
                   </button>
                 </div>
               </form>

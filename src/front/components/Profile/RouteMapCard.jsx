@@ -37,7 +37,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
       ? "Created Route"
       : type === "favorite"
         ? "Favorite Route"
-        : "Route Detail";
+        : "Route Details";
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
