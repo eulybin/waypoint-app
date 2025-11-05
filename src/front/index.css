@@ -320,11 +320,12 @@ body.compact-mode .with-sidebar {
   z-index: calc(var(--z-navbar) + 5) !important;
 }
 
-.navbar-desktop {
-  display: none;
-}
+/* =============================
+   Navbar Responsive Breakpoints
+   ============================= */
 
-@media (min-width: 768px) {
+/* Desktop: ≥992px width AND ≥515px height */
+@media (min-width: 992px) and (min-height: 515px) {
   .navbar-desktop {
     display: flex !important;
   }
@@ -332,7 +333,7 @@ body.compact-mode .with-sidebar {
     display: none !important;
   }
   .navbar-compact-horizontal {
-    display: none !important; /* Hide compact on desktop */
+    display: none !important;
   }
 
   .with-sidebar {
@@ -340,7 +341,8 @@ body.compact-mode .with-sidebar {
   }
 }
 
-@media (max-width: 767.98px) {
+/* Mobile vertical: 576px-992px width AND ≥515px height */
+@media (max-width: 991.98px) and (min-width: 576px) and (min-height: 515px) {
   .navbar-desktop {
     display: none !important;
   }
@@ -348,31 +350,22 @@ body.compact-mode .with-sidebar {
     display: flex !important;
   }
   .navbar-compact-horizontal {
-    display: none !important; /* Hide compact on mobile by default */
+    display: none !important;
   }
 
   .with-sidebar {
     margin-left: var(--navbar-width-mobile);
   }
-
-  /* Only show compact navbar when body has compact-mode class */
-  body.compact-mode .navbar-mobile {
-    display: none !important;
-  }
-
-  body.compact-mode .navbar-compact-horizontal {
-    display: flex !important;
-  }
 }
 
-/* Add to index.css after line 200 */
-
-/* Activate compact mode when height < 515px on mobile screens */
-@media (max-width: 767.98px) and (max-height: 515px) {
+/* Compact horizontal: width <576px OR height <515px */
+@media (max-width: 575.98px), (max-height: 514.98px) {
+  .navbar-desktop {
+    display: none !important;
+  }
   .navbar-mobile {
     display: none !important;
   }
-
   .navbar-compact-horizontal {
     display: flex !important;
   }
@@ -406,8 +399,40 @@ body.compact-mode .with-sidebar {
   }
 }
 
+/* Weather widget shine effect */
+@keyframes weather-shine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
 .weather-pulse-attention {
   animation: weather-pulse 0.6s ease-in-out 2;
+  position: relative;
+  overflow: hidden;
+}
+
+.weather-pulse-attention::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 40%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.4) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: weather-shine 1.2s ease-in-out 1;
+  pointer-events: none;
 }
 
 .rotate-on-hover {
@@ -424,6 +449,18 @@ body.compact-mode .with-sidebar {
 
 .scale-on-hover:hover {
   transform: scale(1.15);
+}
+
+/* Explore page card hover effect */
+.explore-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.explore-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .weather-overlay {

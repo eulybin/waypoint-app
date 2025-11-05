@@ -1,6 +1,6 @@
-// COMPONENTE: StarRating
-// Sistema de votación con estrellas interactivas (1-5)
-// Se usa para votar por rutas
+// COMPONENT: StarRating
+// Interactive star voting system (1-5)
+// Used for voting on routes
 
 import { useState } from "react";
 import { Star } from "lucide-react";
@@ -34,18 +34,19 @@ const StarRating = ({ initialRating = 0, onRatingChange, disabled = false }) => 
     <div className="d-flex gap-1">
       {[1, 2, 3, 4, 5].map((value) => {
         const isFilled = (hoverRating || rating) >= value;
-        
+
         return (
           <Star
             key={value}
             size={28}
             className={`${disabled ? 'cursor-default' : 'cursor-pointer'} transition`}
-            fill={isFilled ? "currentColor" : "none"}
-            color={isFilled ? "#ffc107" : "#6c757d"}
+            fill={isFilled ? "#FFC106" : "none"}
+            stroke={isFilled ? "#FFC106" : "#6c757d"}
+            strokeWidth={isFilled ? 0 : 2}
             onClick={() => handleClick(value)}
             onMouseEnter={() => handleMouseEnter(value)}
             onMouseLeave={handleMouseLeave}
-            style={{ 
+            style={{
               cursor: disabled ? 'default' : 'pointer',
               transition: 'all 0.2s ease'
             }}
@@ -54,7 +55,7 @@ const StarRating = ({ initialRating = 0, onRatingChange, disabled = false }) => 
       })}
       {rating > 0 && (
         <span className="ms-2 text-muted small align-self-center">
-          {rating} {rating === 1 ? 'estrella' : 'estrellas'}
+          {rating} {rating === 1 ? 'star' : 'stars'}
         </span>
       )}
     </div>

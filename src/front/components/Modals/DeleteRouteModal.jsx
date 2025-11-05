@@ -39,7 +39,7 @@ const DeleteRouteModal = ({
                 id="deleteRouteModalLabel"
               >
                 <AlertTriangle size={24} className="text-danger" />
-                Confirmar Eliminación
+                Confirm Deletion
               </h5>
               <button
                 type="button"
@@ -51,7 +51,7 @@ const DeleteRouteModal = ({
             </div>
             <div className="modal-body">
               <p className="mb-3">
-                ¿Estás seguro de que quieres eliminar la ruta{" "}
+                Are you sure you want to delete the route{" "}
                 <strong>"{routeName}"</strong>?
               </p>
               <div
@@ -60,11 +60,11 @@ const DeleteRouteModal = ({
               >
                 <AlertTriangle size={20} className="mt-1 flex-shrink-0" />
                 <div>
-                  <strong>Esta acción no se puede deshacer.</strong>
+                  <strong>This action cannot be undone.</strong>
                   <br />
                   <small>
-                    Se eliminarán todos los datos asociados a esta ruta,
-                    incluyendo valoraciones y comentarios.
+                    All data associated with this route will be deleted,
+                    including ratings and comments.
                   </small>
                 </div>
               </div>
@@ -76,7 +76,7 @@ const DeleteRouteModal = ({
                 onClick={onClose}
                 disabled={isDeleting}
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 type="button"
@@ -91,10 +91,10 @@ const DeleteRouteModal = ({
                       role="status"
                       aria-hidden="true"
                     ></span>
-                    Eliminando...
+                    Deleting...
                   </>
                 ) : (
-                  "Eliminar Ruta"
+                  "Delete Route"
                 )}
               </button>
             </div>

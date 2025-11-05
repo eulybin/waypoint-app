@@ -1,5 +1,5 @@
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
-import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPouplarCountry";
+import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { normalizeText } from "../utils/constants";
 import { useState, useEffect } from "react";
 import {
@@ -10,24 +10,25 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  Building2
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import WeatherWidget from "../components/WeatherWidget";
 import { fetchWeather } from "../services/weatherService";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE } from "../utils/constants";
+import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE, WEATHER_WIDGET_Z_INDEX, WEATHER_WIDGET_OPACITY, CLOSE_WEATHER_ICON_SIZE, STANDARD_ICON_SIZE } from "../utils/constants";
 
 const Explore = () => {
-  // ========== ESTADOS ==========
-  const [allRoutes, setAllRoutes] = useState([]); // Todas las rutas de la BD
-  const [filteredRoutes, setFilteredRoutes] = useState([]); // Rutas después de filtrar
-  const [selectedCountry, setSelectedCountry] = useState(null); // País seleccionado
-  const [selectedCity, setSelectedCity] = useState(null); // Ciudad seleccionada
-  const [searchTerm, setSearchTerm] = useState(""); // Término de búsqueda
+  // ========== STATES ==========
+  const [allRoutes, setAllRoutes] = useState([]); // All routes from DB
+  const [filteredRoutes, setFilteredRoutes] = useState([]); // Routes after filtering
+  const [selectedCountry, setSelectedCountry] = useState(null); // Selected country
+  const [selectedCity, setSelectedCity] = useState(null); // Selected city
+  const [searchTerm, setSearchTerm] = useState(""); // Search term
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Página actual
-  const ITEMS_PER_PAGE = 3; // 3 rutas por página
+  const [currentPage, setCurrentPage] = useState(1); // Current page
+  const ITEMS_PER_PAGE = 3; // 3 routes per page
 
   // ========== WEATHER STATES ==========
   const [weatherCity, setWeatherCity] = useState("Madrid");
@@ -35,7 +36,7 @@ const Explore = () => {
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherAttention, setWeatherAttention] = useState(false);
 
-  // ========== OBTENER RUTAS DE LA BD ==========
+  // ========== FETCH ROUTES FROM DB ==========
   useEffect(() => {
     fetchAllRoutes();
   }, []);
@@ -53,11 +54,11 @@ const Explore = () => {
         headers: getAuthHeaders(),
       });
 
-      if (!response.ok) throw new Error("Error al cargar rutas");
+      if (!response.ok) throw new Error("Error loading routes");
 
       const data = await response.json();
       setAllRoutes(data);
-      setFilteredRoutes(data); // Inicialmente mostrar todas
+      setFilteredRoutes(data); // Initially show all
     } catch (err) {
       setError(err.message);
     } finally {
@@ -65,11 +66,11 @@ const Explore = () => {
     }
   };
 
-  // ========== FILTRAR RUTAS ==========
+  // ========== FILTER ROUTES ==========
   useEffect(() => {
     let filtered = [...allRoutes];
 
-    // Filtro por país (comparamos con el nombre del país)
+    // Filter by country (compare with country name)
     if (selectedCountry) {
       filtered = filtered.filter(
         (route) =>
@@ -77,14 +78,14 @@ const Explore = () => {
       );
     }
 
-    // Filtro por ciudad
+    // Filter by city
     if (selectedCity) {
       filtered = filtered.filter(
         (route) => normalizeText(route.city) === normalizeText(selectedCity)
       );
     }
 
-    // Filtro por búsqueda manual
+    // Filter by manual search
     if (searchTerm.trim()) {
       const searchNormalized = normalizeText(searchTerm);
       filtered = filtered.filter(
@@ -96,7 +97,7 @@ const Explore = () => {
     }
 
     setFilteredRoutes(filtered);
-    setCurrentPage(1); // Reset a página 1 cuando cambian los filtros
+    setCurrentPage(1); // Reset to page 1 when filters change
   }, [selectedCountry, selectedCity, searchTerm, allRoutes]);
 
   // ========== SYNC WEATHER WITH SELECTED CITY ==========
@@ -110,15 +111,15 @@ const Explore = () => {
 
   // ========== HANDLERS ==========
   const handleCountryClick = (country) => {
-    // Guardamos el objeto completo del país para tener acceso al código
+    // Save complete country object to have access to the code
     setSelectedCountry(country);
-    setSelectedCity(null); // Reset ciudad cuando cambias de país
-    setSearchTerm(""); // Limpiar búsqueda
+    setSelectedCity(null); // Reset city when changing country
+    setSearchTerm(""); // Clear search
   };
 
   const handleCityClick = (cityName) => {
     setSelectedCity(cityName);
-    setSearchTerm(""); // Limpiar búsqueda
+    setSearchTerm(""); // Clear search
   };
 
   const handleResetFilters = () => {
@@ -154,12 +155,12 @@ const Explore = () => {
     );
   }
 
-  // Obtener ciudades del país seleccionado usando el código del país
+  // Get cities for selected country using country code
   const citiesForSelectedCountry = selectedCountry
     ? POPULAR_CITIES_BY_COUNTRY[selectedCountry.code] || []
     : [];
 
-  // ========== PAGINACIÓN ==========
+  // ========== PAGINATION ==========
   const totalPages = Math.ceil(filteredRoutes.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -189,7 +190,7 @@ const Explore = () => {
       {/* FIXED WEATHER WIDGET - TOP RIGHT */}
       <div
         className="position-fixed top-0 end-0 mt-4 me-4"
-        style={{ zIndex: 999, opacity: 0.90 }}
+        style={{ zIndex: WEATHER_WIDGET_Z_INDEX, opacity: WEATHER_WIDGET_OPACITY }}
       >
         <WeatherWidget
           weather={weather}
@@ -203,23 +204,23 @@ const Explore = () => {
       {/* HEADER */}
       <div className="text-center mb-5 mt-5 pt-5">
         <div className="mb-3 header-icon-badge badge-blue"><Compass size={HEADER_ICON_SIZE} /></div>
-        <h1 className="display-4 fw-bold">Explorar Rutas</h1>
+        <h1 className="display-4 fw-bold">Explore Routes</h1>
         <p className="lead text-muted">
-          Descubre rutas turísticas creadas por la comunidad
+          Discover travel routes created by the community
         </p>
       </div>
 
-      {/* BUSCADOR */}
+      {/* SEARCH BAR */}
       <div className="row mb-5">
         <div className="col-md-8 mx-auto">
           <div className="input-group input-group-lg">
             <span className="input-group-text">
-              <Search size={24} />
+              <Search size={NAVBAR_ICON_SIZE} />
             </span>
             <input
               type="text"
               className="form-control"
-              placeholder="Buscar por país o ciudad..."
+              placeholder="Search by country or city..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -228,21 +229,21 @@ const Explore = () => {
                 className="btn btn-outline-secondary"
                 onClick={handleResetFilters}
               >
-                Limpiar
+                Clear
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* FILTROS ACTIVOS */}
+      {/* ACTIVE FILTERS */}
       {(selectedCountry || selectedCity) && (
         <div className="mb-4">
-          <h5 className="mb-3">Filtros activos:</h5>
+          <h5 className="mb-3">Active filters:</h5>
           <div className="d-flex gap-2 flex-wrap">
             {selectedCountry && (
-              <span className="badge bg-primary fs-6">
-                País: {selectedCountry.name}
+              <span className="badge bg-primary fs-6 d-inline-flex align-items-center">
+                Country: {selectedCountry.name}
                 <button
                   className="btn-close btn-close-white ms-2"
                   onClick={() => setSelectedCountry(null)}
@@ -250,8 +251,8 @@ const Explore = () => {
               </span>
             )}
             {selectedCity && (
-              <span className="badge bg-info fs-6">
-                Ciudad: {selectedCity}
+              <span className="badge bg-info fs-6 d-inline-flex align-items-center">
+                City: {selectedCity}
                 <button
                   className="btn-close btn-close-white ms-2"
                   onClick={() => setSelectedCity(null)}
@@ -262,20 +263,19 @@ const Explore = () => {
         </div>
       )}
 
-      {/* SECCIÓN DE PAÍSES */}
+      {/* COUNTRIES SECTION */}
       <section className="mb-5">
         <h2 className="mb-4 d-flex align-items-center gap-2">
           <Globe size={NAVBAR_ICON_SIZE} />
-          Países Populares
+          Popular Countries
         </h2>
 
         <div className="row g-3">
           {POPULAR_COUNTRIES.map((country) => (
             <div key={country.name} className="col-lg-3 col-md-6">
               <div
-                className={`card h-100 cursor-pointer ${selectedCountry?.name === country.name ? "border-primary border-3" : ""}`}
+                className={`card h-100 cursor-pointer explore-card ${selectedCountry?.name === country.name ? "border-primary border-3" : ""}`}
                 onClick={() => handleCountryClick(country)}
-                style={{ cursor: "pointer" }}
               >
                 <img
                   src={country.image}
@@ -293,21 +293,23 @@ const Explore = () => {
         </div>
       </section>
 
-      {/* SECCIÓN DE CIUDADES (Solo si hay país seleccionado) */}
+      {/* CITIES SECTION (Only if country is selected) */}
       {selectedCountry && citiesForSelectedCountry.length > 0 && (
         <section className="mb-5">
-          <h2 className="mb-4">Ciudades de {selectedCountry.name}</h2>
+          <h2 className="mb-4 d-flex align-items-center gap-2">
+            <Building2 size={CLOSE_WEATHER_ICON_SIZE} />
+            Cities in {selectedCountry.name}
+          </h2>
           <div className="row g-3">
             {citiesForSelectedCountry.map((city) => (
               <div key={city.name} className="col-md-3 col-sm-6">
                 <div
-                  className={`card h-100 cursor-pointer ${selectedCity === city.name ? "border-info border-3" : ""}`}
+                  className={`card h-100 cursor-pointer explore-card ${selectedCity === city.name ? "border-info border-3" : ""}`}
                   onClick={() => handleCityClick(city.name)}
-                  style={{ cursor: "pointer" }}
                 >
                   <img
                     src={city.image}
-                    className="card-img-top"
+                    className="card-img-top rounded-top-3"
                     alt={city.name}
                     style={{ height: "120px", objectFit: "cover" }}
                   />
@@ -321,17 +323,17 @@ const Explore = () => {
         </section>
       )}
 
-      {/* SECCIÓN DE RUTAS FILTRADAS */}
+      {/* FILTERED ROUTES SECTION */}
       <section>
         <h2 className="mb-4 d-flex align-items-center gap-2">
           <MapPin size={NAVBAR_ICON_SIZE} />
-          Rutas Disponibles ({filteredRoutes.length})
+          Available Routes ({filteredRoutes.length})
         </h2>
 
 
         {filteredRoutes.length === 0 ? (
           <div className="alert alert-info">
-            No se encontraron rutas con los filtros seleccionados.
+            No routes found with the selected filters.
           </div>
         ) : (
           <>
@@ -343,20 +345,20 @@ const Explore = () => {
               ))}
             </div>
 
-            {/* PAGINACIÓN */}
+            {/* PAGINATION */}
             {totalPages > 1 && (
               <div className="d-flex justify-content-center align-items-center gap-3 mt-5">
-                {/* Botón Anterior */}
+                {/* Previous Button */}
                 <button
                   className="btn btn-outline-primary"
                   onClick={goToPrevPage}
                   disabled={currentPage === 1}
                 >
-                  <ChevronLeft size={20} />
-                  Anterior
+                  <ChevronLeft size={STANDARD_ICON_SIZE} />
+                  Previous
                 </button>
 
-                {/* Números de página */}
+                {/* Page Numbers */}
                 <div className="d-flex gap-2">
                   {[...Array(totalPages)].map((_, index) => {
                     const pageNumber = index + 1;
@@ -373,24 +375,24 @@ const Explore = () => {
                   })}
                 </div>
 
-                {/* Botón Siguiente */}
+                {/* Next Button */}
                 <button
                   className="btn btn-outline-primary"
                   onClick={goToNextPage}
                   disabled={currentPage === totalPages}
                 >
-                  Siguiente
-                  <ChevronRight size={20} />
+                  Next
+                  <ChevronRight size={STANDARD_ICON_SIZE} />
                 </button>
               </div>
             )}
 
-            {/* Info de paginación */}
+            {/* Pagination info */}
             <div className="text-center text-muted mt-3">
               <small>
-                Mostrando {startIndex + 1} -{" "}
-                {Math.min(endIndex, filteredRoutes.length)} de{" "}
-                {filteredRoutes.length} rutas
+                Showing {startIndex + 1} -{" "}
+                {Math.min(endIndex, filteredRoutes.length)} of{" "}
+                {filteredRoutes.length} routes
               </small>
             </div>
           </>
