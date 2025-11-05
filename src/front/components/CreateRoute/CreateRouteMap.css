@@ -1,0 +1,103 @@
+/* ============================================================================
+   ESTILOS PARA CreateRouteMap - Mapa Interactivo de Creación de Rutas
+   ============================================================================ */
+
+/* Fix para iconos personalizados de Leaflet */
+.custom-marker-icon {
+  background: none !important;
+  border: none !important;
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+
+/* Asegurar que el contenido del marker sea visible */
+.custom-marker-icon > div {
+  pointer-events: auto !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+/* Animación hover para markers */
+.custom-marker-icon:hover {
+  z-index: 1001 !important;
+}
+
+.custom-marker-icon:hover > div {
+  animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Estilo para clusters personalizados */
+.custom-cluster-icon {
+  background: none !important;
+  border: none !important;
+}
+
+/* Popup personalizado */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Controles del mapa con estilo oscuro */
+.leaflet-control-zoom a {
+  color: #333 !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #fd7e14 !important;
+  color: white !important;
+}
+
+/* Animación para la línea de ruta */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.route-polyline {
+  animation: dash 20s linear infinite;
+}
+
+/* Overlay de información - ajustes para dark mode */
+[data-bs-theme="dark"] .leaflet-popup-content-wrapper {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .leaflet-popup-tip {
+  background-color: #212529 !important;
+}
+
+/* Mejora de controles en móvil */
+@media (max-width: 768px) {
+  .leaflet-control-zoom {
+    margin-top: 60px !important;
+  }
+
+  .custom-marker-icon {
+    font-size: 24px !important;
+  }
+}

@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, url_for, send_from_directory
@@ -12,7 +13,7 @@ from api.routes.routes import api
 # Cargar variables de entorno desde .env
 load_dotenv()
 # from api.admin import setup_admin  # TODO: Crear este archivo
-# from api.commands import setup_commands  # TODO: Crear este archivo
+from api.commands import setup_commands
 
 # Configuración de variables de entorno
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -31,7 +32,9 @@ if db_url is not None:
         "postgres://", "postgresql://"
     )
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
+    # Base de datos SQLite persistente en el directorio del proyecto
+    db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "waypoint.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -39,7 +42,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # CONFIGURACIÓN JWT - IMPORTANTE PARA AUTENTICACIÓN
 # ============================================================================
 # app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret-key-change-in-production')
-# app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False  # Token no expira (puedes cambiarlo)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)  # Token expira en 30 días
 app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
 jwt = JWTManager(app)
 # ============================================================================
@@ -57,7 +60,7 @@ CORS(
     app,
     resources={
         r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
         }
@@ -70,7 +73,7 @@ CORS(
 # ============================================================================
 app.register_blueprint(api, url_prefix="/api")
 # setup_admin(app)  # TODO: Implementar
-# setup_commands(app)  # TODO: Implementar
+setup_commands(app)
 
 
 # ============================================================================

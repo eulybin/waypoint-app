@@ -29,6 +29,7 @@ class User(db.Model):
     # Relaciones
     routes: Mapped[list["Route"]] = relationship('Route', back_populates='author', cascade='all, delete-orphan')
     votes: Mapped[list["Vote"]] = relationship('Vote', back_populates='user', cascade='all, delete-orphan')
+    favorites: Mapped[list["Favorite"]] = relationship('Favorite', back_populates='user', cascade='all, delete-orphan')
 
 
     def serialize(self):
@@ -57,6 +58,7 @@ class Route(db.Model):
     # Relaciones
     author: Mapped["User"] = relationship('User', back_populates='routes')
     votes: Mapped[list["Vote"]] = relationship('Vote', back_populates='route', cascade='all, delete-orphan')
+    favorites: Mapped[list["Favorite"]] = relationship('Favorite', back_populates='route', cascade='all, delete-orphan')
     
     def serialize(self):
     
@@ -88,15 +90,8 @@ class Route(db.Model):
             return []
 
     def get_coordinates_dict(self):
-        """Devuelve coordinates como dict (convierte desde JSON si es necesario)."""
-        try:
-            if not self.coordinates:
-                return None
-            if isinstance(self.coordinates, dict):
-                return self.coordinates
-            return json.loads(self.coordinates)
-        except Exception:
-            return None
+        """Devuelve el string JSON de las coordenadas para que el frontend lo parsee."""
+        return self.coordinates
 
     def get_average_rating(self):
         """Calcula el rating promedio a partir de los objetos Vote relacionados."""
@@ -139,5 +134,28 @@ class Vote(db.Model):
             "route_id": self.route_id,
             "rating": self.rating,
             "user_name": self.user.name if self.user else "Unknown",
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+
+class Favorite(db.Model):
+    __tablename__ = 'favorites'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    route_id: Mapped[int] = mapped_column(ForeignKey('routes.id'), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Relaciones
+    user: Mapped["User"] = relationship('User', back_populates='favorites')
+    route: Mapped["Route"] = relationship('Route', back_populates='favorites')
+    
+    # Constraint para evitar favoritos duplicados
+    __table_args__ = (UniqueConstraint('user_id', 'route_id', name='unique_user_route_favorite'),)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "route_id": self.route_id,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
