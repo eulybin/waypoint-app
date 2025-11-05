@@ -1,6 +1,6 @@
-// COMPONENTE: RouteCard
-// Tarjeta para mostrar información de una ruta turística
-// Se usa en: Explore, Popular, Trending, Profile
+// COMPONENT: RouteCard
+// Card to display tourist route information
+// Used in: Explore, Popular, Trending, Profile
 
 import { useState } from "react";
 import {
@@ -14,14 +14,14 @@ import {
 import { Link } from "react-router-dom";
 
 const RouteCard = ({ route }) => {
-  // Calcular promedio de estrellas para mostrar
+  // Calculate average stars to display
   const [showAllPOIs, setShowAllPOIs] = useState(false);
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
 
-    // Estrellas completas
+    // Full stars
     for (let i = 0; i < fullStars; i++) {
       stars.push(
         <Star
@@ -33,7 +33,7 @@ const RouteCard = ({ route }) => {
       );
     }
 
-    // Media estrella
+    // Half star
     if (hasHalfStar && fullStars < 5) {
       stars.push(
         <Star
@@ -46,7 +46,7 @@ const RouteCard = ({ route }) => {
       );
     }
 
-    // Estrellas vacías
+    // Empty stars
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(<Star key={`empty-${i}`} size={16} className="text-muted" />);
@@ -55,7 +55,7 @@ const RouteCard = ({ route }) => {
     return stars;
   };
 
-  // Formatear fecha
+  // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("es-ES", {
@@ -68,7 +68,7 @@ const RouteCard = ({ route }) => {
   return (
     <div className="card h-100 shadow-sm hover-shadow transition">
       <div className="card-body">
-        {/* Ubicación */}
+        {/* Location */}
         <div className="d-flex align-items-center gap-2 mb-2">
           <MapPin size={18} className="text-primary" />
           <h5 className="card-title mb-0 fw-bold">
@@ -76,16 +76,16 @@ const RouteCard = ({ route }) => {
           </h5>
         </div>
 
-        {/* Localidad (si existe) */}
+        {/* Locality (if exists) */}
         {route.locality && (
           <p className="text-muted small mb-2">{route.locality}</p>
         )}
 
-        {/* Puntos de interés */}
+        {/* Points of interest */}
         <div className="mb-3">
-          <p className="small text-muted mb-1">Puntos de interés:</p>
+          <p className="small text-muted mb-1">Points of Interest:</p>
           <div className="d-flex flex-wrap gap-1">
-            {/* Mostrar 3 o todos según el estado */}
+            {/* Show 3 or all depending on state */}
             {(showAllPOIs
               ? route.points_of_interest
               : route.points_of_interest?.slice(0, 3)
@@ -95,7 +95,7 @@ const RouteCard = ({ route }) => {
               </span>
             ))}
 
-            {/* Botón para expandir/colapsar si hay más de 3 */}
+            {/* Button to expand/collapse if more than 3 */}
             {route.points_of_interest?.length > 3 && (
               <button
                 className="badge bg-primary text-white border-0"
@@ -105,30 +105,30 @@ const RouteCard = ({ route }) => {
                 {showAllPOIs ? (
                   <>
                     <ChevronUp size={12} className="me-1" />
-                    Ver menos
+                    Show less
                   </>
                 ) : (
                   <>
                     <ChevronDown size={12} className="me-1" />+
-                    {route.points_of_interest.length - 3} más
+                    {route.points_of_interest.length - 3} more
                   </>
                 )}
               </button>
             )}
           </div>
         </div>
-        {/* Rating y votos */}
+        {/* Rating and votes */}
         <div className="d-flex align-items-center gap-2 mb-2">
           <div className="d-flex gap-1">
             {renderStars(route.average_rating || 0)}
           </div>
           <span className="text-muted small">
             {route.average_rating?.toFixed(1) || "0.0"} (
-            {route.total_votes || 0} votos)
+            {route.total_votes || 0} {route.total_votes === 1 ? "vote" : "votes"})
           </span>
         </div>
 
-        {/* Autor y fecha */}
+        {/* Author and date */}
         <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
           <div className="d-flex align-items-center gap-2">
             <UserIcon size={16} className="text-muted" />
@@ -142,12 +142,12 @@ const RouteCard = ({ route }) => {
           </div>
         </div>
 
-        {/* Botón ver detalles */}
+        {/* View details button */}
         <Link
           to={`/route/${route.id}`}
           className="btn btn-sm bg-orange text-white w-100 mt-3"
         >
-          Ver detalles
+          View details
         </Link>
       </div>
     </div>

@@ -12,38 +12,38 @@ const Profile = () => {
   const [favoriteRoutes, setFavoriteRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("created"); // "created" o "favorites"
-  const [currentPageCreated, setCurrentPageCreated] = useState(1); // Página actual para rutas creadas
-  const [currentPageFavorites, setCurrentPageFavorites] = useState(1); // Página actual para favoritas
-  const ITEMS_PER_PAGE = 4; // 4 rutas por página
+  const [activeTab, setActiveTab] = useState("created"); // "created" or "favorites"
+  const [currentPageCreated, setCurrentPageCreated] = useState(1); // Current page for created routes
+  const [currentPageFavorites, setCurrentPageFavorites] = useState(1); // Current page for favorites
+  const ITEMS_PER_PAGE = 4; // 4 routes per page
 
   const handleDeleteRoute = async (routeId) => {
     try {
       await deleteRoute(routeId);
-      // Actualizar el estado para remover la ruta eliminada
+      // Update state to remove deleted route
       setCreatedRoutes((prevRoutes) =>
         prevRoutes.filter((route) => route.id !== routeId)
       );
-      // También removerla de favoritas si está ahí
+      // Also remove it from favorites if it's there
       setFavoriteRoutes((prevRoutes) =>
         prevRoutes.filter((route) => route.id !== routeId)
       );
     } catch (error) {
-      console.error("Error al eliminar ruta:", error);
-      throw error; // Propagar el error para que RouteMapCard lo maneje
+      console.error("Error deleting route:", error);
+      throw error; // Propagate error for RouteMapCard to handle
     }
   };
 
   const handleDeleteRouteFavorite = async (routeId) => {
     try {
       await removeFavorite(routeId);
-      // Actualizar el estado para remover la ruta de favoritas
+      // Update state to remove route from favorites
       setFavoriteRoutes((prevRoutes) =>
         prevRoutes.filter((route) => route.id !== routeId)
       );
     } catch (error) {
-      console.error("Error al eliminar ruta de favoritas:", error);
-      throw error; // Propagar el error para que RouteMapCard lo maneje
+      console.error("Error removing route from favorites:", error);
+      throw error; // Propagate error for RouteMapCard to handle
     }
   };
 
@@ -62,7 +62,7 @@ const Profile = () => {
         setFavoriteRoutes(favorites);
       } catch (err) {
         setError(
-          "No se pudieron cargar los datos del perfil. Inténtalo de nuevo más tarde."
+          "Could not load profile data. Please try again later."
         );
         console.error(err);
       } finally {
@@ -88,8 +88,8 @@ const Profile = () => {
     return <div className="alert alert-danger m-4">{error}</div>;
   }
 
-  // ========== PAGINACIÓN ==========
-  // Para rutas creadas
+  // ========== PAGINATION ==========
+  // For created routes
   const totalPagesCreated = Math.ceil(createdRoutes.length / ITEMS_PER_PAGE);
   const startIndexCreated = (currentPageCreated - 1) * ITEMS_PER_PAGE;
   const endIndexCreated = startIndexCreated + ITEMS_PER_PAGE;
@@ -98,7 +98,7 @@ const Profile = () => {
     endIndexCreated
   );
 
-  // Para rutas favoritas
+  // For favorite routes
   const totalPagesFavorites = Math.ceil(favoriteRoutes.length / ITEMS_PER_PAGE);
   const startIndexFavorites = (currentPageFavorites - 1) * ITEMS_PER_PAGE;
   const endIndexFavorites = startIndexFavorites + ITEMS_PER_PAGE;
@@ -119,11 +119,11 @@ const Profile = () => {
     <div className="container mt-4 mb-5">
       {/* HEADER */}
       <div className="text-center mb-5">
-        <h1 className="display-5 fw-bold mb-2">Perfil de {user?.name}</h1>
-        <p className="text-muted">Gestiona tus rutas creadas y favoritas</p>
+        <h1 className="display-5 fw-bold mb-2">{user?.name}'s Profile</h1>
+        <p className="text-muted">Manage your created and favorite routes</p>
       </div>
 
-      {/* SISTEMA DE PESTAÑAS - CENTRADO Y ESTÉTICO */}
+      {/* TAB SYSTEM - CENTERED AND AESTHETIC */}
       <div className="d-flex justify-content-center mb-5">
         <div
           className="btn-group shadow-sm"
@@ -152,7 +152,7 @@ const Profile = () => {
             }}
           >
             <MapPin size={22} />
-            <span>Rutas Creadas</span>
+            <span>Created Routes</span>
             <span
               className={`badge ${activeTab === "created" ? "bg-light text-primary" : "bg-primary text-white"}`}
               style={{
@@ -184,7 +184,7 @@ const Profile = () => {
               size={22}
               fill={activeTab === "favorites" ? "currentColor" : "none"}
             />
-            <span>Rutas Favoritas</span>
+            <span>Favorite Routes</span>
             <span
               className={`badge ${activeTab === "favorites" ? "bg-light text-warning" : "bg-warning text-white"}`}
               style={{
@@ -200,14 +200,14 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* CONTENIDO DE LA PESTAÑA ACTIVA */}
+      {/* ACTIVE TAB CONTENT */}
       <div
         style={{
           animation: "fadeIn 0.3s ease-in-out",
         }}
       >
         {activeTab === "created" ? (
-          /* Sección de Rutas Creadas */
+          /* Created Routes Section */
           <div className="mb-5">
             {createdRoutes.length > 0 ? (
               <>
@@ -222,20 +222,20 @@ const Profile = () => {
                   ))}
                 </div>
 
-                {/* PAGINACIÓN PARA RUTAS CREADAS */}
+                {/* PAGINATION FOR CREATED ROUTES */}
                 {totalPagesCreated > 1 && (
                   <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-                    {/* Botón Anterior */}
+                    {/* Previous Button */}
                     <button
                       className="btn btn-outline-primary"
                       onClick={() => goToPageCreated(currentPageCreated - 1)}
                       disabled={currentPageCreated === 1}
                     >
                       <ChevronLeft size={20} />
-                      Anterior
+                      Previous
                     </button>
 
-                    {/* Números de página */}
+                    {/* Page numbers */}
                     <div className="d-flex gap-2">
                       {[...Array(totalPagesCreated)].map((_, index) => {
                         const pageNumber = index + 1;
@@ -252,25 +252,25 @@ const Profile = () => {
                       })}
                     </div>
 
-                    {/* Botón Siguiente */}
+                    {/* Next Button */}
                     <button
                       className="btn btn-outline-primary"
                       onClick={() => goToPageCreated(currentPageCreated + 1)}
                       disabled={currentPageCreated === totalPagesCreated}
                     >
-                      Siguiente
+                      Next
                       <ChevronRight size={20} />
                     </button>
                   </div>
                 )}
 
-                {/* Info de paginación */}
+                {/* Pagination info */}
                 {totalPagesCreated > 1 && (
                   <div className="text-center text-muted mt-3">
                     <small>
-                      Mostrando {startIndexCreated + 1} -{" "}
-                      {Math.min(endIndexCreated, createdRoutes.length)} de{" "}
-                      {createdRoutes.length} rutas
+                      Showing {startIndexCreated + 1} -{" "}
+                      {Math.min(endIndexCreated, createdRoutes.length)} of{" "}
+                      {createdRoutes.length} routes
                     </small>
                   </div>
                 )}
@@ -278,15 +278,15 @@ const Profile = () => {
             ) : (
               <div className="text-center py-5">
                 <MapPin size={64} className="text-muted mb-3" />
-                <h4 className="text-muted mb-2">No hay rutas creadas</h4>
+                <h4 className="text-muted mb-2">No created routes</h4>
                 <p className="text-muted">
-                  ¡Crea tu primera ruta para empezar tu aventura!
+                  Create your first route and start your adventure!
                 </p>
               </div>
             )}
           </div>
         ) : (
-          /* Sección de Rutas Favoritas */
+          /* Favorite Routes Section */
           <div className="mb-5">
             {favoriteRoutes.length > 0 ? (
               <>
@@ -301,10 +301,10 @@ const Profile = () => {
                   ))}
                 </div>
 
-                {/* PAGINACIÓN PARA RUTAS FAVORITAS */}
+                {/* PAGINATION FOR FAVORITE ROUTES */}
                 {totalPagesFavorites > 1 && (
                   <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-                    {/* Botón Anterior */}
+                    {/* Previous Button */}
                     <button
                       className="btn btn-outline-warning"
                       onClick={() =>
@@ -313,10 +313,10 @@ const Profile = () => {
                       disabled={currentPageFavorites === 1}
                     >
                       <ChevronLeft size={20} />
-                      Anterior
+                      Previous
                     </button>
 
-                    {/* Números de página */}
+                    {/* Page numbers */}
                     <div className="d-flex gap-2">
                       {[...Array(totalPagesFavorites)].map((_, index) => {
                         const pageNumber = index + 1;
@@ -333,7 +333,7 @@ const Profile = () => {
                       })}
                     </div>
 
-                    {/* Botón Siguiente */}
+                    {/* Next Button */}
                     <button
                       className="btn btn-outline-warning"
                       onClick={() =>
@@ -341,19 +341,19 @@ const Profile = () => {
                       }
                       disabled={currentPageFavorites === totalPagesFavorites}
                     >
-                      Siguiente
+                      Next
                       <ChevronRight size={20} />
                     </button>
                   </div>
                 )}
 
-                {/* Info de paginación */}
+                {/* Pagination info */}
                 {totalPagesFavorites > 1 && (
                   <div className="text-center text-muted mt-3">
                     <small>
-                      Mostrando {startIndexFavorites + 1} -{" "}
-                      {Math.min(endIndexFavorites, favoriteRoutes.length)} de{" "}
-                      {favoriteRoutes.length} rutas
+                      Showing {startIndexFavorites + 1} -{" "}
+                      {Math.min(endIndexFavorites, favoriteRoutes.length)} of{" "}
+                      {favoriteRoutes.length} routes
                     </small>
                   </div>
                 )}
@@ -361,9 +361,9 @@ const Profile = () => {
             ) : (
               <div className="text-center py-5">
                 <Heart size={64} className="text-muted mb-3" />
-                <h4 className="text-muted mb-2">No hay rutas favoritas</h4>
+                <h4 className="text-muted mb-2">No favorite routes</h4>
                 <p className="text-muted">
-                  Guarda tus rutas favoritas para acceder rápidamente a ellas.
+                  Save your favorite routes to access them quickly.
                 </p>
               </div>
             )}
