@@ -23,14 +23,14 @@ import {
   ChevronRight,
   Map,
   LayoutGrid,
+  Globe,
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
-import { STANDARD_ICON_SIZE } from "../utils/constants";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
-import { normalizeText } from "../utils/constants";
+import { normalizeText, STANDARD_ICON_SIZE } from "../utils/constants";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -1215,10 +1215,14 @@ const CreateRoute = () => {
                 {/* Cards de Países Populares */}
                 {!formState.country && (
                   <div className="mb-4">
-                    <h5 className="fw-semibold mb-3">🌍 Most Visited Countries</h5>
+                    <h5 className="fw-semibold mb-3 d-flex align-items-center gap-2">
+                      <Globe size={STANDARD_ICON_SIZE} />
+                      Most Visited Countries
+                    </h5>
+
                     <div className="row g-3">
                       {POPULAR_COUNTRIES.map((country) => (
-                        <div key={country.code} className="col-md-3 col-sm-6">
+                        <div key={country.code} className="col-lg-3 col-md-6">
                           <div
                             className="card h-100 shadow-sm"
                             style={{
@@ -1244,9 +1248,7 @@ const CreateRoute = () => {
                             />
                             <div className="card-body text-center p-2">
                               <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
-                              <small className="text-muted">
-                                {country.visitors} visitors/year
-                              </small>
+                              <small className="text-muted">{country.visitors}</small>
                             </div>
                           </div>
                         </div>
@@ -1264,8 +1266,9 @@ const CreateRoute = () => {
                   !formState.city &&
                   POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
                     <div className="mb-4">
-                      <h5 className="fw-semibold mb-3">
-                        🏙️ Most Visited Cities in {formState.country}
+                      <h5 className="mb-3 d-flex align-items-center gap-2">
+                        <Building2 size={STANDARD_ICON_SIZE} />
+                        Most Visited Cities in {formState.country}
                       </h5>
                       <div className="row g-3">
                         {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map(
