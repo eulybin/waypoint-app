@@ -4,7 +4,8 @@ import useAuth from "../hooks/useAuth";
 import { getRoutesByUser, deleteRoute } from "../services/routesService";
 import { getUserFavorites, removeFavorite } from "../services/favoritesService";
 import RouteMapCard from "../components/Profile/RouteMapCard";
-import { Loader, MapPin, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader, MapPin, Heart, ChevronLeft, ChevronRight, User } from "lucide-react";
+import { HEADER_ICON_SIZE } from "../utils/constants";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -119,7 +120,10 @@ const Profile = () => {
     <div className="container mt-4 mb-5">
       {/* HEADER */}
       <div className="text-center mb-5">
-        <h1 className="display-5 fw-bold mb-2">{user?.name}'s Profile</h1>
+        <div className="mb-4 mt-3 header-icon-badge badge-green"><User size={HEADER_ICON_SIZE} /></div>
+        <h1 className="display-5 fw-bold mb-2">
+          {user?.name?.split(' ')[0].charAt(0).toUpperCase() + user?.name?.split(' ')[0].slice(1).toLowerCase()}'s Profile
+        </h1>
         <p className="text-muted">Manage your created and favorite routes</p>
       </div>
 
