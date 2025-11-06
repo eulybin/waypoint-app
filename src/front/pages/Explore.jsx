@@ -10,7 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
-  Building2
+  Building2,
+  X
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import WeatherWidget from "../components/WeatherWidget";
@@ -220,7 +221,7 @@ const Explore = () => {
             <input
               type="text"
               className="form-control"
-              placeholder="Search by country or city..."
+              placeholder="Search by country or city"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -242,21 +243,29 @@ const Explore = () => {
           <h5 className="mb-3">Active filters:</h5>
           <div className="d-flex gap-2 flex-wrap">
             {selectedCountry && (
-              <span className="badge bg-primary fs-6 d-inline-flex align-items-center">
-                Country: {selectedCountry.name}
+              <span className="badge bg-primary fs-6 d-inline-flex align-items-center gap-2">
+                <span className="fw-normal">Country:</span>{selectedCountry.name}
                 <button
-                  className="btn-close btn-close-white ms-2"
+                  type="button"
+                  className="btn p-0 border-0 bg-transparent d-flex align-items-center"
                   onClick={() => setSelectedCountry(null)}
-                ></button>
+                  aria-label="Clear selected country"
+                >
+                  <X size={14} strokeWidth={3} className="text-white" />
+                </button>
               </span>
             )}
             {selectedCity && (
-              <span className="badge bg-info fs-6 d-inline-flex align-items-center">
-                City: {selectedCity}
+              <span className="badge bg-info fs-6 d-inline-flex align-items-center gap-2">
+                <span className="fw-normal">City:</span> {selectedCity}
                 <button
-                  className="btn-close btn-close-white ms-2"
+                  type="button"
+                  className="btn p-0 border-0 bg-transparent d-flex align-items-center"
                   onClick={() => setSelectedCity(null)}
-                ></button>
+                  aria-label="Clear selected city"
+                >
+                  <X size={14} strokeWidth={3} className="text-white" />
+                </button>
               </span>
             )}
           </div>
