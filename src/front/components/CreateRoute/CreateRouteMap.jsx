@@ -24,9 +24,11 @@ import {
   Church,
   Hotel,
   Mountain,
+  Loader,
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "./CreateRouteMap.css";
+import { HEADER_ICON_SIZE } from "../../utils/constants";
 
 // Fix para los iconos de Leaflet (problema conocido)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -138,6 +140,59 @@ const getMarkerIcon = (type, isSelected) => {
 };
 
 // ============================================================================
+// COMPONENTE DE POPUP REUTILIZABLE
+// ============================================================================
+const POIPopupContent = ({ poi, isSelected, onPOIClick }) => (
+  <div className="p-2" style={{ minWidth: "200px", paddingTop: "8px" }}>
+    <h6 className="fw-bold mb-2" style={{
+      paddingRight: "20px",
+      wordWrap: "break-word",
+      overflowWrap: "break-word"
+    }}>
+      {poi.name}
+    </h6>
+
+    <div className="mb-2">
+      <span className="badge bg-secondary">
+        {poi.type.charAt(0).toUpperCase() + poi.type.slice(1)}
+      </span>
+    </div>
+
+    {poi.address && (
+      <p className="small text-muted mb-2" style={{
+        wordWrap: "break-word",
+        overflowWrap: "break-word"
+      }}>
+        📍 {poi.address}
+      </p>
+    )}
+
+    <button
+      type="button"
+      className={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-2 ${isSelected ? "btn-success" : "btn-primary"
+        }`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onPOIClick(poi);
+      }}
+    >
+      {isSelected ? (
+        <>
+          <Check size={16} />
+          Selected
+        </>
+      ) : (
+        <>
+          <Plus size={16} />
+          Add to Route
+        </>
+      )}
+    </button>
+  </div>
+);
+
+// ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 const CreateRouteMap = ({
@@ -174,13 +229,10 @@ const CreateRouteMap = ({
         style={{ height: "600px" }}
       >
         <div className="text-center p-4">
-          <AlertCircle size={48} className="text-warning mb-3" />
-          <h5 className="fw-bold">No hay POIs con coordenadas válidas</h5>
-          <p className="text-muted">
-            Los puntos de interés de esta categoría no tienen información de
-            ubicación disponible.
-            <br />
-            Prueba con otra categoría o ciudad.
+          <Loader size={HEADER_ICON_SIZE} className="text-primary mb-3 animate-spin" />
+          <h5 className="fw-bold text-dark">Loading Locations</h5>
+          <p className="text-dark">
+            Fetching available locations, please wait.
           </p>
         </div>
       </div>
@@ -188,7 +240,7 @@ const CreateRouteMap = ({
   }
 
   return (
-    <div className="position-relative rounded-3 overflow-hidden shadow">
+    <div className="position-relative overflow-hidden shadow-sm border rounded-3">
       <MapContainer
         center={mapCenter}
         zoom={13}
@@ -230,6 +282,7 @@ const CreateRouteMap = ({
                 box-shadow: 0 3px 8px rgba(0,0,0,0.5);
                 position: relative;
                 z-index: 2000 !important;
+                cursor: pointer;
               ">
                 <div style="
                   position: absolute;
@@ -255,7 +308,15 @@ const CreateRouteMap = ({
                     iconAnchor: [10, 10],
                   })}
                   zIndexOffset={2000}
-                />
+                >
+                  <Popup closeButton={true}>
+                    <POIPopupContent
+                      poi={poi}
+                      isSelected={true}
+                      onPOIClick={onPOIClick}
+                    />
+                  </Popup>
+                </Marker>
               ))}
           </>
         )}
@@ -296,51 +357,23 @@ const CreateRouteMap = ({
           {validPOIs.map((poi) => {
             const isSelected = selectedPOIs.some((p) => p.id === poi.id);
 
+            // Don't show POI marker if it's selected and route line is actually being displayed (2+ POIs)
+            if (isSelected && showRoute && selectedPOIs.length > 1) {
+              return null;
+            }
+
             return (
               <Marker
                 key={poi.id}
                 position={[poi.lat, poi.lon]}
                 icon={getMarkerIcon(poi.type, isSelected)}
               >
-                <Popup>
-                  <div className="p-2" style={{ minWidth: "200px" }}>
-                    {/* Nombre del POI */}
-                    <h6 className="fw-bold mb-2 text-truncate">{poi.name}</h6>
-
-                    {/* Tipo */}
-                    <div className="mb-2">
-                      <span className="badge bg-secondary">{poi.type}</span>
-                    </div>
-
-                    {/* Dirección */}
-                    {poi.address && (
-                      <p className="small text-muted mb-2">📍 {poi.address}</p>
-                    )}
-
-                    {/* Botón de selección */}
-                    <button
-                      type="button"
-                      className={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-2 ${isSelected ? "btn-success" : "btn-primary"
-                        }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onPOIClick(poi);
-                      }}
-                    >
-                      {isSelected ? (
-                        <>
-                          <Check size={16} />
-                          Seleccionado
-                        </>
-                      ) : (
-                        <>
-                          <Plus size={16} />
-                          Agregar a Ruta
-                        </>
-                      )}
-                    </button>
-                  </div>
+                <Popup closeButton={true}>
+                  <POIPopupContent
+                    poi={poi}
+                    isSelected={isSelected}
+                    onPOIClick={onPOIClick}
+                  />
                 </Popup>
               </Marker>
             );
@@ -351,15 +384,14 @@ const CreateRouteMap = ({
       {/* Overlay de información */}
       {validPOIs.length > 0 && (
         <div
-          className="position-absolute top-0 end-0 m-3 bg-white rounded-3 shadow p-3"
+          className="position-absolute top-0 end-0 m-3 bg-white rounded-4 shadow p-3"
           style={{ zIndex: 1000 }}
         >
           <div className="d-flex align-items-center gap-2">
-            <MapPin size={20} className="text-primary" />
             <div>
-              <div className="fw-bold">{validPOIs.length} POIs disponibles</div>
-              <div className="small text-success">
-                {selectedPOIs.length} seleccionados
+              <div className="fw-bold text-dark">{validPOIs.length} Available Locations</div>
+              <div className={`small ${selectedPOIs.length > 0 ? 'text-success' : 'text-danger'}`}>
+                {selectedPOIs.length} selected
               </div>
             </div>
           </div>
@@ -373,10 +405,10 @@ const CreateRouteMap = ({
           style={{ zIndex: 1000, maxWidth: "300px" }}
         >
           <div className="d-flex align-items-start gap-2">
-            <AlertCircle size={16} className="text-dark mt-1 flex-shrink-0" />
+            <AlertCircle size={16} className="text-dark mt-1 shrink-0" />
             <div className="small text-dark">
-              {pois.length - validPOIs.length} POI(s) sin coordenadas válidas no
-              se muestran en el mapa
+              {pois.length - validPOIs.length} POI(s) without valid coordinates are
+              not shown on the map
             </div>
           </div>
         </div>

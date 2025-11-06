@@ -160,7 +160,7 @@ const CreateRoute = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // ========== ESTADO PARA VISTA (MAPA O CARDS) ==========
-  const [viewMode, setViewMode] = useState("cards"); // "cards" o "map"
+  const [viewMode, setViewMode] = useState("map"); // "cards" o "map"
 
   // Estado para imágenes de POIs
   const [poiImages, setPoiImages] = useState({});
@@ -1306,7 +1306,7 @@ const CreateRoute = () => {
                 {/* Puntos de Interés - MÚLTIPLES SELECCIONES CON CARDS */}
                 <div className="mb-3">
                   <label className="form-label fw-semibold">
-                    Points of Interest *{" "}
+                    Locations *{" "}
                     {loadingAll.pois && (
                       <Loader
                         className="d-inline-block animate-spin"
@@ -1326,20 +1326,20 @@ const CreateRoute = () => {
                     <div className="btn-group" role="group">
                       <button
                         type="button"
-                        className={`btn ${viewMode === "cards" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
-                        onClick={() => setViewMode("cards")}
-                      >
-                        <LayoutGrid size={18} />
-                        Cards View
-                      </button>
-                      <button
-                        type="button"
                         className={`btn ${viewMode === "map" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
                         onClick={() => setViewMode("map")}
                         disabled={!formState.city}
                       >
                         <Map size={18} />
                         Map View
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn ${viewMode === "cards" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
+                        onClick={() => setViewMode("cards")}
+                      >
+                        <LayoutGrid size={18} />
+                        Cards View
                       </button>
                     </div>
                   </div>
@@ -1446,8 +1446,8 @@ const CreateRoute = () => {
                   {/* POIs Seleccionados (Tags) */}
                   {formState.points_of_interest.length > 0 && (
                     <div className="mb-3 p-3 bg-body rounded border shadow-sm">
-                      <div className="small fw-semibold mb-2 text-body">
-                        POIs in your Route:
+                      <div className="small fw-semibold mb-2 text-body fs-6">
+                        Locations in your Route:
                       </div>
                       <div className="d-flex flex-wrap gap-2">
                         {formState.points_of_interest.map((poi) => (
