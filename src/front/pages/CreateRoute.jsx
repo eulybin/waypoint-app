@@ -733,6 +733,21 @@ const CreateRoute = () => {
     setShowDropdownAll((prev) => ({ ...prev, countries: false })); // ✅ Cerrar dropdown
   };
 
+  const handleClearCountry = () => {
+    dispatch({
+      type: "SET_COUNTRY",
+      value: "",
+      countryCode: "",
+    });
+    dispatch({
+      type: "SET_CITY",
+      value: "",
+      coordinates: null,
+    });
+    setSearchState((prev) => ({ ...prev, countryQuery: "", cityQuery: "" }));
+    setSuggestions((prev) => ({ ...prev, countries: [], cities: [], pois: [] }));
+  };
+
   const handleSelectCity = (city) => {
     dispatch({
       type: "SET_CITY",
@@ -741,6 +756,16 @@ const CreateRoute = () => {
     });
     setSearchState((prev) => ({ ...prev, cityQuery: city.name }));
     setShowDropdownAll((prev) => ({ ...prev, cities: false })); // ✅ Cerrar dropdown
+  };
+
+  const handleClearCity = () => {
+    dispatch({
+      type: "SET_CITY",
+      value: "",
+      coordinates: null,
+    });
+    setSearchState((prev) => ({ ...prev, cityQuery: "" }));
+    setSuggestions((prev) => ({ ...prev, pois: [] }));
   };
 
   const handleAddPOI = (poi) => {
@@ -988,7 +1013,7 @@ const CreateRoute = () => {
                       <Loader
                         className="position-absolute animate-spin"
                         size={STANDARD_ICON_SIZE}
-                        style={{ right: 12, top: 12 }}
+                        style={{ right: 12, top: 10 }}
                       />
                     )}
 
@@ -1023,8 +1048,15 @@ const CreateRoute = () => {
 
                   {formState.country && (
                     <div className="mt-2">
-                      <span className="badge bg-success">
-                        ✓ {formState.country}
+                      <span className="badge bg-success d-inline-flex align-items-center gap-1 fs-6 py-2">
+                        <span className="fw-normal">Country:</span>
+                        <span className="fw-semibold">{formState.country}</span>
+                        <X
+                          size={14}
+                          strokeWidth={3}
+                          style={{ cursor: 'pointer', marginLeft: '4px' }}
+                          onClick={handleClearCountry}
+                        />
                       </span>
                     </div>
                   )}
@@ -1139,46 +1171,6 @@ const CreateRoute = () => {
                     />
                   </div>
 
-                  {/* Mensaje informativo mejorado */}
-                  {formState.country &&
-                    !loadingAll.cities &&
-                    suggestions.cities.length === 0 &&
-                    !formState.city &&
-                    searchState.cityQuery.length === 0 && (
-                      <div className="alert alert-info mt-2 mb-0 py-2 small">
-                        💡 <strong>Type the name</strong> of the town or
-                        city you are looking for
-                        <br />
-                        <span className="text-muted">
-                          Examples: Carmona, Dos Hermanas, Utrera...
-                        </span>
-                      </div>
-                    )}
-
-                  {/* Mensaje mientras busca */}
-                  {formState.country &&
-                    loadingAll.cities &&
-                    searchState.cityQuery.length >= 3 && (
-                      <div className="alert alert-primary mt-2 mb-0 py-2 small">
-                        🔍 Searching "{searchState.cityQuery}" in{" "}
-                        {formState.country}...
-                      </div>
-                    )}
-
-                  {/* Mensaje si no encuentra resultados */}
-                  {formState.country &&
-                    !loadingAll.cities &&
-                    suggestions.cities.length === 0 &&
-                    searchState.cityQuery.length >= 3 && (
-                      <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                        ⚠️ "{searchState.cityQuery}" not found.
-                        <br />
-                        <span className="text-muted">
-                          Try another name or check the spelling.
-                        </span>
-                      </div>
-                    )}
-
                   {/* Lista de ciudades y localidades (filtrada localmente) */}
                   {showDropdownAll.cities &&
                     formState.country &&
@@ -1242,8 +1234,15 @@ const CreateRoute = () => {
 
                   {formState.city && (
                     <div className="mt-2">
-                      <span className="badge bg-success fs-6 py-2">
-                        ✓ {formState.city}
+                      <span className="badge bg-success d-inline-flex align-items-center gap-1 fs-6 py-2">
+                        <span className="fw-normal">City:</span>
+                        <span className="fw-semibold">{formState.city}</span>
+                        <X
+                          size={14}
+                          strokeWidth={3}
+                          style={{ cursor: 'pointer', marginLeft: '4px' }}
+                          onClick={handleClearCity}
+                        />
                       </span>
                     </div>
                   )}
@@ -1301,17 +1300,8 @@ const CreateRoute = () => {
                           )
                         )}
                       </div>
-                      <hr className="my-4" />
-                      <p className="text-center text-muted small">
-                        Or search for another city/town:
-                      </p>
                     </div>
                   )}
-
-
-
-
-
 
                 {/* Puntos de Interés - MÚLTIPLES SELECCIONES CON CARDS */}
                 <div className="mb-3">
@@ -1455,9 +1445,9 @@ const CreateRoute = () => {
 
                   {/* POIs Seleccionados (Tags) */}
                   {formState.points_of_interest.length > 0 && (
-                    <div className="mb-3 p-3 bg-light rounded">
-                      <div className="small fw-semibold mb-2">
-                        POIs in your route:
+                    <div className="mb-3 p-3 bg-body rounded border shadow-sm">
+                      <div className="small fw-semibold mb-2 text-body">
+                        POIs in your Route:
                       </div>
                       <div className="d-flex flex-wrap gap-2">
                         {formState.points_of_interest.map((poi) => (
@@ -1482,7 +1472,7 @@ const CreateRoute = () => {
                                 lineHeight: 0,
                               }}
                             >
-                              <X size={16} />
+                              <X size={14} />
                             </button>
                           </span>
                         ))}
