@@ -949,20 +949,16 @@ const CreateRoute = () => {
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
                     Country *{" "}
-                    <span className="text-muted small">
-                      (search and select)
-                    </span>
                   </label>
                   <div className="position-relative">
                     <Search
-                      className="position-absolute"
-                      size={20}
-                      style={{ left: 12, top: 12 }}
+                      className="icon_input_position text-muted"
+                      size={STANDARD_ICON_SIZE}
                     />
                     <input
                       type="text"
                       className="form-control ps-5"
-                      placeholder="Search country... Ex: Spain"
+                      placeholder="Search for a country"
                       value={searchState.countryQuery}
                       onChange={(e) =>
                         setSearchState((prev) => ({
@@ -991,7 +987,7 @@ const CreateRoute = () => {
                     {loadingAll.countries && (
                       <Loader
                         className="position-absolute animate-spin"
-                        size={20}
+                        size={STANDARD_ICON_SIZE}
                         style={{ right: 12, top: 12 }}
                       />
                     )}
@@ -1034,7 +1030,49 @@ const CreateRoute = () => {
                   )}
                 </div>
 
+                {!formState.country && (
+                  <div className="mb-4">
+                    <h5 className="fw-semibold mb-3 d-flex align-items-center gap-2">
+                      <Globe size={STANDARD_ICON_SIZE} />
+                      Most Visited Countries
+                    </h5>
 
+                    <div className="row g-3">
+                      {POPULAR_COUNTRIES.map((country) => (
+                        <div key={country.code} className="col-lg-3 col-md-6">
+                          <div
+                            className="card h-100 shadow-sm"
+                            style={{
+                              cursor: "pointer",
+                              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                            }}
+                            onClick={() => handleSelectCountry(country)}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = "translateY(-5px)";
+                              e.currentTarget.style.boxShadow =
+                                "0 8px 20px rgba(0,0,0,0.15)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.boxShadow = "";
+                            }}
+                          >
+                            <img
+                              src={country.image}
+                              className="card-img-top"
+                              alt={country.name}
+                              style={{ height: "120px", objectFit: "cover" }}
+                            />
+                            <div className="card-body text-center p-2">
+                              <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
+                              <small className="text-muted">{country.visitors}</small>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Ciudad/Localidad con Autocompletado */}
                 <div className="mb-3 position-relative">
@@ -1059,9 +1097,8 @@ const CreateRoute = () => {
                   </label>
                   <div className="position-relative">
                     <Search
-                      className="position-absolute"
-                      size={20}
-                      style={{ left: 12, top: 12 }}
+                      className="icon_input_position text-muted"
+                      size={STANDARD_ICON_SIZE}
                     />
                     <input
                       type="text"
@@ -1073,7 +1110,7 @@ const CreateRoute = () => {
                             ? "Searching..."
                             : suggestions.cities.length > 0
                               ? "Type to search more places..."
-                              : "Type the name of the town/city (ex: Carmona)"
+                              : "Search for a city"
                       }
                       value={searchState.cityQuery}
                       onChange={(e) =>
@@ -1195,7 +1232,7 @@ const CreateRoute = () => {
                               {formState.city === city.name && (
                                 <Check
                                   className="text-success flex-shrink-0"
-                                  size={20}
+                                  size={STANDARD_ICON_SIZE}
                                 />
                               )}
                             </div>
@@ -1211,55 +1248,6 @@ const CreateRoute = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Cards de Países Populares */}
-                {!formState.country && (
-                  <div className="mb-4">
-                    <h5 className="fw-semibold mb-3 d-flex align-items-center gap-2">
-                      <Globe size={STANDARD_ICON_SIZE} />
-                      Most Visited Countries
-                    </h5>
-
-                    <div className="row g-3">
-                      {POPULAR_COUNTRIES.map((country) => (
-                        <div key={country.code} className="col-lg-3 col-md-6">
-                          <div
-                            className="card h-100 shadow-sm"
-                            style={{
-                              cursor: "pointer",
-                              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                            }}
-                            onClick={() => handleSelectCountry(country)}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = "translateY(-5px)";
-                              e.currentTarget.style.boxShadow =
-                                "0 8px 20px rgba(0,0,0,0.15)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = "translateY(0)";
-                              e.currentTarget.style.boxShadow = "";
-                            }}
-                          >
-                            <img
-                              src={country.image}
-                              className="card-img-top"
-                              alt={country.name}
-                              style={{ height: "120px", objectFit: "cover" }}
-                            />
-                            <div className="card-body text-center p-2">
-                              <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
-                              <small className="text-muted">{country.visitors}</small>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <hr className="my-4" />
-                    <p className="text-center text-muted small">
-                      Or search for any other country:
-                    </p>
-                  </div>
-                )}
 
                 {/* Cards de Ciudades Populares del País Seleccionado */}
                 {formState.country &&
@@ -1428,9 +1416,9 @@ const CreateRoute = () => {
                           color: "primary",
                         },
                         {
-                          value: "viewpoint",
+                          value: "lookouts",
                           icon: Mountain,
-                          label: "Viewpoints",
+                          label: "Lookouts",
                           color: "success",
                         },
                       ].map((category) => {
@@ -1509,16 +1497,15 @@ const CreateRoute = () => {
                       <div className="position-relative mb-3">
                         <div className="position-relative">
                           <Search
-                            className="position-absolute"
-                            size={20}
-                            style={{ left: 12, top: 12 }}
+                            className="icon_input_position text-muted"
+                            size={STANDARD_ICON_SIZE}
                           />
                           <input
                             type="text"
                             className="form-control ps-5"
                             placeholder={
                               formState.city
-                                ? "Search by name..."
+                                ? "Search by name"
                                 : "First select a city"
                             }
                             value={searchState.poiQuery}
@@ -1648,7 +1635,7 @@ const CreateRoute = () => {
                                               "0 2px 8px rgba(0,0,0,0.3)",
                                           }}
                                         >
-                                          <Check size={20} />
+                                          <Check size={STANDARD_ICON_SIZE} />
                                         </div>
                                       )}
 
@@ -1666,7 +1653,7 @@ const CreateRoute = () => {
                                         }}
                                       >
                                         <IconComponent
-                                          size={20}
+                                          size={STANDARD_ICON_SIZE}
                                           className={`text-${colorClass}`}
                                         />
                                       </div>
@@ -1788,7 +1775,7 @@ const CreateRoute = () => {
                                 }
                                 disabled={currentPage === 1}
                               >
-                                <ChevronLeft size={20} />
+                                <ChevronLeft size={STANDARD_ICON_SIZE} />
                                 Previous
                               </button>
 
@@ -1841,7 +1828,7 @@ const CreateRoute = () => {
                                 disabled={currentPage === getTotalPages()}
                               >
                                 Next
-                                <ChevronRight size={20} />
+                                <ChevronRight size={STANDARD_ICON_SIZE} />
                               </button>
                             </div>
                           )}
@@ -1853,7 +1840,7 @@ const CreateRoute = () => {
                         !loadingAll.pois &&
                         suggestions.pois.length === 0 && (
                           <div className="alert alert-info">
-                            <AlertCircle size={20} className="me-2" />
+                            <AlertCircle size={STANDARD_ICON_SIZE} className="me-2" />
                             No points of interest found for this
                             category. Try another category.
                           </div>
@@ -1864,7 +1851,7 @@ const CreateRoute = () => {
                         suggestions.pois.length > 0 &&
                         getFilteredPOIs().length === 0 && (
                           <div className="alert alert-warning">
-                            <AlertCircle size={20} className="me-2" />
+                            <AlertCircle size={STANDARD_ICON_SIZE} className="me-2" />
                             No results found for "
                             {searchState.poiQuery}". Try another search term.
                           </div>
@@ -1908,7 +1895,7 @@ const CreateRoute = () => {
                     className="alert alert-danger d-flex align-items-center gap-2"
                     role="alert"
                   >
-                    <AlertCircle size={20} />
+                    <AlertCircle size={STANDARD_ICON_SIZE} />
                     Registration Required
                   </div>
                 )}
