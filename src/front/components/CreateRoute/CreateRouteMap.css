@@ -82,12 +82,12 @@
 }
 
 /* Overlay de información - ajustes para dark mode */
-[data-bs-theme="dark"] .leaflet-popup-content-wrapper {
+[data-bs-theme='dark'] .leaflet-popup-content-wrapper {
   background-color: #212529 !important;
   color: #f8f9fa !important;
 }
 
-[data-bs-theme="dark"] .leaflet-popup-tip {
+[data-bs-theme='dark'] .leaflet-popup-tip {
   background-color: #212529 !important;
 }
 

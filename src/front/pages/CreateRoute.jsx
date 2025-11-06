@@ -25,13 +25,14 @@ import {
   Map,
   LayoutGrid,
   Globe,
+  MapPinPlus,
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
-import { normalizeText, STANDARD_ICON_SIZE } from "../utils/constants";
+import { normalizeText, STANDARD_ICON_SIZE, HEADER_ICON_SIZE } from "../utils/constants";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -967,14 +968,17 @@ const CreateRoute = () => {
   return (
     <div className="container-fluid p-4">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="display-4 fw-bold mb-2">Create New Route</h1>
-
+      <div className="text-center mb-4 mt-3">
+        <div className="mb-3 header-icon-badge badge-orange"><MapPinPlus size={HEADER_ICON_SIZE} /></div>
+        <h1 className="display-4 fw-bold mb-2">Create a New Route</h1>
+        <p className="lead text-muted">
+          Create and share your routes for any city in the world
+        </p>
       </div>
       {/* Formulario */}
       <div className="row">
         <div className="col-12">
-          <div className="card shadow-sm">
+          <div className="card shadow-sm border">
             <div className="card-body p-4">
               <form onSubmit={handleSubmit}>
                 {/* País con Autocompletado */}

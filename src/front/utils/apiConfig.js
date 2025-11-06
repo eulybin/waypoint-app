@@ -62,7 +62,7 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 minutos (aumentado de 5)
 
 // Sistema de control de peticiones para evitar rate limiting
 let lastOverpassRequest = 0;
-const MIN_OVERPASS_INTERVAL = 2000; // 2 segundos mínimo entre peticiones
+const MIN_OVERPASS_INTERVAL = 1000; // 1 segundo mínimo entre peticiones (reducido de 2s para mejor UX)
 
 const getCacheKey = (prefix, ...args) => {
   return `${prefix}_${args.join('_')}`;
