@@ -317,7 +317,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   : route.points_of_interest?.slice(0, 3)
                 )?.map((poi, index) => (
                   <span key={index} className="badge bg-secondary-subtle text-body border">
-                    {poi}
+                    {typeof poi === 'string' ? poi : poi.name}
                   </span>
                 ))}
 
@@ -445,7 +445,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   : route.points_of_interest?.slice(0, 3)
                 )?.map((poi, index) => (
                   <span key={index} className="badge bg-secondary-subtle text-body border">
-                    {poi}
+                    {typeof poi === 'string' ? poi : poi.name}
                   </span>
                 ))}
 

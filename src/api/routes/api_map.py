@@ -13,65 +13,67 @@ def get_all_routes():
     except Exception as e:
         return jsonify({"message": "Error al obtener rutas"}), 500
 
+
 def calculate_distance(coord1, coord2):
     """Calcula la distancia entre dos coordenadas usando la fórmula de Haversine"""
     from math import radians, sin, cos, sqrt, atan2
-    
+
     lat1, lon1 = coord1
     lat2, lon2 = coord2
-    
+
     # Radio de la Tierra en kilómetros
     R = 6371.0
-    
+
     # Convertir grados a radianes
     lat1_rad = radians(lat1)
     lon1_rad = radians(lon1)
     lat2_rad = radians(lat2)
     lon2_rad = radians(lon2)
-    
+
     # Diferencias
     dlat = lat2_rad - lat1_rad
     dlon = lon2_rad - lon1_rad
-    
+
     # Fórmula de Haversine
-    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
+    a = sin(dlat / 2) ** 2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    
+
     distance = R * c
     return distance
+
 
 def order_points_by_proximity(points):
     """Ordena los puntos usando el algoritmo del vecino más cercano"""
     if len(points) <= 1:
         return points
-    
+
     ordered_points = []
     remaining_points = points.copy()
-    
+
     # Empezar desde el primer punto
     current_point = remaining_points.pop(0)
     ordered_points.append(current_point)
-    
+
     # Mientras queden puntos por visitar
     while remaining_points:
-        current_coords = [current_point['lat'], current_point['lon']]
-        
+        current_coords = [current_point["lat"], current_point["lon"]]
+
         # Encontrar el punto más cercano
-        min_distance = float('inf')
+        min_distance = float("inf")
         closest_index = 0
-        
+
         for i, point in enumerate(remaining_points):
-            point_coords = [point['lat'], point['lon']]
+            point_coords = [point["lat"], point["lon"]]
             distance = calculate_distance(current_coords, point_coords)
-            
+
             if distance < min_distance:
                 min_distance = distance
                 closest_index = i
-        
+
         # Añadir el punto más cercano a la ruta ordenada
         current_point = remaining_points.pop(closest_index)
         ordered_points.append(current_point)
-    
+
     return ordered_points
 
 
@@ -96,21 +98,27 @@ def create_route():
         # Extraer coordenadas de los puntos de interés para crear la polilínea
         points_of_interest = data.get("points_of_interest", [])
         route_path = []
-        poi_names = []
-        
+        poi_data = []
+
         if isinstance(points_of_interest, list) and len(points_of_interest) > 0:
             # Ordenar los puntos por proximidad (vecino más cercano)
             ordered_pois = order_points_by_proximity(points_of_interest)
-            
+
             for poi in ordered_pois:
                 # Asegurarse de que cada POI es un diccionario con lat y lon
-                if isinstance(poi, dict) and 'lat' in poi and 'lon' in poi:
-                    route_path.append([poi['lat'], poi['lon']])
-                    poi_names.append(poi.get('name', 'POI sin nombre'))
-        
+                if isinstance(poi, dict) and "lat" in poi and "lon" in poi:
+                    route_path.append([poi["lat"], poi["lon"]])
+                    # Store POI with name, type, and address for frontend display
+                    poi_data.append(
+                        {
+                            "name": poi.get("name", "POI sin nombre"),
+                            "type": poi.get("type", "attraction"),
+                        }
+                    )
+
         # Guardar el array de coordenadas como un string JSON
         coordinates_json = json.dumps(route_path) if route_path else None
-        poi_names_json = json.dumps(poi_names) if poi_names else json.dumps([])
+        poi_data_json = json.dumps(poi_data) if poi_data else json.dumps([])
 
         # Crear ruta
         new_route = Route(
@@ -118,7 +126,7 @@ def create_route():
             country=data["country"],
             city=data["city"],
             locality=data.get("locality", ""),
-            points_of_interest=poi_names_json,
+            points_of_interest=poi_data_json,
             coordinates=coordinates_json,
         )
 
@@ -147,6 +155,7 @@ def create_route():
             500,
         )
 
+
 def get_route_detail(route_id):
     """Obtener detalle de una ruta específica"""
     try:
@@ -156,6 +165,7 @@ def get_route_detail(route_id):
         return jsonify(route.serialize()), 200
     except Exception as e:
         return jsonify({"message": "Error al obtener ruta"}), 500
+
 
 def update_route(route_id):
     """Actualizar ruta - solo el autor"""
@@ -200,6 +210,7 @@ def update_route(route_id):
     except Exception as e:
         return jsonify({"message": "Error al actualizar ruta"}), 500
 
+
 def delete_route(route_id):
     """Eliminar ruta - solo autor o admin"""
     try:
@@ -224,7 +235,7 @@ def delete_route(route_id):
 
     except Exception as e:
         return jsonify({"message": "Error al eliminar ruta"}), 500
-    
+
 
 def get_routes_by_city(city):
     # Obtener rutas por ciudad
@@ -235,6 +246,7 @@ def get_routes_by_city(city):
         return jsonify([route.serialize() for route in routes]), 200
     except Exception as e:
         return jsonify({"message": "Error al obtener rutas por ciudad"}), 500
+
 
 def get_routes_by_user(user_id):
     # Obtener rutas de un usuario específico
@@ -247,6 +259,7 @@ def get_routes_by_user(user_id):
         return jsonify([route.serialize() for route in routes]), 200
     except Exception as e:
         return jsonify({"message": "Error al obtener rutas del usuario"}), 500
+
 
 def get_top_routes():
     # Obtener top rutas por rating

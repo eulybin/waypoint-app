@@ -153,6 +153,7 @@ const FullscreenMapModal = ({
             coordinates={coordinates}
             color={lineColor}
             pointsOfInterest={route.points_of_interest}
+            isFullscreen={true}
           />
         </MapContainer>
 
@@ -377,7 +378,7 @@ const FullscreenMapModal = ({
                         key={index}
                         className="badge bg-secondary-subtle text-body border small"
                       >
-                        {poi}
+                        {typeof poi === 'string' ? poi : poi.name}
                       </span>
                     ))}
                   </div>

@@ -1,24 +1,44 @@
 /**
- * COMPONENTE: RouteMarkers
+ * COMPONENT: RouteMarkers
  * 
- * Renderiza los marcadores numerados en cada punto de interés (POI)
- * Cada marcador tiene un número y un popup con información
+ * Renders numbered markers at each point of interest (POI)
+ * Each marker has a number and a popup with information
  */
 
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import { CATEGORY_NAMES } from "../../utils/categoryNames";
 
 /**
- * Crea un icono personalizado para cada marcador
+ * Get color class for POI category
+ */
+const getPOIColor = (type) => {
+    const colorMap = {
+        attraction: "primary",
+        museum: "info",
+        restaurant: "danger",
+        cafe: "warning",
+        bar: "success",
+        park: "success",
+        monument: "secondary",
+        church: "info",
+        hotel: "primary",
+        viewpoint: "success",
+    };
+    return colorMap[type] || "primary";
+};
+
+/**
+ * Creates a custom icon for each marker
  * 
- * @param {number} number - Número del punto (1, 2, 3...)
- * @param {string} color - Color del marcador ('blue' o 'orange')
- * @returns {L.DivIcon} - Icono de Leaflet
+ * @param {number} number - Point number (1, 2, 3...)
+ * @param {string} color - Marker color ('blue' or 'orange')
+ * @returns {L.DivIcon} - Leaflet icon
  */
 const createNumberedIcon = (number, color) => {
-    // Creamos un icono HTML personalizado con número
+    // Create a custom HTML icon with number
     return L.divIcon({
-        className: 'custom-marker', // Clase CSS personalizada
+        className: 'custom-marker', // Custom CSS class
         html: `
       <div style="
         background-color: ${color};
@@ -37,43 +57,59 @@ const createNumberedIcon = (number, color) => {
         ${number}
       </div>
     `,
-        iconSize: [30, 30], // Tamaño del icono
-        iconAnchor: [15, 15], // Punto de anclaje (centro)
-        popupAnchor: [0, -15], // Dónde aparece el popup
+        iconSize: [30, 30], // Icon size
+        iconAnchor: [15, 15], // Anchor point (center)
+        popupAnchor: [0, -15], // Where the popup appears
     });
 };
 
 /**
- * Componente que renderiza todos los marcadores de la ruta
+ * Component that renders all route markers
  */
-const RouteMarkers = ({ coordinates, color = "blue", pointsOfInterest = [] }) => {
-    // Si no hay coordenadas, no renderizamos nada
+const RouteMarkers = ({ coordinates, color = "blue", pointsOfInterest = [], isFullscreen = false }) => {
+    // If no coordinates, render nothing
     if (!coordinates || coordinates.length === 0) return null;
+
+    // Popup size based on fullscreen or regular view
+    const popupPadding = isFullscreen ? 'p-4' : 'p-3';
+    const popupMinWidth = isFullscreen ? '180px' : '150px';
+    const badgeFontSize = isFullscreen ? '0.8rem' : '0.7rem';
+    const nameFontSize = isFullscreen ? '1rem' : '0.9rem';
 
     return (
         <>
-            {/* Mapeamos cada coordenada para crear un marcador */}
+            {/* Map each coordinate to create a marker */}
             {coordinates.map((coord, index) => (
                 <Marker
                     key={`marker-${index}`}
                     position={coord} // [lat, lng]
-                    icon={createNumberedIcon(index + 1, color)} // Número del 1 al N
+                    icon={createNumberedIcon(index + 1, color)} // Number from 1 to N
                 >
-                    {/* Popup que aparece al hacer clic en el marcador */}
+                    {/* Popup that appears when clicking the marker */}
                     <Popup>
-                        <div style={{ textAlign: 'center' }}>
-                            <strong>Punto {index + 1}</strong>
-                            <br />
-                            {/* Si hay nombre del punto de interés, lo mostramos */}
-                            {pointsOfInterest[index] && (
+                        <div className={`text-center ${popupPadding}`} style={{ minWidth: popupMinWidth }}>
+                            {/* Show category if POI is an object with type */}
+                            {pointsOfInterest[index]?.type && (
                                 <>
-                                    <small>{pointsOfInterest[index]}</small>
+                                    <span
+                                        className={`badge bg-${getPOIColor(pointsOfInterest[index].type)} text-white mb-2`}
+                                        style={{ fontSize: badgeFontSize }}
+                                    >
+                                        {CATEGORY_NAMES[pointsOfInterest[index].type] || pointsOfInterest[index].type}
+                                    </span>
                                     <br />
                                 </>
                             )}
-                            <small className="text-muted">
-                                {coord[0].toFixed(4)}, {coord[1].toFixed(4)}
-                            </small>
+                            {/* If there's a point of interest name, show it */}
+                            {pointsOfInterest[index] && (
+                                <>
+                                    <strong style={{ fontSize: nameFontSize }}>
+                                        {typeof pointsOfInterest[index] === 'string'
+                                            ? pointsOfInterest[index]
+                                            : pointsOfInterest[index].name}
+                                    </strong>
+                                </>
+                            )}
                         </div>
                     </Popup>
                 </Marker>
