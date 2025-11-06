@@ -29,6 +29,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import "./CreateRouteMap.css";
 import { HEADER_ICON_SIZE } from "../../utils/constants";
+import { CATEGORY_NAMES } from "../../utils/categoryNames";
 
 // Fix para los iconos de Leaflet (problema conocido)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -56,6 +57,7 @@ const iconComponentMap = {
   hotel: Hotel,
   attraction: Compass,
   viewpoint: Mountain,
+  lookouts: Mountain,
 };
 
 // Mapeo de tipos a colores Bootstrap
@@ -70,6 +72,7 @@ const iconColorMap = {
   church: '#0dcaf0',        // info
   hotel: '#0d6efd',         // primary
   viewpoint: '#198754',     // success
+  lookouts: '#198754',      // success
 };
 
 const getMarkerIcon = (type, isSelected) => {
@@ -199,9 +202,12 @@ const CreateRouteMap = ({
   center = [40.4168, -3.7038], // Madrid por defecto
   pois = [],
   selectedPOIs = [],
+  categoryType = 'attraction', // Tipo de categoría seleccionada
   onPOIClick,
   showRoute = true, // Mostrar líneas entre POIs seleccionados
 }) => {
+  const categoryDisplayName = CATEGORY_NAMES[categoryType] || 'Locations';
+
   // Si no hay centro válido, usar Madrid
   const mapCenter =
     center && center[0] && center[1] ? center : [40.4168, -3.7038];
@@ -230,9 +236,9 @@ const CreateRouteMap = ({
       >
         <div className="text-center p-4">
           <Loader size={HEADER_ICON_SIZE} className="text-primary mb-3 animate-spin" />
-          <h5 className="fw-bold text-dark">Loading Locations</h5>
+          <h5 className="fw-bold text-dark">Loading {categoryDisplayName}</h5>
           <p className="text-dark">
-            Fetching available locations, please wait.
+            Fetching available {categoryDisplayName.toLowerCase()}, please wait.
           </p>
         </div>
       </div>
@@ -384,12 +390,12 @@ const CreateRouteMap = ({
       {/* Overlay de información */}
       {validPOIs.length > 0 && (
         <div
-          className="position-absolute top-0 end-0 m-3 bg-white rounded-4 shadow p-3"
+          className="position-absolute top-0 end-0 m-3 bg-body border rounded-4 shadow p-3 d-flex flex-column align-items-center justify-content-center gap-1"
           style={{ zIndex: 1000 }}
         >
           <div className="d-flex align-items-center gap-2">
             <div>
-              <div className="fw-bold text-dark">{validPOIs.length} Available Locations</div>
+              <div className="fw-bold text-body">{validPOIs.length} Available Locations</div>
               <div className={`small ${selectedPOIs.length > 0 ? 'text-success' : 'text-danger'}`}>
                 {selectedPOIs.length} selected
               </div>

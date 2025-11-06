@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getPlaceImage } from "../services/imageService";
 import {
   MapPin,
+  Pin,
   Plus,
   X,
   Search,
@@ -169,6 +170,7 @@ const CreateRoute = () => {
   const countryDebounceRef = useRef(null);
   const cityDebounceRef = useRef(null);
   const poiDebounceRef = useRef(null);
+  const mapContainerRef = useRef(null);
 
   // ✅ OPTIMIZACIÓN: Gestión centralizada de AbortControllers
   const abortControllersRef = useRef({
@@ -392,9 +394,8 @@ const CreateRoute = () => {
         // ✅ OPTIMIZACIÓN: No mostrar error si fue cancelado
         if (error.name !== "AbortError") {
           console.error("Error loading cities:", error);
-          if (!controller.signal.aborted) {
-            setError("Error al cargar sugerencias. Puedes buscar manualmente.");
-          }
+          // Don't set error state - users can still search manually
+          // The UI shows appropriate messages already
         }
       } finally {
         // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
@@ -457,9 +458,8 @@ const CreateRoute = () => {
 
       if (pois.length === 0) {
         if (!controller.signal.aborted) {
-          setError(
-            "⏳ No se encontraron puntos de interés. Puede que el servidor esté ocupado. Intenta de nuevo en 1 minuto."
-          );
+          // Don't set error for empty results - it's normal for some categories
+          console.log("No POIs found for this category and location");
         }
       } else {
         // ✅ OPTIMIZACIÓN: Limitar número de POIs para mejor rendimiento
@@ -473,11 +473,8 @@ const CreateRoute = () => {
       // ✅ OPTIMIZACIÓN: No mostrar error si fue cancelado
       if (error.name !== "AbortError") {
         console.error("Error loading POIs:", error);
-        if (!controller.signal.aborted) {
-          setError(
-            "❌ Error al cargar puntos de interés. Por favor, espera 1-2 minutos e intenta de nuevo."
-          );
-        }
+        // Don't set error state - POI loading failures shouldn't block the form
+        // The UI already shows "No points of interest found" message
       }
     } finally {
       // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
@@ -756,6 +753,16 @@ const CreateRoute = () => {
     });
     setSearchState((prev) => ({ ...prev, cityQuery: city.name }));
     setShowDropdownAll((prev) => ({ ...prev, cities: false })); // ✅ Cerrar dropdown
+
+    // Scroll to map after city selection
+    setTimeout(() => {
+      if (mapContainerRef.current) {
+        mapContainerRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }, 100);
   };
 
   const handleClearCity = () => {
@@ -1047,7 +1054,7 @@ const CreateRoute = () => {
                     )}
 
                   {formState.country && (
-                    <div className="mt-2">
+                    <div className="mt-3">
                       <span className="badge bg-success d-inline-flex align-items-center gap-1 fs-6 py-2">
                         <span className="fw-normal">Country:</span>
                         <span className="fw-semibold">{formState.country}</span>
@@ -1197,7 +1204,7 @@ const CreateRoute = () => {
                             >
                               <div className="flex-grow-1">
                                 <div className="fw-semibold d-flex align-items-center gap-2">
-                                  <MapPin size={16} className="text-primary" />
+                                  <MapPin size={16} className="text-body" />
                                   {city.name}
                                   {city.type && (
                                     <span className="badge bg-secondary text-white small">
@@ -1217,8 +1224,7 @@ const CreateRoute = () => {
                                   {city.displayName}
                                 </div>
                                 <div className="extra-small text-muted">
-                                  📍 {city.lat.toFixed(4)},{" "}
-                                  {city.lon.toFixed(4)}
+                                  📍 {city.lat.toFixed(4)}, {city.lon.toFixed(4)}
                                 </div>
                               </div>
                               {formState.city === city.name && (
@@ -1233,7 +1239,7 @@ const CreateRoute = () => {
                     )}
 
                   {formState.city && (
-                    <div className="mt-2">
+                    <div className="mt-3">
                       <span className="badge bg-success d-inline-flex align-items-center gap-1 fs-6 py-2">
                         <span className="fw-normal">City:</span>
                         <span className="fw-semibold">{formState.city}</span>
@@ -1252,7 +1258,7 @@ const CreateRoute = () => {
                 {formState.country &&
                   !formState.city &&
                   POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
-                    <div className="mb-4">
+                    <div className="mb-3">
                       <h5 className="mb-3 d-flex align-items-center gap-2">
                         <Building2 size={STANDARD_ICON_SIZE} />
                         Most Visited Cities in {formState.country}
@@ -1304,23 +1310,7 @@ const CreateRoute = () => {
                   )}
 
                 {/* Puntos de Interés - MÚLTIPLES SELECCIONES CON CARDS */}
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">
-                    Locations *{" "}
-                    {loadingAll.pois && (
-                      <Loader
-                        className="d-inline-block animate-spin"
-                        size={16}
-                      />
-                    )}
-                    {formState.city && (
-                      <span className="text-muted small ms-2">
-                        ({formState.points_of_interest.length} selected,{" "}
-                        {suggestions.pois.length} available)
-                      </span>
-                    )}
-                  </label>
-
+                <div className={`mb-3 ${formState.city ? 'mt-3' : 'mt-5'}`}>
                   {/* Toggle entre Vista de Cards y Mapa */}
                   <div className="mb-3 d-flex justify-content-center">
                     <div className="btn-group" role="group">
@@ -1345,8 +1335,8 @@ const CreateRoute = () => {
                   </div>
 
                   {/* Selector de categoría de POI con Botones */}
-                  <div className="mb-3">
-                    <label className="form-label small fw-semibold">
+                  <div ref={mapContainerRef} className="mb-3">
+                    <label className="form-label fw-semibold">
                       Select a category:
                     </label>
                     <div className="d-flex flex-wrap gap-2">
@@ -1446,8 +1436,20 @@ const CreateRoute = () => {
                   {/* POIs Seleccionados (Tags) */}
                   {formState.points_of_interest.length > 0 && (
                     <div className="mb-3 p-3 bg-body rounded border shadow-sm">
-                      <div className="small fw-semibold mb-2 text-body fs-6">
-                        Locations in your Route:
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <div className="small fw-semibold text-body fs-6">
+                          Locations in your Route:
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => {
+                            formState.points_of_interest.forEach((poi) => handleRemovePOI(poi.id));
+                          }}
+                          title="Clear all locations"
+                        >
+                          Clear All
+                        </button>
                       </div>
                       <div className="d-flex flex-wrap gap-2">
                         {formState.points_of_interest.map((poi) => (
@@ -1863,6 +1865,7 @@ const CreateRoute = () => {
                         }
                         pois={suggestions.pois}
                         selectedPOIs={formState.points_of_interest}
+                        categoryType={searchState.poiType}
                         onPOIClick={(poi) => {
                           const isSelected = formState.points_of_interest.some(
                             (p) => p.id === poi.id
@@ -1886,7 +1889,7 @@ const CreateRoute = () => {
                     role="alert"
                   >
                     <AlertCircle size={STANDARD_ICON_SIZE} />
-                    Registration Required
+                    {error}
                   </div>
                 )}
 
