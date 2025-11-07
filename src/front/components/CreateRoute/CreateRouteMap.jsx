@@ -28,7 +28,18 @@ import {
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "./CreateRouteMap.css";
-import { HEADER_ICON_SIZE } from "../../utils/constants";
+import {
+  HEADER_ICON_SIZE,
+  MAP_HEIGHT,
+  POPUP_MIN_WIDTH,
+  MARKER_ICON_SIZE,
+  MARKER_ICON_SIZE_SELECTED,
+  ROUTE_POINT_SIZE,
+  CLUSTER_SIZE,
+  ROUTE_POINT_NUMBER_FONT_SIZE,
+  BORDER_RADIUS_MD,
+  BORDER_RADIUS_CIRCLE
+} from "../../utils/constants";
 import { CATEGORY_NAMES_PLURAL, getPOIColor, getPOIHexColor } from "../../utils/categoryInfo";
 
 // Fix para los iconos de Leaflet (problema conocido)
@@ -74,8 +85,8 @@ const getMarkerIcon = (type, isSelected) => {
       html: `
         <div style="
           position: relative;
-          width: 40px;
-          height: 40px;
+          width: ${MARKER_ICON_SIZE_SELECTED}px;
+          height: ${MARKER_ICON_SIZE_SELECTED}px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -87,11 +98,11 @@ const getMarkerIcon = (type, isSelected) => {
         </div>
       `,
       className: 'custom-marker-selected',
-      iconSize: [40, 40],
-      iconAnchor: [20, 38],
-      popupAnchor: [0, -38],
+      iconSize: [MARKER_ICON_SIZE_SELECTED, MARKER_ICON_SIZE_SELECTED],
+      iconAnchor: [MARKER_ICON_SIZE_SELECTED / 2, MARKER_ICON_SIZE_SELECTED - 2],
+      popupAnchor: [0, -(MARKER_ICON_SIZE_SELECTED - 2)],
     });
-  }
+  };
 
   // Si NO está seleccionado, mostrar icono de la categoría
   const iconSvg = ReactDOMServer.renderToString(
@@ -102,13 +113,13 @@ const getMarkerIcon = (type, isSelected) => {
     html: `
       <div style="
         position: relative;
-        width: 36px;
-        height: 36px;
+        width: ${MARKER_ICON_SIZE}px;
+        height: ${MARKER_ICON_SIZE}px;
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: ${iconColor};
-        border-radius: 50%;
+        border-radius: ${BORDER_RADIUS_CIRCLE};
         border: 3px solid white;
         box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         cursor: pointer;
@@ -117,9 +128,9 @@ const getMarkerIcon = (type, isSelected) => {
       </div>
     `,
     className: 'custom-marker-icon',
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -36],
+    iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
+    iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE],
+    popupAnchor: [0, -MARKER_ICON_SIZE],
   });
 };
 
@@ -127,7 +138,7 @@ const getMarkerIcon = (type, isSelected) => {
 // COMPONENTE DE POPUP REUTILIZABLE
 // ============================================================================
 const POIPopupContent = ({ poi, isSelected, onPOIClick }) => (
-  <div className="p-3" style={{ minWidth: "220px", paddingTop: "10px" }}>
+  <div className="p-3" style={{ minWidth: POPUP_MIN_WIDTH, paddingTop: "10px" }}>
     <h6 className="fw-bold mb-3" style={{
       paddingRight: "20px",
       wordWrap: "break-word",
@@ -235,7 +246,7 @@ const CreateRouteMap = ({
     return (
       <div
         className="position-relative rounded-3 overflow-hidden shadow bg-light d-flex align-items-center justify-content-center"
-        style={{ height: "600px" }}
+        style={{ height: MAP_HEIGHT }}
       >
         <div className="text-center p-4">
           <Loader size={HEADER_ICON_SIZE} className="text-primary mb-3 animate-spin" />
@@ -253,7 +264,7 @@ const CreateRouteMap = ({
       <MapContainer
         center={mapCenter}
         zoom={13}
-        style={{ height: "600px", width: "100%" }}
+        style={{ height: MAP_HEIGHT, width: "100%" }}
         scrollWheelZoom={true}
       >
         {/* Capa del mapa */}
@@ -283,11 +294,11 @@ const CreateRouteMap = ({
                   icon={L.divIcon({
                     html: `
               <div style="
-                width: 20px;
-                height: 20px;
+                width: ${ROUTE_POINT_SIZE}px;
+                height: ${ROUTE_POINT_SIZE}px;
                 background-color: #0d6efd;
                 border: 4px solid white;
-                border-radius: 50%;
+                border-radius: ${BORDER_RADIUS_CIRCLE};
                 box-shadow: 0 3px 8px rgba(0,0,0,0.5);
                 position: relative;
                 z-index: 2000 !important;
@@ -301,8 +312,8 @@ const CreateRouteMap = ({
                   background: #0d6efd;
                   color: white;
                   padding: 3px 8px;
-                  border-radius: 12px;
-                  font-size: 12px;
+                  border-radius: ${BORDER_RADIUS_MD};
+                  font-size: ${ROUTE_POINT_NUMBER_FONT_SIZE};
                   font-weight: bold;
                   white-space: nowrap;
                   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
@@ -313,8 +324,8 @@ const CreateRouteMap = ({
               </div>
             `,
                     className: 'route-point-marker',
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10],
+                    iconSize: [ROUTE_POINT_SIZE, ROUTE_POINT_SIZE],
+                    iconAnchor: [ROUTE_POINT_SIZE / 2, ROUTE_POINT_SIZE / 2],
                   })}
                   zIndexOffset={2000}
                 >
@@ -344,9 +355,9 @@ const CreateRouteMap = ({
                 <div style="
                   background-color: #1c14fdff;
                   color: white;
-                  border-radius: 50%;
-                  width: 40px;
-                  height: 40px;
+                  border-radius: ${BORDER_RADIUS_CIRCLE};
+                  width: ${CLUSTER_SIZE}px;
+                  height: ${CLUSTER_SIZE}px;
                   display: flex;
                   align-items: center;
                   justify-content: center;

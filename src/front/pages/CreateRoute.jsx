@@ -32,8 +32,31 @@ import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
-import { normalizeText, STANDARD_ICON_SIZE, HEADER_ICON_SIZE } from "../utils/constants";
+import {
+  normalizeText,
+  STANDARD_ICON_SIZE,
+  HEADER_ICON_SIZE,
+  DROPDOWN_MAX_HEIGHT,
+  POI_CARD_IMAGE_HEIGHT,
+  SUGGESTION_ITEM_IMAGE_HEIGHT,
+  POI_CATEGORY_BADGE_FONT_SIZE,
+  POI_DESCRIPTION_FONT_SIZE,
+  POI_NAME_FONT_SIZE,
+  POI_CARD_CONTENT_HEIGHT,
+  POI_PREVIEW_IMAGE_HEIGHT,
+  CLOSE_BUTTON_SIZE,
+  BORDER_RADIUS_SM,
+  BORDER_RADIUS_MD,
+  BORDER_RADIUS_CIRCLE,
+  PAGINATION_MIN_WIDTH,
+  ITEMS_PER_PAGE
+} from "../utils/constants";
 import { getPOIColor } from "../utils/categoryInfo";
+import { poiCategories } from "../utils/poiCategories";
+import { DEFAULT_IMAGES } from "../utils/defaultImages";
+
+// Icon map for POI categories
+const iconMap = { Compass, Building2, UtensilsCrossed, Coffee, Beer, Trees, Landmark, Church, Hotel, Mountain };
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -93,34 +116,6 @@ const initialFormState = {
   city: "",
   coordinates: null,
   points_of_interest: [],
-};
-
-// ============================================================================
-// CONSTANTES PARA PAGINACIÓN
-// ============================================================================
-const ITEMS_PER_PAGE = 8;
-
-// ============================================================================
-// IMÁGENES POR DEFECTO SEGÚN TIPO DE POI
-// ============================================================================
-const DEFAULT_IMAGES = {
-  attraction:
-    "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400&h=300&fit=crop",
-  museum:
-    "https://images.unsplash.com/photo-1565626424178-c699f6601afd?w=400&h=300&fit=crop",
-  restaurant:
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
-  cafe: "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&h=300&fit=crop",
-  bar: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop",
-  park: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
-  monument:
-    "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=300&fit=crop",
-  church:
-    "https://images.unsplash.com/photo-1491677533189-49215d7e8c2e?w=400&h=300&fit=crop",
-  hotel:
-    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
-  viewpoint:
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
 };
 
 // ============================================================================
@@ -794,6 +789,7 @@ const CreateRoute = () => {
           id: poi.id,
           name: poi.name,
           type: poi.type,
+          address: poi.address,
           lat: poi.lat,
           lon: poi.lon,
         },
@@ -1019,7 +1015,7 @@ const CreateRoute = () => {
                         className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
                         style={{
                           zIndex: 1000,
-                          maxHeight: "300px",
+                          maxHeight: DROPDOWN_MAX_HEIGHT,
                           overflowY: "auto",
                         }}
                       >
@@ -1086,7 +1082,7 @@ const CreateRoute = () => {
                               src={country.image}
                               className="card-img-top"
                               alt={country.name}
-                              style={{ height: "120px", objectFit: "cover" }}
+                              style={{ height: SUGGESTION_ITEM_IMAGE_HEIGHT, objectFit: "cover" }}
                             />
                             <div className="card-body text-center p-2">
                               <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
@@ -1172,7 +1168,7 @@ const CreateRoute = () => {
                         className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
                         style={{
                           zIndex: 1000,
-                          maxHeight: "400px",
+                          maxHeight: DROPDOWN_MAX_HEIGHT,
                           overflowY: "auto",
                         }}
                       >
@@ -1278,7 +1274,7 @@ const CreateRoute = () => {
                                   className="card-img-top"
                                   alt={city.name}
                                   style={{
-                                    height: "100px",
+                                    height: POI_PREVIEW_IMAGE_HEIGHT,
                                     objectFit: "cover",
                                   }}
                                 />
@@ -1326,69 +1322,8 @@ const CreateRoute = () => {
                       Select a category:
                     </label>
                     <div className="d-flex flex-wrap gap-2">
-                      {[
-                        {
-                          value: "attraction",
-                          icon: Compass,
-                          label: "Attractions",
-                          color: "primary",
-                        },
-                        {
-                          value: "museum",
-                          icon: Building2,
-                          label: "Museums",
-                          color: "info",
-                        },
-                        {
-                          value: "restaurant",
-                          icon: UtensilsCrossed,
-                          label: "Restaurants",
-                          color: "danger",
-                        },
-                        {
-                          value: "cafe",
-                          icon: Coffee,
-                          label: "Cafés",
-                          color: "warning",
-                        },
-                        {
-                          value: "bar",
-                          icon: Beer,
-                          label: "Bars",
-                          color: "success",
-                        },
-                        {
-                          value: "park",
-                          icon: Trees,
-                          label: "Parks",
-                          color: "success",
-                        },
-                        {
-                          value: "monument",
-                          icon: Landmark,
-                          label: "Monuments",
-                          color: "secondary",
-                        },
-                        {
-                          value: "church",
-                          icon: Church,
-                          label: "Churches",
-                          color: "info",
-                        },
-                        {
-                          value: "hotel",
-                          icon: Hotel,
-                          label: "Hotels",
-                          color: "primary",
-                        },
-                        {
-                          value: "lookouts",
-                          icon: Mountain,
-                          label: "Lookouts",
-                          color: "success",
-                        },
-                      ].map((category) => {
-                        const IconComponent = category.icon;
+                      {poiCategories.map((category) => {
+                        const IconComponent = iconMap[category.icon];
                         return (
                           <button
                             key={category.value}
@@ -1572,7 +1507,7 @@ const CreateRoute = () => {
                                       style={{
                                         position: "relative",
                                         width: "100%",
-                                        height: "180px",
+                                        height: POI_CARD_IMAGE_HEIGHT,
                                         overflow: "hidden",
                                         backgroundColor: "#f0f0f0",
                                       }}
@@ -1603,9 +1538,9 @@ const CreateRoute = () => {
                                             right: "10px",
                                             backgroundColor: "#198754",
                                             color: "white",
-                                            borderRadius: "50%",
-                                            width: "32px",
-                                            height: "32px",
+                                            borderRadius: BORDER_RADIUS_CIRCLE,
+                                            width: CLOSE_BUTTON_SIZE,
+                                            height: CLOSE_BUTTON_SIZE,
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
@@ -1624,7 +1559,7 @@ const CreateRoute = () => {
                                           top: "10px",
                                           left: "10px",
                                           backgroundColor: "white",
-                                          borderRadius: "8px",
+                                          borderRadius: BORDER_RADIUS_SM,
                                           padding: "8px",
                                           boxShadow:
                                             "0 2px 8px rgba(0,0,0,0.2)",
@@ -1642,14 +1577,14 @@ const CreateRoute = () => {
                                       className="card-body d-flex flex-column"
                                       style={{
                                         padding: "1rem",
-                                        height: "200px", // Altura fija para el contenido
+                                        height: POI_CARD_CONTENT_HEIGHT, // Altura fija para el contenido
                                       }}
                                     >
                                       {/* Nombre del POI - altura fija */}
                                       <h6
                                         className="card-title mb-2 fw-bold"
                                         style={{
-                                          fontSize: "0.95rem",
+                                          fontSize: POI_NAME_FONT_SIZE,
                                           lineHeight: "1.3",
                                           height: "2.6rem",
                                           display: "-webkit-box",
@@ -1667,7 +1602,7 @@ const CreateRoute = () => {
                                         <span
                                           className="badge"
                                           style={{
-                                            fontSize: "0.7rem",
+                                            fontSize: POI_CATEGORY_BADGE_FONT_SIZE,
                                             backgroundColor: `var(--bs-${colorClass})`,
                                             color: "white",
                                           }}
@@ -1778,7 +1713,7 @@ const CreateRoute = () => {
                                           : "btn-outline-primary"
                                           }`}
                                         onClick={() => handlePageChange(page)}
-                                        style={{ minWidth: "40px" }}
+                                        style={{ minWidth: PAGINATION_MIN_WIDTH }}
                                       >
                                         {page}
                                       </button>

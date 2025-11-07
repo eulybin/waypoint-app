@@ -113,6 +113,7 @@ def create_route():
                         {
                             "name": poi.get("name", "POI sin nombre"),
                             "type": poi.get("type", "attraction"),
+                            "address": poi.get("address", ""),
                         }
                     )
 

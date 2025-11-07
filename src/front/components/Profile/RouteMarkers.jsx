@@ -89,6 +89,12 @@ const RouteMarkers = ({ coordinates, color = "blue", pointsOfInterest = [], isFu
                                             ? pointsOfInterest[index]
                                             : pointsOfInterest[index].name}
                                     </strong>
+                                    {/* Show address only in fullscreen mode */}
+                                    {isFullscreen && pointsOfInterest[index]?.address && (
+                                        <div className="text-muted mt-2" style={{ fontSize: '0.85rem', lineHeight: '1.3' }}>
+                                            📍 {pointsOfInterest[index].address}
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>

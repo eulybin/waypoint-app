@@ -5,7 +5,7 @@ import { getRoutesByUser, deleteRoute } from "../services/routesService";
 import { getUserFavorites, removeFavorite } from "../services/favoritesService";
 import RouteMapCard from "../components/Profile/RouteMapCard";
 import { Loader, MapPin, Heart, ChevronLeft, ChevronRight, User } from "lucide-react";
-import { HEADER_ICON_SIZE } from "../utils/constants";
+import { HEADER_ICON_SIZE, PAGINATION_MIN_WIDTH, PROFILE_CARD_MAX_WIDTH, BORDER_RADIUS_MD } from "../utils/constants";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -133,9 +133,9 @@ const Profile = () => {
           className="btn-group shadow-sm"
           role="group"
           style={{
-            borderRadius: "12px",
+            borderRadius: BORDER_RADIUS_MD,
             overflow: "hidden",
-            maxWidth: "600px",
+            maxWidth: PROFILE_CARD_MAX_WIDTH,
             width: "100%",
           }}
         >
@@ -248,7 +248,7 @@ const Profile = () => {
                             key={pageNumber}
                             className={`btn ${currentPageCreated === pageNumber ? "btn-primary" : "btn-outline-primary"}`}
                             onClick={() => goToPageCreated(pageNumber)}
-                            style={{ minWidth: "40px" }}
+                            style={{ minWidth: PAGINATION_MIN_WIDTH }}
                           >
                             {pageNumber}
                           </button>
@@ -329,7 +329,7 @@ const Profile = () => {
                             key={pageNumber}
                             className={`btn ${currentPageFavorites === pageNumber ? "btn-warning" : "btn-outline-warning"}`}
                             onClick={() => goToPageFavorites(pageNumber)}
-                            style={{ minWidth: "40px" }}
+                            style={{ minWidth: PAGINATION_MIN_WIDTH }}
                           >
                             {pageNumber}
                           </button>

@@ -17,7 +17,7 @@ import RouteCard from "../components/RouteCard";
 import WeatherWidget from "../components/WeatherWidget";
 import { fetchWeather } from "../services/weatherService";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE, WEATHER_WIDGET_Z_INDEX, WEATHER_WIDGET_OPACITY, CLOSE_WEATHER_ICON_SIZE, STANDARD_ICON_SIZE } from "../utils/constants";
+import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE, WEATHER_WIDGET_Z_INDEX, WEATHER_WIDGET_OPACITY, CLOSE_WEATHER_ICON_SIZE, STANDARD_ICON_SIZE, PAGINATION_MIN_WIDTH, ROUTE_CARD_IMAGE_HEIGHT, TRENDING_CARD_IMAGE_HEIGHT } from "../utils/constants";
 
 const Explore = () => {
   // ========== STATES ==========
@@ -290,7 +290,7 @@ const Explore = () => {
                   src={country.image}
                   className="card-img-top"
                   alt={country.name}
-                  style={{ height: "150px", objectFit: "cover" }}
+                  style={{ height: ROUTE_CARD_IMAGE_HEIGHT, objectFit: "cover" }}
                 />
                 <div className="card-body text-center">
                   <h5 className="card-title">{country.name}</h5>
@@ -320,7 +320,7 @@ const Explore = () => {
                     src={city.image}
                     className="card-img-top rounded-top-3"
                     alt={city.name}
-                    style={{ height: "120px", objectFit: "cover" }}
+                    style={{ height: TRENDING_CARD_IMAGE_HEIGHT, objectFit: "cover" }}
                   />
                   <div className="card-body text-center">
                     <h6 className="card-title">{city.name}</h6>
@@ -376,7 +376,7 @@ const Explore = () => {
                         key={pageNumber}
                         className={`btn ${currentPage === pageNumber ? "btn-primary" : "btn-outline-primary"}`}
                         onClick={() => goToPage(pageNumber)}
-                        style={{ minWidth: "40px" }}
+                        style={{ minWidth: PAGINATION_MIN_WIDTH }}
                       >
                         {pageNumber}
                       </button>
