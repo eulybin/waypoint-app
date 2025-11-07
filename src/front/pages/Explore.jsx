@@ -143,6 +143,19 @@ const Explore = () => {
       setSelectedCountry(null);
       setSelectedCity(null);
       scrollToRoutes();
+
+      // Update weather widget if search matches a city
+      const searchNormalized = normalizeText(searchTerm);
+      const matchedRoute = allRoutes.find(
+        (route) =>
+          normalizeText(route.city).includes(searchNormalized) ||
+          normalizeText(route.locality || "").includes(searchNormalized)
+      );
+
+      if (matchedRoute && matchedRoute.city) {
+        handleWeatherUpdate(matchedRoute.city);
+        setWeatherAttention(prev => !prev); // Trigger attention animation
+      }
     }
   };
 
