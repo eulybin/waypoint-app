@@ -135,7 +135,15 @@ const SearchBar = () => {
                     className="form-control ps-5 py-2 rounded-pill shadow-sm border search-input"
                     placeholder="Search for a city"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                        const newValue = e.target.value;
+                        setSearchTerm(newValue);
+                        // Clear results if input is empty
+                        if (!newValue.trim()) {
+                            setFilteredRoutes([]);
+                            setHasSearched(false);
+                        }
+                    }}
                     onKeyDown={handleKeyDown}
                 />
             </div>

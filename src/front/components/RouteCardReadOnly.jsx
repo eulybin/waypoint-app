@@ -142,7 +142,7 @@ const RouteCardReadOnly = ({ route }) => {
                 </div>
 
                 {/* No view details button - read-only */}
-                <div className="alert alert-warning mt-3 mb-0 small text-center border-warning">
+                <div className="alert alert-info mt-3 mb-0 small text-center">
                     Sign in to view route details and interactive features
                 </div>
             </div>
