@@ -129,6 +129,23 @@ const Explore = () => {
     setSearchTerm("");
   };
 
+  // Scroll to routes section
+  const scrollToRoutes = () => {
+    const routesSection = document.getElementById('routes-section');
+    if (routesSection) {
+      routesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Handle search action (Enter key or icon click)
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      setSelectedCountry(null);
+      setSelectedCity(null);
+      scrollToRoutes();
+    }
+  };
+
   // ========== WEATHER HANDLER ==========
   const handleWeatherUpdate = async (city) => {
     if (!city) return;
@@ -215,15 +232,25 @@ const Explore = () => {
       <div className="row mb-5">
         <div className="col-md-8 mx-auto">
           <div className="input-group input-group-lg">
-            <span className="input-group-text">
+            <span
+              className="input-group-text"
+              style={{ cursor: 'pointer' }}
+              onClick={handleSearch}
+            >
               <Search size={NAVBAR_ICON_SIZE} />
             </span>
             <input
+              id="explore-search-input"
               type="text"
               className="form-control"
               placeholder="Search by country or city"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
             />
             {(searchTerm || selectedCountry || selectedCity) && (
               <button
@@ -333,7 +360,7 @@ const Explore = () => {
       )}
 
       {/* FILTERED ROUTES SECTION */}
-      <section>
+      <section id="routes-section">
         <h2 className="mb-4 d-flex align-items-center gap-2">
           <MapPin size={NAVBAR_ICON_SIZE} />
           Available Routes ({filteredRoutes.length})
