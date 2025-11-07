@@ -267,6 +267,14 @@ body.compact-mode .with-sidebar {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
+.icon_input_position {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 .icon-badge {
   width: 56px;
   height: 56px;

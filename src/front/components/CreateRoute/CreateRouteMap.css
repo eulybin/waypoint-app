@@ -25,9 +25,11 @@
 }
 
 .custom-marker-icon:hover > div {
-  animation: bounce 0.5s ease;
+  transform: scale(1.25);
+  transition: transform 0.2s ease;
 }
 
+/* Remove the bounce animation that causes flickering
 @keyframes bounce {
   0%,
   100% {
@@ -37,6 +39,7 @@
     transform: translateY(-10px);
   }
 }
+*/
 
 /* Estilo para clusters personalizados */
 .custom-cluster-icon {
@@ -82,12 +85,12 @@
 }
 
 /* Overlay de información - ajustes para dark mode */
-[data-bs-theme="dark"] .leaflet-popup-content-wrapper {
+[data-bs-theme='dark'] .leaflet-popup-content-wrapper {
   background-color: #212529 !important;
   color: #f8f9fa !important;
 }
 
-[data-bs-theme="dark"] .leaflet-popup-tip {
+[data-bs-theme='dark'] .leaflet-popup-tip {
   background-color: #212529 !important;
 }
 
