@@ -19,6 +19,7 @@ import DeleteRouteModal from "../Modals/DeleteRouteModal";
 import FullscreenMapModal from "../Modals/FullscreenMapModal";
 import RouteMarkers from "./RouteMarkers";
 import { getRouteFromOSRM } from "../../services/routingService";
+import { STANDARD_ICON_SIZE } from "../../utils/constants";
 
 // Fix for default Leaflet icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -81,7 +82,26 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
     }
   };
 
-  const toggleFullscreen = () => {
+  const toggleFullscreen = async () => {
+    if (!isFullscreen) {
+      // Opening fullscreen - activate street routing if not already active
+      if (!useStreetRouting && !streetRoute && coordinates.length > 0) {
+        setIsCalculatingRoute(true);
+        try {
+          const result = await getRouteFromOSRM(coordinates, transportMode);
+          setStreetRoute(result.coordinates);
+          setRouteInfo({ duration: result.duration, distance: result.distance });
+          setUseStreetRouting(true);
+        } catch (error) {
+          console.error("Error calculating route:", error);
+        } finally {
+          setIsCalculatingRoute(false);
+        }
+      } else if (!useStreetRouting && streetRoute) {
+        // If route already calculated, just activate it
+        setUseStreetRouting(true);
+      }
+    }
     setIsFullscreen(!isFullscreen);
   };
 
@@ -242,14 +262,14 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
               <div>
                 <h5 className="card-title mb-1">
                   <MapPin
-                    size={20}
+                    size={STANDARD_ICON_SIZE}
                     className="me-2"
                     style={{ color: lineColor }}
                   />
                   {route.city}, {route.country}
                 </h5>
                 {route.locality && (
-                  <p className="text-muted small mb-2">{route.locality}</p>
+                  <p className="text-body small mb-2">{route.locality}</p>
                 )}
               </div>
               <div className="d-flex gap-2 align-items-center">
@@ -260,10 +280,12 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                 </span>
                 {onDelete && (
                   <button
-                    className="btn btn-danger btn-sm"
+                    type="button"
+                    className="btn btn-danger btn-sm d-inline-flex align-items-center justify-content-center"
                     onClick={handleDeleteClick}
                     disabled={isDeleting}
                     title="Delete route"
+                    style={{ width: 30, height: 30 }} // optional for consistent sizing
                   >
                     {isDeleting ? (
                       <span
@@ -276,6 +298,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                     )}
                   </button>
                 )}
+
               </div>
             </div>
             <div className="alert alert-warning mb-3">
@@ -286,15 +309,15 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             </div>
 
             <div className="mb-3">
-              <h6 className="text-muted small mb-2">Points of Interest:</h6>
+              <h6 className="text-body small mb-2">Points of Interest:</h6>
               <div className="d-flex flex-wrap gap-1">
                 {/* Show 3 or all depending on state */}
                 {(showAllPOIs
                   ? route.points_of_interest
                   : route.points_of_interest?.slice(0, 3)
                 )?.map((poi, index) => (
-                  <span key={index} className="badge bg-light text-dark border">
-                    {poi}
+                  <span key={index} className="badge bg-secondary-subtle text-body border">
+                    {typeof poi === 'string' ? poi : poi.name}
                   </span>
                 ))}
 
@@ -322,8 +345,8 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             </div>
 
             {/* RATING SECTION - ALWAYS VISIBLE */}
-            <div className="mb-3 p-3">
-              <h6 className="text-muted small mb-2">Route rating:</h6>
+            <div className="mb-3 p-3 border rounded">
+              <h6 className="text-body small mb-2">Route rating:</h6>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex align-items-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -347,7 +370,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   <span className="fw-bold fs-5">
                     {(route.average_rating || 0).toFixed(1)}
                   </span>
-                  <span className="text-muted small ms-2">
+                  <span className="text-body small ms-2">
                     ({route.total_votes || 0}{" "}
                     {(route.total_votes || 0) === 1 ? "vote" : "votes"})
                   </span>
@@ -376,16 +399,12 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start mb-3">
               <div>
-                <h5 className="card-title mb-1">
-                  <MapPin
-                    size={20}
-                    className="me-2"
-                    style={{ color: lineColor }}
-                  />
-                  {route.city}, {route.country}
+                <h5 className="card-title mb-1 d-flex align-items-center">
+                  <MapPin size={STANDARD_ICON_SIZE} className="me-2 text-body flex-shrink-0" />
+                  <span>{route.city}, {route.country}</span>
                 </h5>
                 {route.locality && (
-                  <p className="text-muted small mb-2">{route.locality}</p>
+                  <p className="text-body small mb-2">{route.locality}</p>
                 )}
               </div>
               <div className="d-flex gap-2 align-items-center">
@@ -415,8 +434,8 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
               </div>
             </div>
 
-            <div className="mb-3">
-              <h6 className="text-muted small mb-2">
+            <div className="mb-2">
+              <h6 className="text-body small mb-2">
                 Points of Interest ({coordinates.length}):
               </h6>
               <div className="d-flex flex-wrap gap-1">
@@ -425,8 +444,8 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   ? route.points_of_interest
                   : route.points_of_interest?.slice(0, 3)
                 )?.map((poi, index) => (
-                  <span key={index} className="badge bg-light text-dark border">
-                    {poi}
+                  <span key={index} className="badge bg-secondary-subtle text-body border">
+                    {typeof poi === 'string' ? poi : poi.name}
                   </span>
                 ))}
 
@@ -454,14 +473,14 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
             </div>
 
             {/* RATING SECTION - ALWAYS VISIBLE */}
-            <div className="mb-3 p-3">
-              <h6 className="text-muted small mb-2">Route rating:</h6>
+            <div className="mb-3 mt-3 p-3 border rounded">
+              <h6 className="text-body small mb-2">Route rating:</h6>
               <div className="d-flex align-items-center gap-3">
                 <div className="d-flex align-items-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
-                      size={20}
+                      size={STANDARD_ICON_SIZE}
                       fill={
                         star <= Math.round(route.average_rating || 0)
                           ? "#ffc107"
@@ -479,7 +498,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   <span className="fw-bold fs-5">
                     {(route.average_rating || 0).toFixed(1)}
                   </span>
-                  <span className="text-muted small ms-2">
+                  <span className="text-body small ms-2">
                     ({route.total_votes || 0}{" "}
                     {(route.total_votes || 0) === 1 ? "vote" : "votes"})
                   </span>
@@ -500,7 +519,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
               {/* Fullscreen button */}
               <button
                 onClick={toggleFullscreen}
-                className="btn btn-light btn-sm shadow-sm"
+                className="btn bg-body text-body border btn-sm shadow-sm"
                 style={{
                   position: "absolute",
                   top: "10px",
@@ -522,7 +541,7 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
               <button
                 onClick={toggleStreetRouting}
                 disabled={isCalculatingRoute || coordinates.length === 0}
-                className={`btn btn-sm shadow-sm ${useStreetRouting ? "btn-success" : "btn-light"}`}
+                className={`btn btn-sm shadow-sm ${useStreetRouting ? "btn-success" : "bg-body text-body border"}`}
                 style={{
                   position: "absolute",
                   top: "60px", // Below fullscreen button
@@ -569,12 +588,13 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   <button
                     onClick={() => handleTransportModeChange("driving")}
                     disabled={isCalculatingRoute}
-                    className={`btn btn-sm shadow-sm ${transportMode === "driving" ? "btn-primary" : "btn-light"}`}
+                    className={`btn btn-sm shadow-sm ${transportMode === "driving" ? "btn-primary" : "bg-body text-body border"}`}
                     style={{
                       borderRadius: "8px",
                       padding: "8px 12px",
                       display: "flex",
                       alignItems: "center",
+                      justifyContent: "center",
                       gap: "6px",
                     }}
                     title="Car route"
@@ -586,12 +606,13 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   <button
                     onClick={() => handleTransportModeChange("foot")}
                     disabled={isCalculatingRoute}
-                    className={`btn btn-sm shadow-sm ${transportMode === "foot" ? "btn-primary" : "btn-light"}`}
+                    className={`btn btn-sm shadow-sm ${transportMode === "foot" ? "btn-primary" : "bg-body text-body border"}`}
                     style={{
                       borderRadius: "8px",
                       padding: "8px 12px",
                       display: "flex",
                       alignItems: "center",
+                      justifyContent: "center",
                       gap: "6px",
                     }}
                     title="Walking route"
@@ -603,12 +624,13 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                   <button
                     onClick={() => handleTransportModeChange("bike")}
                     disabled={isCalculatingRoute}
-                    className={`btn btn-sm shadow-sm ${transportMode === "bike" ? "btn-primary" : "btn-light"}`}
+                    className={`btn btn-sm shadow-sm ${transportMode === "bike" ? "btn-primary" : "bg-body text-body border"}`}
                     style={{
                       borderRadius: "8px",
                       padding: "8px 12px",
                       display: "flex",
                       alignItems: "center",
+                      justifyContent: "center",
                       gap: "6px",
                     }}
                     title="Bike route"
@@ -622,16 +644,15 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
               {/* ROUTE INFORMATION - Duration and distance */}
               {useStreetRouting && routeInfo && routeInfo.duration && (
                 <div
+                  className="bg-body text-body border shadow-sm"
                   style={{
                     position: "absolute",
                     bottom: "10px",
                     left: "50%",
                     transform: "translateX(-50%)",
                     zIndex: 900,
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
                     padding: "8px 16px",
                     borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
@@ -644,20 +665,29 @@ const RouteMapCard = ({ route, type = "created", onDelete }) => {
                       gap: "6px",
                     }}
                   >
-                    <Clock size={16} style={{ color: "#0d6efd" }} />
-                    <span style={{ fontSize: "14px", fontWeight: "500" }}>
+                    <Clock size={14} className="text-body" />
+                    <span className="fw-medium" style={{ fontSize: "14px" }}>
                       {formatDuration(routeInfo.duration)}
                     </span>
                   </div>
                   <div
+                    className="border-end"
                     style={{
                       width: "1px",
                       height: "16px",
-                      backgroundColor: "#dee2e6",
                     }}
                   />
-                  <div style={{ fontSize: "14px", fontWeight: "500" }}>
-                    {formatDistance(routeInfo.distance)}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <RouteIcon size={14} className="text-body" />
+                    <span className="fw-medium" style={{ fontSize: "14px" }}>
+                      {formatDistance(routeInfo.distance)}
+                    </span>
                   </div>
                 </div>
               )}

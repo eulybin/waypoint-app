@@ -10,13 +10,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
-  Building2
+  Building2,
+  X
 } from "lucide-react";
 import RouteCard from "../components/RouteCard";
 import WeatherWidget from "../components/WeatherWidget";
 import { fetchWeather } from "../services/weatherService";
 import { API_ENDPOINTS, getAuthHeaders } from "../utils/apiConfig";
-import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE, WEATHER_WIDGET_Z_INDEX, WEATHER_WIDGET_OPACITY, CLOSE_WEATHER_ICON_SIZE, STANDARD_ICON_SIZE } from "../utils/constants";
+import { goToNextPage, goToPrevPage, goToPage, HEADER_ICON_SIZE, NAVBAR_ICON_SIZE, WEATHER_WIDGET_Z_INDEX, WEATHER_WIDGET_OPACITY, CLOSE_WEATHER_ICON_SIZE, STANDARD_ICON_SIZE, PAGINATION_MIN_WIDTH, ROUTE_CARD_IMAGE_HEIGHT, TRENDING_CARD_IMAGE_HEIGHT } from "../utils/constants";
 
 const Explore = () => {
   // ========== STATES ==========
@@ -128,6 +129,23 @@ const Explore = () => {
     setSearchTerm("");
   };
 
+  // Scroll to routes section
+  const scrollToRoutes = () => {
+    const routesSection = document.getElementById('routes-section');
+    if (routesSection) {
+      routesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Handle search action (Enter key or icon click)
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      setSelectedCountry(null);
+      setSelectedCity(null);
+      scrollToRoutes();
+    }
+  };
+
   // ========== WEATHER HANDLER ==========
   const handleWeatherUpdate = async (city) => {
     if (!city) return;
@@ -214,15 +232,25 @@ const Explore = () => {
       <div className="row mb-5">
         <div className="col-md-8 mx-auto">
           <div className="input-group input-group-lg">
-            <span className="input-group-text">
+            <span
+              className="input-group-text"
+              style={{ cursor: 'pointer' }}
+              onClick={handleSearch}
+            >
               <Search size={NAVBAR_ICON_SIZE} />
             </span>
             <input
+              id="explore-search-input"
               type="text"
               className="form-control"
-              placeholder="Search by country or city..."
+              placeholder="Search by country or city"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
             />
             {(searchTerm || selectedCountry || selectedCity) && (
               <button
@@ -242,21 +270,29 @@ const Explore = () => {
           <h5 className="mb-3">Active filters:</h5>
           <div className="d-flex gap-2 flex-wrap">
             {selectedCountry && (
-              <span className="badge bg-primary fs-6 d-inline-flex align-items-center">
-                Country: {selectedCountry.name}
+              <span className="badge bg-primary fs-6 d-inline-flex align-items-center gap-2">
+                <span className="fw-normal">Country:</span>{selectedCountry.name}
                 <button
-                  className="btn-close btn-close-white ms-2"
+                  type="button"
+                  className="btn p-0 border-0 bg-transparent d-flex align-items-center"
                   onClick={() => setSelectedCountry(null)}
-                ></button>
+                  aria-label="Clear selected country"
+                >
+                  <X size={14} strokeWidth={3} className="text-white" />
+                </button>
               </span>
             )}
             {selectedCity && (
-              <span className="badge bg-info fs-6 d-inline-flex align-items-center">
-                City: {selectedCity}
+              <span className="badge bg-info fs-6 d-inline-flex align-items-center gap-2">
+                <span className="fw-normal">City:</span> {selectedCity}
                 <button
-                  className="btn-close btn-close-white ms-2"
+                  type="button"
+                  className="btn p-0 border-0 bg-transparent d-flex align-items-center"
                   onClick={() => setSelectedCity(null)}
-                ></button>
+                  aria-label="Clear selected city"
+                >
+                  <X size={14} strokeWidth={3} className="text-white" />
+                </button>
               </span>
             )}
           </div>
@@ -281,7 +317,7 @@ const Explore = () => {
                   src={country.image}
                   className="card-img-top"
                   alt={country.name}
-                  style={{ height: "150px", objectFit: "cover" }}
+                  style={{ height: ROUTE_CARD_IMAGE_HEIGHT, objectFit: "cover" }}
                 />
                 <div className="card-body text-center">
                   <h5 className="card-title">{country.name}</h5>
@@ -311,7 +347,7 @@ const Explore = () => {
                     src={city.image}
                     className="card-img-top rounded-top-3"
                     alt={city.name}
-                    style={{ height: "120px", objectFit: "cover" }}
+                    style={{ height: TRENDING_CARD_IMAGE_HEIGHT, objectFit: "cover" }}
                   />
                   <div className="card-body text-center">
                     <h6 className="card-title">{city.name}</h6>
@@ -324,7 +360,7 @@ const Explore = () => {
       )}
 
       {/* FILTERED ROUTES SECTION */}
-      <section>
+      <section id="routes-section">
         <h2 className="mb-4 d-flex align-items-center gap-2">
           <MapPin size={NAVBAR_ICON_SIZE} />
           Available Routes ({filteredRoutes.length})
@@ -367,7 +403,7 @@ const Explore = () => {
                         key={pageNumber}
                         className={`btn ${currentPage === pageNumber ? "btn-primary" : "btn-outline-primary"}`}
                         onClick={() => goToPage(pageNumber)}
-                        style={{ minWidth: "40px" }}
+                        style={{ minWidth: PAGINATION_MIN_WIDTH }}
                       >
                         {pageNumber}
                       </button>
