@@ -10,7 +10,6 @@ import {
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import {
-  MapPin,
   Check,
   Plus,
   AlertCircle,
@@ -25,11 +24,12 @@ import {
   Hotel,
   Mountain,
   Loader,
+  MapPin,
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "./CreateRouteMap.css";
 import { HEADER_ICON_SIZE } from "../../utils/constants";
-import { CATEGORY_NAMES } from "../../utils/categoryNames";
+import { CATEGORY_NAMES_PLURAL, getPOIColor, getPOIHexColor } from "../../utils/categoryInfo";
 
 // Fix para los iconos de Leaflet (problema conocido)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -60,27 +60,16 @@ const iconComponentMap = {
   lookouts: Mountain,
 };
 
-// Mapeo de tipos a colores Bootstrap
-const iconColorMap = {
-  attraction: '#0d6efd',    // primary
-  museum: '#0dcaf0',        // info
-  restaurant: '#dc3545',    // danger
-  cafe: '#ffc107',          // warning
-  bar: '#198754',           // success
-  park: '#198754',          // success
-  monument: '#6c757d',      // secondary
-  church: '#0dcaf0',        // info
-  hotel: '#0d6efd',         // primary
-  viewpoint: '#198754',     // success
-  lookouts: '#198754',      // success
-};
-
 const getMarkerIcon = (type, isSelected) => {
   const IconComponent = iconComponentMap[type] || Compass;
-  const iconColor = iconColorMap[type] || '#0d6efd';
+  const iconColor = getPOIHexColor(type);
 
-  // Si está seleccionado, mostrar chincheta roja
+  // Si está seleccionado, mostrar MapPin rojo
   if (isSelected) {
+    const mapPinSvg = ReactDOMServer.renderToString(
+      <MapPin size={HEADER_ICON_SIZE} strokeWidth={2} color="white" fill="#dc3545" />
+    );
+
     return L.divIcon({
       html: `
         <div style="
@@ -94,20 +83,13 @@ const getMarkerIcon = (type, isSelected) => {
           transform: scale(1.2);
           z-index: 1000;
         ">
-          <!-- Chincheta roja -->
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" 
-                  fill="#dc3545" 
-                  stroke="white" 
-                  stroke-width="2"/>
-            <circle cx="12" cy="9" r="3" fill="white"/>
-          </svg>
+          ${mapPinSvg}
         </div>
       `,
       className: 'custom-marker-selected',
       iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -40],
+      iconAnchor: [20, 38],
+      popupAnchor: [0, -38],
     });
   }
 
@@ -130,7 +112,6 @@ const getMarkerIcon = (type, isSelected) => {
         border: 3px solid white;
         box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         cursor: pointer;
-        transition: all 0.2s ease;
       ">
         ${iconSvg}
       </div>
@@ -146,8 +127,8 @@ const getMarkerIcon = (type, isSelected) => {
 // COMPONENTE DE POPUP REUTILIZABLE
 // ============================================================================
 const POIPopupContent = ({ poi, isSelected, onPOIClick }) => (
-  <div className="p-2" style={{ minWidth: "200px", paddingTop: "8px" }}>
-    <h6 className="fw-bold mb-2" style={{
+  <div className="p-3" style={{ minWidth: "220px", paddingTop: "10px" }}>
+    <h6 className="fw-bold mb-3" style={{
       paddingRight: "20px",
       wordWrap: "break-word",
       overflowWrap: "break-word"
@@ -155,14 +136,14 @@ const POIPopupContent = ({ poi, isSelected, onPOIClick }) => (
       {poi.name}
     </h6>
 
-    <div className="mb-2">
-      <span className="badge bg-secondary">
+    <div className="mb-3">
+      <span className={`badge bg-${getPOIColor(poi.type)}`}>
         {poi.type.charAt(0).toUpperCase() + poi.type.slice(1)}
       </span>
     </div>
 
     {poi.address && (
-      <p className="small text-muted mb-2" style={{
+      <p className="small text-muted mb-3" style={{
         wordWrap: "break-word",
         overflowWrap: "break-word"
       }}>
@@ -206,14 +187,36 @@ const CreateRouteMap = ({
   onPOIClick,
   showRoute = true, // Mostrar líneas entre POIs seleccionados
 }) => {
-  const categoryDisplayName = CATEGORY_NAMES[categoryType] || 'Locations';
+  const categoryDisplayName = CATEGORY_NAMES_PLURAL[categoryType] || 'Locations';
 
   // Si no hay centro válido, usar Madrid
   const mapCenter =
     center && center[0] && center[1] ? center : [40.4168, -3.7038];
 
+  // Merge current category POIs with selected POIs from other categories
+  // This ensures selected POIs persist when switching between categories
+  const mergedPOIs = React.useMemo(() => {
+    const poiMap = new Map();
+
+    // Add current category POIs
+    pois.forEach(poi => {
+      if (poi && poi.id) {
+        poiMap.set(poi.id, poi);
+      }
+    });
+
+    // Add selected POIs (these might be from different categories)
+    selectedPOIs.forEach(poi => {
+      if (poi && poi.id) {
+        poiMap.set(poi.id, poi);
+      }
+    });
+
+    return Array.from(poiMap.values());
+  }, [pois, selectedPOIs]);
+
   // Filtrar POIs con coordenadas válidas
-  const validPOIs = pois.filter(
+  const validPOIs = mergedPOIs.filter(
     (poi) =>
       poi &&
       poi.lat != null &&
@@ -327,7 +330,7 @@ const CreateRouteMap = ({
           </>
         )}
 
-        {/* Markers con clustering */}
+        {/* Markers con clustering - SOLO para POIs NO seleccionados */}
         <MarkerClusterGroup
           chunkedLoading
           maxClusterRadius={50}
@@ -360,31 +363,51 @@ const CreateRouteMap = ({
             });
           }}
         >
-          {validPOIs.map((poi) => {
-            const isSelected = selectedPOIs.some((p) => p.id === poi.id);
+          {validPOIs
+            .filter((poi) => !selectedPOIs.some((p) => p.id === poi.id))
+            .map((poi) => (
+              <Marker
+                key={`${poi.id}-${categoryType}`}
+                position={[poi.lat, poi.lon]}
+                icon={getMarkerIcon(poi.type, false)}
+              >
+                <Popup closeButton={true}>
+                  <POIPopupContent
+                    poi={poi}
+                    isSelected={false}
+                    onPOIClick={onPOIClick}
+                  />
+                </Popup>
+              </Marker>
+            ))}
+        </MarkerClusterGroup>
 
-            // Don't show POI marker if it's selected and route line is actually being displayed (2+ POIs)
-            if (isSelected && showRoute && selectedPOIs.length > 1) {
+        {/* Selected POIs - rendered OUTSIDE clustering to always be visible */}
+        {selectedPOIs
+          .filter((poi) => poi && poi.lat != null && poi.lon != null && !isNaN(poi.lat) && !isNaN(poi.lon))
+          .map((poi) => {
+            // If showing route with 2+ POIs, selected markers are shown as numbered blue dots above
+            if (showRoute && selectedPOIs.length > 1) {
               return null;
             }
 
             return (
               <Marker
-                key={poi.id}
+                key={`selected-${poi.id}-${categoryType}`}
                 position={[poi.lat, poi.lon]}
-                icon={getMarkerIcon(poi.type, isSelected)}
+                icon={getMarkerIcon(poi.type, true)}
+                zIndexOffset={1000}
               >
                 <Popup closeButton={true}>
                   <POIPopupContent
                     poi={poi}
-                    isSelected={isSelected}
+                    isSelected={true}
                     onPOIClick={onPOIClick}
                   />
                 </Popup>
               </Marker>
             );
           })}
-        </MarkerClusterGroup>
       </MapContainer>
 
       {/* Overlay de información */}

@@ -33,6 +33,7 @@ import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
 import { normalizeText, STANDARD_ICON_SIZE, HEADER_ICON_SIZE } from "../utils/constants";
+import { getPOIColor } from "../utils/categoryInfo";
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -920,25 +921,6 @@ const CreateRoute = () => {
       viewpoint: Mountain,
     };
     return iconMap[type] || MapPin;
-  };
-
-  // ============================================================================
-  // FUNCIÓN: Obtener color según tipo de POI
-  // ============================================================================
-  const getPOIColor = (type) => {
-    const colorMap = {
-      attraction: "primary",
-      museum: "info",
-      restaurant: "danger",
-      cafe: "warning",
-      bar: "success",
-      park: "success",
-      monument: "secondary",
-      church: "info",
-      hotel: "primary",
-      viewpoint: "success",
-    };
-    return colorMap[type] || "primary";
   };
 
   // ============================================================================

@@ -7,26 +7,7 @@
 
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import { CATEGORY_NAMES } from "../../utils/categoryNames";
-
-/**
- * Get color class for POI category
- */
-const getPOIColor = (type) => {
-    const colorMap = {
-        attraction: "primary",
-        museum: "info",
-        restaurant: "danger",
-        cafe: "warning",
-        bar: "success",
-        park: "success",
-        monument: "secondary",
-        church: "info",
-        hotel: "primary",
-        viewpoint: "success",
-    };
-    return colorMap[type] || "primary";
-};
+import { CATEGORY_NAMES, getPOIColor } from "../../utils/categoryInfo";
 
 /**
  * Creates a custom icon for each marker
