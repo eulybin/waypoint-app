@@ -91,7 +91,7 @@ const RouteCard = ({ route }) => {
               : route.points_of_interest?.slice(0, 3)
             )?.map((poi, index) => (
               <span key={index} className="badge bg-light text-dark border">
-                {poi}
+                {typeof poi === 'string' ? poi : poi.name}
               </span>
             ))}
 

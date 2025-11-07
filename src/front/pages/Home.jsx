@@ -67,7 +67,7 @@ const Home = () => {
             <div className="col-12 col-xl-6">
               <div className="card h-100 pop-card cursor-pointer" role="button" onClick={() => navigate('/profile')} aria-label="Go to profile">
                 <div className="card-body p-4 d-flex align-items-center gap-3">
-                  <div className="icon-badge badge-gray"><User size={NAVBAR_ICON_SIZE} /></div>
+                  <div className="icon-badge badge-green"><User size={NAVBAR_ICON_SIZE} /></div>
                   <div>
                     <h6 className="fw-semibold mb-1">View Profile</h6>
                     <p className="text-muted mb-2">View and manage all of your favorite routes.</p>

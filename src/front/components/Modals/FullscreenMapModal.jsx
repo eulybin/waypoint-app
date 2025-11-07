@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 
 // COMPONENT: FullscreenMapModal
 // Fullscreen modal for visualizing a route map
@@ -15,9 +15,13 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
+  Route as RouteIcon,
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import RouteMarkers from "../Profile/RouteMarkers";
+import { StoreContext } from "../../context/StoreContext";
+import { NAVBAR_ICON_SIZE } from "../../utils/constants";
+
 
 const FullscreenMapModal = ({
   show,
@@ -36,6 +40,7 @@ const FullscreenMapModal = ({
   routeInfo = null,
 }) => {
   const [showInfoPanel, setShowInfoPanel] = useState(true);
+  const { store } = useContext(StoreContext);
 
   // Functions to format duration and distance
   const formatDuration = (seconds) => {
@@ -60,59 +65,52 @@ const FullscreenMapModal = ({
 
   return (
     <div
+      className="bg-dark bg-opacity-75"
       style={{
         position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.95)",
         zIndex: 9999,
         display: "flex",
         flexDirection: "column",
       }}
-      onClick={(e) => {
-        // Cerrar al hacer clic en el fondo
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      {/* Header del modal fullscreen */}
       onClick={(e) => {
         // Close when clicking on background
         if (e.target === e.currentTarget) {
           onClose();
         }
       }}
+    >
       {/* Fullscreen modal header */}
       <div
+        className="bg-body text-body shadow"
         style={{
           padding: "20px 30px",
-          backgroundColor: "#fff",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
         <div>
-          <h4 className="mb-1" style={{ color: "#000" }}>
-            <MapPin size={24} className="me-2" style={{ color: lineColor }} />
-            {route.city}, {route.country}
+          <h4 className="mb-1 d-flex align-items-center">
+            <MapPin size={NAVBAR_ICON_SIZE} className="me-2 text-body flex-shrink-0" />
+            <span>{route.city}, {route.country}</span>
           </h4>
+
           {route.locality && (
-            <p className="mb-0" style={{ color: "#000", fontSize: "14px" }}>
+            <p className="mb-0" style={{ fontSize: "14px" }}>
               {route.locality}
             </p>
           )}
         </div>
         <button
           onClick={onClose}
-          className="btn btn-outline-dark btn-lg"
+          className="btn btn-outline-secondary btn-lg"
           style={{ borderRadius: "8px" }}
         >
-          <X size={24} className="me-2" />
+          <X size={24} className="me-2 align-text-bottom" />
           Close
         </button>
       </div>
@@ -155,6 +153,7 @@ const FullscreenMapModal = ({
             coordinates={coordinates}
             color={lineColor}
             pointsOfInterest={route.points_of_interest}
+            isFullscreen={true}
           />
         </MapContainer>
 
@@ -174,51 +173,54 @@ const FullscreenMapModal = ({
             <button
               onClick={() => onTransportModeChange("driving")}
               disabled={isCalculatingRoute}
-              className={`btn btn-sm shadow-sm ${transportMode === "driving" ? "btn-primary" : "btn-light"}`}
+              className={`btn btn-sm shadow-sm ${transportMode === "driving" ? "btn-primary" : "bg-body text-body border"}`}
               style={{
                 borderRadius: "8px",
                 padding: "8px 12px",
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "6px",
               }}
               title="Car route"
             >
-              <Car size={18} />
+              <Car size={18} className="align-text-bottom" />
               <span className="small">Car</span>
             </button>
 
             <button
               onClick={() => onTransportModeChange("foot")}
               disabled={isCalculatingRoute}
-              className={`btn btn-sm shadow-sm ${transportMode === "foot" ? "btn-primary" : "btn-light"}`}
+              className={`btn btn-sm shadow-sm ${transportMode === "foot" ? "btn-primary" : "bg-body text-body border"}`}
               style={{
                 borderRadius: "8px",
                 padding: "8px 12px",
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "6px",
               }}
               title="Walking route"
             >
-              <Footprints size={18} />
+              <Footprints size={18} className="align-text-bottom" />
               <span className="small">Walking</span>
             </button>
 
             <button
               onClick={() => onTransportModeChange("bike")}
               disabled={isCalculatingRoute}
-              className={`btn btn-sm shadow-sm ${transportMode === "bike" ? "btn-primary" : "btn-light"}`}
+              className={`btn btn-sm shadow-sm ${transportMode === "bike" ? "btn-primary" : "bg-body text-body border"}`}
               style={{
                 borderRadius: "8px",
                 padding: "8px 12px",
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "6px",
               }}
               title="Bike route"
             >
-              <Bike size={18} />
+              <Bike size={18} className="align-text-bottom" />
               <span className="small">Bike</span>
             </button>
           </div>
@@ -227,36 +229,38 @@ const FullscreenMapModal = ({
         {/* ROUTE INFORMATION - Duration and distance in fullscreen */}
         {useStreetRouting && routeInfo && routeInfo.duration && (
           <div
+            className="bg-body text-body border shadow"
             style={{
               position: "absolute",
               top: "20px",
               left: "50%",
               transform: "translateX(-50%)",
               zIndex: 1000,
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
               padding: "12px 20px",
               borderRadius: "12px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
               display: "flex",
               alignItems: "center",
               gap: "16px",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Clock size={18} style={{ color: "#0d6efd" }} />
-              <span style={{ fontSize: "16px", fontWeight: "600" }}>
+              <Clock size={18} className="text-body align-text-bottom" />
+              <span className="fw-semibold" style={{ fontSize: "16px" }}>
                 {formatDuration(routeInfo.duration)}
               </span>
             </div>
             <div
+              className="border-end"
               style={{
                 width: "1px",
                 height: "20px",
-                backgroundColor: "#dee2e6",
               }}
             />
-            <div style={{ fontSize: "16px", fontWeight: "600" }}>
-              {formatDistance(routeInfo.distance)}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <RouteIcon size={18} className="text-body align-text-bottom" />
+              <span className="fw-semibold" style={{ fontSize: "16px" }}>
+                {formatDistance(routeInfo.distance)}
+              </span>
             </div>
           </div>
         )}
@@ -264,26 +268,25 @@ const FullscreenMapModal = ({
         {/* Info overlay in fullscreen */}
         {showInfoPanel ? (
           <div
+            className="bg-body text-body border shadow"
             style={{
               position: "absolute",
               bottom: "20px",
               left: "20px",
-              backgroundColor: "white",
               padding: "20px",
               borderRadius: "12px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
               maxWidth: "400px",
               zIndex: 1000,
             }}
           >
             {/* Panel header with integrated close button */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h6 className="mb-0" style={{ color: "#000" }}>
+              <h6 className="mb-0">
                 Route information
               </h6>
               <button
                 onClick={() => setShowInfoPanel(false)}
-                className="btn btn-sm btn-light"
+                className="btn btn-sm border"
                 style={{
                   borderRadius: "6px",
                   padding: "4px 8px",
@@ -293,12 +296,12 @@ const FullscreenMapModal = ({
                 }}
                 title="Hide information"
               >
-                <ChevronDown size={16} />
+                <ChevronDown size={16} className="text-body align-text-bottom" />
               </button>
             </div>
 
             <div className="mb-2">
-              <span className="badge bg-light text-dark border me-2">
+              <span className="badge bg-secondary-subtle text-body border me-2">
                 {coordinates.length} points of interest
               </span>
               <span
@@ -310,12 +313,17 @@ const FullscreenMapModal = ({
                 <span className="badge bg-success text-white ms-2">
                   {transportMode === "driving" ? (
                     <>
-                      <Car size={14} className="me-1" />
+                      <Car size={14} className="me-1 align-text-bottom" />
                       By car
+                    </>
+                  ) : transportMode === "bike" ? (
+                    <>
+                      <Bike size={14} className="me-1 align-text-bottom" />
+                      By bike
                     </>
                   ) : (
                     <>
-                      <Footprints size={14} className="me-1" />
+                      <Footprints size={14} className="me-1 align-text-bottom" />
                       Walking
                     </>
                   )}
@@ -325,7 +333,7 @@ const FullscreenMapModal = ({
 
             {/* Rating in fullscreen - ALWAYS VISIBLE */}
             <div className="mt-3 pt-3 border-top">
-              <small className="d-block mb-2" style={{ color: "#000" }}>
+              <small className="d-block mb-2">
                 Rating:
               </small>
               <div className="d-flex align-items-center gap-2">
@@ -347,10 +355,10 @@ const FullscreenMapModal = ({
                     />
                   ))}
                 </div>
-                <span className="fw-bold" style={{ color: "#000" }}>
+                <span className="fw-bold">
                   {(route.average_rating || 0).toFixed(1)}
                 </span>
-                <span className="small" style={{ color: "#000" }}>
+                <span className="small">
                   ({route.total_votes || 0}{" "}
                   {(route.total_votes || 0) === 1 ? "vote" : "votes"})
                 </span>
@@ -361,16 +369,16 @@ const FullscreenMapModal = ({
             {route.points_of_interest &&
               route.points_of_interest.length > 0 && (
                 <div className="mt-3">
-                  <small className="d-block mb-2" style={{ color: "#000" }}>
+                  <small className="d-block mb-2">
                     Featured places:
                   </small>
                   <div className="d-flex flex-wrap gap-1">
                     {route.points_of_interest.map((poi, index) => (
                       <span
                         key={index}
-                        className="badge bg-light text-dark border small"
+                        className="badge bg-secondary-subtle text-body border small"
                       >
-                        {poi}
+                        {typeof poi === 'string' ? poi : poi.name}
                       </span>
                     ))}
                   </div>
@@ -381,7 +389,7 @@ const FullscreenMapModal = ({
           /* Small floating button to show panel when hidden */
           <button
             onClick={() => setShowInfoPanel(true)}
-            className="btn btn-light shadow"
+            className="btn bg-body shadow text-body"
             style={{
               position: "absolute",
               bottom: "20px",
@@ -395,7 +403,7 @@ const FullscreenMapModal = ({
             }}
             title="Show information"
           >
-            <ChevronUp size={18} />
+            <ChevronUp size={18} className="text-body align-text-bottom" />
             Show info
           </button>
         )}

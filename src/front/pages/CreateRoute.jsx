@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getPlaceImage } from "../services/imageService";
 import {
   MapPin,
+  Pin,
   Plus,
   X,
   Search,
@@ -23,14 +24,39 @@ import {
   ChevronRight,
   Map,
   LayoutGrid,
+  Globe,
+  MapPinPlus,
 } from "lucide-react";
 import { createRoute } from "../services/routesService";
 import { searchLocations, searchPointsOfInterest } from "../utils/apiConfig";
-import { STANDARD_ICON_SIZE } from "../utils/constants";
 import CreateRouteMap from "../components/CreateRoute/CreateRouteMap";
 import { POPULAR_COUNTRIES } from "../components/CreateRoute/CardPopularCountry";
 import { POPULAR_CITIES_BY_COUNTRY } from "../components/CreateRoute/CardPopularCities";
-import { normalizeText } from "../utils/constants";
+import {
+  normalizeText,
+  STANDARD_ICON_SIZE,
+  HEADER_ICON_SIZE,
+  DROPDOWN_MAX_HEIGHT,
+  POI_CARD_IMAGE_HEIGHT,
+  SUGGESTION_ITEM_IMAGE_HEIGHT,
+  POI_CATEGORY_BADGE_FONT_SIZE,
+  POI_DESCRIPTION_FONT_SIZE,
+  POI_NAME_FONT_SIZE,
+  POI_CARD_CONTENT_HEIGHT,
+  POI_PREVIEW_IMAGE_HEIGHT,
+  CLOSE_BUTTON_SIZE,
+  BORDER_RADIUS_SM,
+  BORDER_RADIUS_MD,
+  BORDER_RADIUS_CIRCLE,
+  PAGINATION_MIN_WIDTH,
+  ITEMS_PER_PAGE
+} from "../utils/constants";
+import { getPOIColor } from "../utils/categoryInfo";
+import { poiCategories } from "../utils/poiCategories";
+import { DEFAULT_IMAGES } from "../utils/defaultImages";
+
+// Icon map for POI categories
+const iconMap = { Compass, Building2, UtensilsCrossed, Coffee, Beer, Trees, Landmark, Church, Hotel, Mountain };
 
 // ============================================================================
 // REDUCER: Estado simplificado sin campo "locality"
@@ -93,34 +119,6 @@ const initialFormState = {
 };
 
 // ============================================================================
-// CONSTANTES PARA PAGINACIÓN
-// ============================================================================
-const ITEMS_PER_PAGE = 8;
-
-// ============================================================================
-// IMÁGENES POR DEFECTO SEGÚN TIPO DE POI
-// ============================================================================
-const DEFAULT_IMAGES = {
-  attraction:
-    "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=400&h=300&fit=crop",
-  museum:
-    "https://images.unsplash.com/photo-1565626424178-c699f6601afd?w=400&h=300&fit=crop",
-  restaurant:
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
-  cafe: "https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=400&h=300&fit=crop",
-  bar: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop",
-  park: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop",
-  monument:
-    "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=300&fit=crop",
-  church:
-    "https://images.unsplash.com/photo-1491677533189-49215d7e8c2e?w=400&h=300&fit=crop",
-  hotel:
-    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop",
-  viewpoint:
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
-};
-
-// ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
 const CreateRoute = () => {
@@ -160,7 +158,7 @@ const CreateRoute = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // ========== ESTADO PARA VISTA (MAPA O CARDS) ==========
-  const [viewMode, setViewMode] = useState("cards"); // "cards" o "map"
+  const [viewMode, setViewMode] = useState("map"); // "cards" o "map"
 
   // Estado para imágenes de POIs
   const [poiImages, setPoiImages] = useState({});
@@ -169,6 +167,7 @@ const CreateRoute = () => {
   const countryDebounceRef = useRef(null);
   const cityDebounceRef = useRef(null);
   const poiDebounceRef = useRef(null);
+  const mapContainerRef = useRef(null);
 
   // ✅ OPTIMIZACIÓN: Gestión centralizada de AbortControllers
   const abortControllersRef = useRef({
@@ -392,9 +391,8 @@ const CreateRoute = () => {
         // ✅ OPTIMIZACIÓN: No mostrar error si fue cancelado
         if (error.name !== "AbortError") {
           console.error("Error loading cities:", error);
-          if (!controller.signal.aborted) {
-            setError("Error al cargar sugerencias. Puedes buscar manualmente.");
-          }
+          // Don't set error state - users can still search manually
+          // The UI shows appropriate messages already
         }
       } finally {
         // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
@@ -457,9 +455,8 @@ const CreateRoute = () => {
 
       if (pois.length === 0) {
         if (!controller.signal.aborted) {
-          setError(
-            "⏳ No se encontraron puntos de interés. Puede que el servidor esté ocupado. Intenta de nuevo en 1 minuto."
-          );
+          // Don't set error for empty results - it's normal for some categories
+          console.log("No POIs found for this category and location");
         }
       } else {
         // ✅ OPTIMIZACIÓN: Limitar número de POIs para mejor rendimiento
@@ -473,11 +470,8 @@ const CreateRoute = () => {
       // ✅ OPTIMIZACIÓN: No mostrar error si fue cancelado
       if (error.name !== "AbortError") {
         console.error("Error loading POIs:", error);
-        if (!controller.signal.aborted) {
-          setError(
-            "❌ Error al cargar puntos de interés. Por favor, espera 1-2 minutos e intenta de nuevo."
-          );
-        }
+        // Don't set error state - POI loading failures shouldn't block the form
+        // The UI already shows "No points of interest found" message
       }
     } finally {
       // ✅ OPTIMIZACIÓN: Solo cambiar loading si no fue cancelado
@@ -733,6 +727,21 @@ const CreateRoute = () => {
     setShowDropdownAll((prev) => ({ ...prev, countries: false })); // ✅ Cerrar dropdown
   };
 
+  const handleClearCountry = () => {
+    dispatch({
+      type: "SET_COUNTRY",
+      value: "",
+      countryCode: "",
+    });
+    dispatch({
+      type: "SET_CITY",
+      value: "",
+      coordinates: null,
+    });
+    setSearchState((prev) => ({ ...prev, countryQuery: "", cityQuery: "" }));
+    setSuggestions((prev) => ({ ...prev, countries: [], cities: [], pois: [] }));
+  };
+
   const handleSelectCity = (city) => {
     dispatch({
       type: "SET_CITY",
@@ -741,6 +750,26 @@ const CreateRoute = () => {
     });
     setSearchState((prev) => ({ ...prev, cityQuery: city.name }));
     setShowDropdownAll((prev) => ({ ...prev, cities: false })); // ✅ Cerrar dropdown
+
+    // Scroll to map after city selection
+    setTimeout(() => {
+      if (mapContainerRef.current) {
+        mapContainerRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }, 100);
+  };
+
+  const handleClearCity = () => {
+    dispatch({
+      type: "SET_CITY",
+      value: "",
+      coordinates: null,
+    });
+    setSearchState((prev) => ({ ...prev, cityQuery: "" }));
+    setSuggestions((prev) => ({ ...prev, pois: [] }));
   };
 
   const handleAddPOI = (poi) => {
@@ -760,6 +789,7 @@ const CreateRoute = () => {
           id: poi.id,
           name: poi.name,
           type: poi.type,
+          address: poi.address,
           lat: poi.lat,
           lon: poi.lon,
         },
@@ -890,25 +920,6 @@ const CreateRoute = () => {
   };
 
   // ============================================================================
-  // FUNCIÓN: Obtener color según tipo de POI
-  // ============================================================================
-  const getPOIColor = (type) => {
-    const colorMap = {
-      attraction: "primary",
-      museum: "info",
-      restaurant: "danger",
-      cafe: "warning",
-      bar: "success",
-      park: "success",
-      monument: "secondary",
-      church: "info",
-      hotel: "primary",
-      viewpoint: "success",
-    };
-    return colorMap[type] || "primary";
-  };
-
-  // ============================================================================
   // FUNCIÓN: Obtener imagen del POI (de la API o por defecto)
   // ============================================================================
   // ============================================================================
@@ -935,34 +946,33 @@ const CreateRoute = () => {
   return (
     <div className="container-fluid p-4">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="display-4 fw-bold mb-2">Create New Route</h1>
-
+      <div className="text-center mb-4 mt-3">
+        <div className="mb-3 header-icon-badge badge-orange"><MapPinPlus size={HEADER_ICON_SIZE} /></div>
+        <h1 className="display-4 fw-bold mb-2">Create a New Route</h1>
+        <p className="lead text-muted">
+          Create and share your routes for any city in the world
+        </p>
       </div>
       {/* Formulario */}
       <div className="row">
         <div className="col-12">
-          <div className="card shadow-sm">
+          <div className="card shadow-sm border">
             <div className="card-body p-4">
               <form onSubmit={handleSubmit}>
                 {/* País con Autocompletado */}
                 <div className="mb-3 position-relative">
                   <label className="form-label fw-semibold">
                     Country *{" "}
-                    <span className="text-muted small">
-                      (search and select)
-                    </span>
                   </label>
                   <div className="position-relative">
                     <Search
-                      className="position-absolute"
-                      size={20}
-                      style={{ left: 12, top: 12 }}
+                      className="icon_input_position text-muted"
+                      size={STANDARD_ICON_SIZE}
                     />
                     <input
                       type="text"
                       className="form-control ps-5"
-                      placeholder="Search country... Ex: Spain"
+                      placeholder="Search for a country"
                       value={searchState.countryQuery}
                       onChange={(e) =>
                         setSearchState((prev) => ({
@@ -991,8 +1001,8 @@ const CreateRoute = () => {
                     {loadingAll.countries && (
                       <Loader
                         className="position-absolute animate-spin"
-                        size={20}
-                        style={{ right: 12, top: 12 }}
+                        size={STANDARD_ICON_SIZE}
+                        style={{ right: 12, top: 10 }}
                       />
                     )}
 
@@ -1005,7 +1015,7 @@ const CreateRoute = () => {
                         className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
                         style={{
                           zIndex: 1000,
-                          maxHeight: "300px",
+                          maxHeight: DROPDOWN_MAX_HEIGHT,
                           overflowY: "auto",
                         }}
                       >
@@ -1026,15 +1036,64 @@ const CreateRoute = () => {
                     )}
 
                   {formState.country && (
-                    <div className="mt-2">
-                      <span className="badge bg-success">
-                        ✓ {formState.country}
+                    <div className="mt-3">
+                      <span className="badge bg-success d-inline-flex align-items-center gap-1 fs-6 py-2">
+                        <span className="fw-normal">Country:</span>
+                        <span className="fw-semibold">{formState.country}</span>
+                        <X
+                          size={14}
+                          strokeWidth={3}
+                          style={{ cursor: 'pointer', marginLeft: '4px' }}
+                          onClick={handleClearCountry}
+                        />
                       </span>
                     </div>
                   )}
                 </div>
 
+                {!formState.country && (
+                  <div className="mb-4">
+                    <h5 className="fw-semibold mb-3 d-flex align-items-center gap-2">
+                      <Globe size={STANDARD_ICON_SIZE} />
+                      Most Visited Countries
+                    </h5>
 
+                    <div className="row g-3">
+                      {POPULAR_COUNTRIES.map((country) => (
+                        <div key={country.code} className="col-lg-3 col-md-6">
+                          <div
+                            className="card h-100 shadow-sm"
+                            style={{
+                              cursor: "pointer",
+                              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                            }}
+                            onClick={() => handleSelectCountry(country)}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = "translateY(-5px)";
+                              e.currentTarget.style.boxShadow =
+                                "0 8px 20px rgba(0,0,0,0.15)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.boxShadow = "";
+                            }}
+                          >
+                            <img
+                              src={country.image}
+                              className="card-img-top"
+                              alt={country.name}
+                              style={{ height: SUGGESTION_ITEM_IMAGE_HEIGHT, objectFit: "cover" }}
+                            />
+                            <div className="card-body text-center p-2">
+                              <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
+                              <small className="text-muted">{country.visitors}</small>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Ciudad/Localidad con Autocompletado */}
                 <div className="mb-3 position-relative">
@@ -1059,9 +1118,8 @@ const CreateRoute = () => {
                   </label>
                   <div className="position-relative">
                     <Search
-                      className="position-absolute"
-                      size={20}
-                      style={{ left: 12, top: 12 }}
+                      className="icon_input_position text-muted"
+                      size={STANDARD_ICON_SIZE}
                     />
                     <input
                       type="text"
@@ -1073,7 +1131,7 @@ const CreateRoute = () => {
                             ? "Searching..."
                             : suggestions.cities.length > 0
                               ? "Type to search more places..."
-                              : "Type the name of the town/city (ex: Carmona)"
+                              : "Search for a city"
                       }
                       value={searchState.cityQuery}
                       onChange={(e) =>
@@ -1102,46 +1160,6 @@ const CreateRoute = () => {
                     />
                   </div>
 
-                  {/* Mensaje informativo mejorado */}
-                  {formState.country &&
-                    !loadingAll.cities &&
-                    suggestions.cities.length === 0 &&
-                    !formState.city &&
-                    searchState.cityQuery.length === 0 && (
-                      <div className="alert alert-info mt-2 mb-0 py-2 small">
-                        💡 <strong>Type the name</strong> of the town or
-                        city you are looking for
-                        <br />
-                        <span className="text-muted">
-                          Examples: Carmona, Dos Hermanas, Utrera...
-                        </span>
-                      </div>
-                    )}
-
-                  {/* Mensaje mientras busca */}
-                  {formState.country &&
-                    loadingAll.cities &&
-                    searchState.cityQuery.length >= 3 && (
-                      <div className="alert alert-primary mt-2 mb-0 py-2 small">
-                        🔍 Searching "{searchState.cityQuery}" in{" "}
-                        {formState.country}...
-                      </div>
-                    )}
-
-                  {/* Mensaje si no encuentra resultados */}
-                  {formState.country &&
-                    !loadingAll.cities &&
-                    suggestions.cities.length === 0 &&
-                    searchState.cityQuery.length >= 3 && (
-                      <div className="alert alert-warning mt-2 mb-0 py-2 small">
-                        ⚠️ "{searchState.cityQuery}" not found.
-                        <br />
-                        <span className="text-muted">
-                          Try another name or check the spelling.
-                        </span>
-                      </div>
-                    )}
-
                   {/* Lista de ciudades y localidades (filtrada localmente) */}
                   {showDropdownAll.cities &&
                     formState.country &&
@@ -1150,7 +1168,7 @@ const CreateRoute = () => {
                         className="position-absolute w-100 mt-1 bg-body border rounded shadow-lg"
                         style={{
                           zIndex: 1000,
-                          maxHeight: "400px",
+                          maxHeight: DROPDOWN_MAX_HEIGHT,
                           overflowY: "auto",
                         }}
                       >
@@ -1168,7 +1186,7 @@ const CreateRoute = () => {
                             >
                               <div className="flex-grow-1">
                                 <div className="fw-semibold d-flex align-items-center gap-2">
-                                  <MapPin size={16} className="text-primary" />
+                                  <MapPin size={16} className="text-body" />
                                   {city.name}
                                   {city.type && (
                                     <span className="badge bg-secondary text-white small">
@@ -1188,14 +1206,13 @@ const CreateRoute = () => {
                                   {city.displayName}
                                 </div>
                                 <div className="extra-small text-muted">
-                                  📍 {city.lat.toFixed(4)},{" "}
-                                  {city.lon.toFixed(4)}
+                                  📍 {city.lat.toFixed(4)}, {city.lon.toFixed(4)}
                                 </div>
                               </div>
                               {formState.city === city.name && (
                                 <Check
                                   className="text-success flex-shrink-0"
-                                  size={20}
+                                  size={STANDARD_ICON_SIZE}
                                 />
                               )}
                             </div>
@@ -1204,68 +1221,29 @@ const CreateRoute = () => {
                     )}
 
                   {formState.city && (
-                    <div className="mt-2">
-                      <span className="badge bg-success fs-6 py-2">
-                        ✓ {formState.city}
+                    <div className="mt-3">
+                      <span className="badge bg-success d-inline-flex align-items-center gap-1 fs-6 py-2">
+                        <span className="fw-normal">City:</span>
+                        <span className="fw-semibold">{formState.city}</span>
+                        <X
+                          size={14}
+                          strokeWidth={3}
+                          style={{ cursor: 'pointer', marginLeft: '4px' }}
+                          onClick={handleClearCity}
+                        />
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* Cards de Países Populares */}
-                {!formState.country && (
-                  <div className="mb-4">
-                    <h5 className="fw-semibold mb-3">🌍 Most Visited Countries</h5>
-                    <div className="row g-3">
-                      {POPULAR_COUNTRIES.map((country) => (
-                        <div key={country.code} className="col-md-3 col-sm-6">
-                          <div
-                            className="card h-100 shadow-sm"
-                            style={{
-                              cursor: "pointer",
-                              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                            }}
-                            onClick={() => handleSelectCountry(country)}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = "translateY(-5px)";
-                              e.currentTarget.style.boxShadow =
-                                "0 8px 20px rgba(0,0,0,0.15)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = "translateY(0)";
-                              e.currentTarget.style.boxShadow = "";
-                            }}
-                          >
-                            <img
-                              src={country.image}
-                              className="card-img-top"
-                              alt={country.name}
-                              style={{ height: "120px", objectFit: "cover" }}
-                            />
-                            <div className="card-body text-center p-2">
-                              <h6 className="card-title mb-1 fw-bold">{country.name}</h6>
-                              <small className="text-muted">
-                                {country.visitors} visitors/year
-                              </small>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <hr className="my-4" />
-                    <p className="text-center text-muted small">
-                      Or search for any other country:
-                    </p>
-                  </div>
-                )}
-
                 {/* Cards de Ciudades Populares del País Seleccionado */}
                 {formState.country &&
                   !formState.city &&
                   POPULAR_CITIES_BY_COUNTRY[formState.countryCode] && (
-                    <div className="mb-4">
-                      <h5 className="fw-semibold mb-3">
-                        🏙️ Most Visited Cities in {formState.country}
+                    <div className="mb-3">
+                      <h5 className="mb-3 d-flex align-items-center gap-2">
+                        <Building2 size={STANDARD_ICON_SIZE} />
+                        Most Visited Cities in {formState.country}
                       </h5>
                       <div className="row g-3">
                         {POPULAR_CITIES_BY_COUNTRY[formState.countryCode].map(
@@ -1296,7 +1274,7 @@ const CreateRoute = () => {
                                   className="card-img-top"
                                   alt={city.name}
                                   style={{
-                                    height: "100px",
+                                    height: POI_PREVIEW_IMAGE_HEIGHT,
                                     objectFit: "cover",
                                   }}
                                 />
@@ -1310,47 +1288,14 @@ const CreateRoute = () => {
                           )
                         )}
                       </div>
-                      <hr className="my-4" />
-                      <p className="text-center text-muted small">
-                        Or search for another city/town:
-                      </p>
                     </div>
                   )}
 
-
-
-
-
-
                 {/* Puntos de Interés - MÚLTIPLES SELECCIONES CON CARDS */}
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">
-                    Points of Interest *{" "}
-                    {loadingAll.pois && (
-                      <Loader
-                        className="d-inline-block animate-spin"
-                        size={16}
-                      />
-                    )}
-                    {formState.city && (
-                      <span className="text-muted small ms-2">
-                        ({formState.points_of_interest.length} selected,{" "}
-                        {suggestions.pois.length} available)
-                      </span>
-                    )}
-                  </label>
-
+                <div className={`mb-3 ${formState.city ? 'mt-3' : 'mt-5'}`}>
                   {/* Toggle entre Vista de Cards y Mapa */}
                   <div className="mb-3 d-flex justify-content-center">
                     <div className="btn-group" role="group">
-                      <button
-                        type="button"
-                        className={`btn ${viewMode === "cards" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
-                        onClick={() => setViewMode("cards")}
-                      >
-                        <LayoutGrid size={18} />
-                        Cards View
-                      </button>
                       <button
                         type="button"
                         className={`btn ${viewMode === "map" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
@@ -1360,78 +1305,25 @@ const CreateRoute = () => {
                         <Map size={18} />
                         Map View
                       </button>
+                      <button
+                        type="button"
+                        className={`btn ${viewMode === "cards" ? "btn-primary" : "btn-outline-primary"} d-flex align-items-center gap-2`}
+                        onClick={() => setViewMode("cards")}
+                      >
+                        <LayoutGrid size={18} />
+                        Cards View
+                      </button>
                     </div>
                   </div>
 
                   {/* Selector de categoría de POI con Botones */}
-                  <div className="mb-3">
-                    <label className="form-label small fw-semibold">
+                  <div ref={mapContainerRef} className="mb-3">
+                    <label className="form-label fw-semibold">
                       Select a category:
                     </label>
                     <div className="d-flex flex-wrap gap-2">
-                      {[
-                        {
-                          value: "attraction",
-                          icon: Compass,
-                          label: "Attractions",
-                          color: "primary",
-                        },
-                        {
-                          value: "museum",
-                          icon: Building2,
-                          label: "Museums",
-                          color: "info",
-                        },
-                        {
-                          value: "restaurant",
-                          icon: UtensilsCrossed,
-                          label: "Restaurants",
-                          color: "danger",
-                        },
-                        {
-                          value: "cafe",
-                          icon: Coffee,
-                          label: "Cafés",
-                          color: "warning",
-                        },
-                        {
-                          value: "bar",
-                          icon: Beer,
-                          label: "Bars",
-                          color: "success",
-                        },
-                        {
-                          value: "park",
-                          icon: Trees,
-                          label: "Parks",
-                          color: "success",
-                        },
-                        {
-                          value: "monument",
-                          icon: Landmark,
-                          label: "Monuments",
-                          color: "secondary",
-                        },
-                        {
-                          value: "church",
-                          icon: Church,
-                          label: "Churches",
-                          color: "info",
-                        },
-                        {
-                          value: "hotel",
-                          icon: Hotel,
-                          label: "Hotels",
-                          color: "primary",
-                        },
-                        {
-                          value: "viewpoint",
-                          icon: Mountain,
-                          label: "Viewpoints",
-                          color: "success",
-                        },
-                      ].map((category) => {
-                        const IconComponent = category.icon;
+                      {poiCategories.map((category) => {
+                        const IconComponent = iconMap[category.icon];
                         return (
                           <button
                             key={category.value}
@@ -1464,9 +1356,21 @@ const CreateRoute = () => {
 
                   {/* POIs Seleccionados (Tags) */}
                   {formState.points_of_interest.length > 0 && (
-                    <div className="mb-3 p-3 bg-light rounded">
-                      <div className="small fw-semibold mb-2">
-                        POIs in your route:
+                    <div className="mb-3 p-3 bg-body rounded border shadow-sm">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <div className="small fw-semibold text-body fs-6">
+                          Locations in your Route:
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => {
+                            formState.points_of_interest.forEach((poi) => handleRemovePOI(poi.id));
+                          }}
+                          title="Clear all locations"
+                        >
+                          Clear All
+                        </button>
                       </div>
                       <div className="d-flex flex-wrap gap-2">
                         {formState.points_of_interest.map((poi) => (
@@ -1491,7 +1395,7 @@ const CreateRoute = () => {
                                 lineHeight: 0,
                               }}
                             >
-                              <X size={16} />
+                              <X size={14} />
                             </button>
                           </span>
                         ))}
@@ -1506,16 +1410,15 @@ const CreateRoute = () => {
                       <div className="position-relative mb-3">
                         <div className="position-relative">
                           <Search
-                            className="position-absolute"
-                            size={20}
-                            style={{ left: 12, top: 12 }}
+                            className="icon_input_position text-muted"
+                            size={STANDARD_ICON_SIZE}
                           />
                           <input
                             type="text"
                             className="form-control ps-5"
                             placeholder={
                               formState.city
-                                ? "Search by name..."
+                                ? "Search by name"
                                 : "First select a city"
                             }
                             value={searchState.poiQuery}
@@ -1604,7 +1507,7 @@ const CreateRoute = () => {
                                       style={{
                                         position: "relative",
                                         width: "100%",
-                                        height: "180px",
+                                        height: POI_CARD_IMAGE_HEIGHT,
                                         overflow: "hidden",
                                         backgroundColor: "#f0f0f0",
                                       }}
@@ -1635,9 +1538,9 @@ const CreateRoute = () => {
                                             right: "10px",
                                             backgroundColor: "#198754",
                                             color: "white",
-                                            borderRadius: "50%",
-                                            width: "32px",
-                                            height: "32px",
+                                            borderRadius: BORDER_RADIUS_CIRCLE,
+                                            width: CLOSE_BUTTON_SIZE,
+                                            height: CLOSE_BUTTON_SIZE,
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
@@ -1645,7 +1548,7 @@ const CreateRoute = () => {
                                               "0 2px 8px rgba(0,0,0,0.3)",
                                           }}
                                         >
-                                          <Check size={20} />
+                                          <Check size={STANDARD_ICON_SIZE} />
                                         </div>
                                       )}
 
@@ -1656,14 +1559,14 @@ const CreateRoute = () => {
                                           top: "10px",
                                           left: "10px",
                                           backgroundColor: "white",
-                                          borderRadius: "8px",
+                                          borderRadius: BORDER_RADIUS_SM,
                                           padding: "8px",
                                           boxShadow:
                                             "0 2px 8px rgba(0,0,0,0.2)",
                                         }}
                                       >
                                         <IconComponent
-                                          size={20}
+                                          size={STANDARD_ICON_SIZE}
                                           className={`text-${colorClass}`}
                                         />
                                       </div>
@@ -1674,14 +1577,14 @@ const CreateRoute = () => {
                                       className="card-body d-flex flex-column"
                                       style={{
                                         padding: "1rem",
-                                        height: "200px", // Altura fija para el contenido
+                                        height: POI_CARD_CONTENT_HEIGHT, // Altura fija para el contenido
                                       }}
                                     >
                                       {/* Nombre del POI - altura fija */}
                                       <h6
                                         className="card-title mb-2 fw-bold"
                                         style={{
-                                          fontSize: "0.95rem",
+                                          fontSize: POI_NAME_FONT_SIZE,
                                           lineHeight: "1.3",
                                           height: "2.6rem",
                                           display: "-webkit-box",
@@ -1699,7 +1602,7 @@ const CreateRoute = () => {
                                         <span
                                           className="badge"
                                           style={{
-                                            fontSize: "0.7rem",
+                                            fontSize: POI_CATEGORY_BADGE_FONT_SIZE,
                                             backgroundColor: `var(--bs-${colorClass})`,
                                             color: "white",
                                           }}
@@ -1785,7 +1688,7 @@ const CreateRoute = () => {
                                 }
                                 disabled={currentPage === 1}
                               >
-                                <ChevronLeft size={20} />
+                                <ChevronLeft size={STANDARD_ICON_SIZE} />
                                 Previous
                               </button>
 
@@ -1810,7 +1713,7 @@ const CreateRoute = () => {
                                           : "btn-outline-primary"
                                           }`}
                                         onClick={() => handlePageChange(page)}
-                                        style={{ minWidth: "40px" }}
+                                        style={{ minWidth: PAGINATION_MIN_WIDTH }}
                                       >
                                         {page}
                                       </button>
@@ -1838,7 +1741,7 @@ const CreateRoute = () => {
                                 disabled={currentPage === getTotalPages()}
                               >
                                 Next
-                                <ChevronRight size={20} />
+                                <ChevronRight size={STANDARD_ICON_SIZE} />
                               </button>
                             </div>
                           )}
@@ -1850,7 +1753,7 @@ const CreateRoute = () => {
                         !loadingAll.pois &&
                         suggestions.pois.length === 0 && (
                           <div className="alert alert-info">
-                            <AlertCircle size={20} className="me-2" />
+                            <AlertCircle size={STANDARD_ICON_SIZE} className="me-2" />
                             No points of interest found for this
                             category. Try another category.
                           </div>
@@ -1861,7 +1764,7 @@ const CreateRoute = () => {
                         suggestions.pois.length > 0 &&
                         getFilteredPOIs().length === 0 && (
                           <div className="alert alert-warning">
-                            <AlertCircle size={20} className="me-2" />
+                            <AlertCircle size={STANDARD_ICON_SIZE} className="me-2" />
                             No results found for "
                             {searchState.poiQuery}". Try another search term.
                           </div>
@@ -1883,6 +1786,7 @@ const CreateRoute = () => {
                         }
                         pois={suggestions.pois}
                         selectedPOIs={formState.points_of_interest}
+                        categoryType={searchState.poiType}
                         onPOIClick={(poi) => {
                           const isSelected = formState.points_of_interest.some(
                             (p) => p.id === poi.id
@@ -1905,8 +1809,8 @@ const CreateRoute = () => {
                     className="alert alert-danger d-flex align-items-center gap-2"
                     role="alert"
                   >
-                    <AlertCircle size={20} />
-                    Registration Required
+                    <AlertCircle size={STANDARD_ICON_SIZE} />
+                    {error}
                   </div>
                 )}
 
