@@ -122,21 +122,11 @@ Manage your routes and track your travel planning journey:
 **Egor Ulybin**: [@eulybin](https://github.com/eulybin)  
 **Victor Moreno Cabello**: [@VictorPko73](https://github.com/VictorPko73)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **4Geeks Academy** - Initial React-Flask template
-- **OpenStreetMap** - Map data and POI information
-- **Leaflet** - Interactive mapping library
-- **Unsplash** - High-quality POI images
-- **OpenRouteService** - Route calculation API
-- **OpenWeatherMap** - Weather data API
-
----
-
-<div align="center">
-
-**Built with ❤️ using React and Flask**
-
-⭐ Star this repo if you find it helpful!
-
-</div>
+- **4Geeks Academy** - Initial React-Flask template.
+- **OpenStreetMap** - Map data and POI information.
+- **Leaflet** - Interactive mapping library.
+- **Unsplash** - High-quality POI images.
+- **OpenRouteService** - Route calculation API.
+- **OpenWeatherMap** - Weather data API.
