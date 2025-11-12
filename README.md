@@ -1,81 +1,139 @@
-# WebApp boilerplate with React JS and Flask API
+# Waypoint · Explora ciudades, crea rutas y comparte experiencias
 
-Build web applications using React.js for the front end and python/flask for your backend API.
+Rutas turísticas interactivas con React + Vite en el frontend y Flask en el backend. Mapa con Leaflet, votos con estrellas, favoritos, clima y autenticación JWT.
 
-- Documentation can be found here: https://4geeks.com/docs/start/react-flask-template
-- Here is a video on [how to use this template](https://www.loom.com/share/f37c6838b3f1496c95111e515e83dd9b)
-- Integrated with Pipenv for package managing.
-- Fast deployment to Render [in just a few steps here](https://4geeks.com/docs/start/deploy-to-render-com).
-- Use of .env file.
-- SQLAlchemy integration for database abstraction.
+[![Made with Flask](https://img.shields.io/badge/Flask-API-000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/) [![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=000)](https://react.dev/) [![Vite](https://img.shields.io/badge/Vite-4-646cff?logo=vite&logoColor=fff)](https://vitejs.dev/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?logo=postgresql&logoColor=fff)](https://www.postgresql.org/) [![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?logo=render&logoColor=fff)](https://render.com)
 
-### 1) Installation:
+---
 
-> If you use Github Codespaces (recommended) or Gitpod this template will already come with Python, Node and the Posgres Database installed. If you are working locally make sure to install Python 3.10, Node 
+## ✨ Características
 
-It is recomended to install the backend first, make sure you have Python 3.10, Pipenv and a database engine (Posgress recomended)
+- Mapa interactivo con Leaflet (react-leaflet) y clustering de marcadores.
+- Creación de rutas con puntos de interés (POIs) y guardado de coordenadas.
+- Sistema de votos con estrellas y favoritos por usuario.
+- Autenticación con JWT (login, registro, perfil).
+- Widget de clima y utilidades de geocodificación (Nominatim/Overpass).
+- API REST en Flask con SQLAlchemy y migraciones (Alembic).
+- Despliegue sencillo en Render con base de datos gestionada.
 
-1. Install the python packages: `$ pipenv install`
-2. Create a .env file based on the .env.example: `$ cp .env.example .env`
-3. Install your database engine and create your database, depending on your database you have to create a DATABASE_URL variable with one of the possible values, make sure you replace the valudes with your database information:
+## 🧭 Arquitectura
 
-| Engine    | DATABASE_URL                                        |
-| --------- | --------------------------------------------------- |
-| SQLite    | sqlite:////test.db                                  |
-| MySQL     | mysql://username:password@localhost:port/example    |
-| Postgress | postgres://username:password@localhost:5432/example |
+- Frontend: React + Vite en `src/front`.
+- Backend: Flask en `src/` con blueprints en `src/api`.
+- Persistencia: PostgreSQL (Render) o SQLite local de respaldo.
+- Servido en producción por Gunicorn, estáticos servidos desde `public/`.
 
-4. Migrate the migrations: `$ pipenv run migrate` (skip if you have not made changes to the models on the `./src/api/models.py`)
-5. Run the migrations: `$ pipenv run upgrade`
-6. Run the application: `$ pipenv run start`
+Estructura parcial del proyecto:
 
-> Note: Codespaces users can connect to psql by typing: `psql -h localhost -U gitpod example`
-
-### Undo a migration
-
-You are also able to undo a migration by running
-
-```sh
-$ pipenv run downgrade
+```text
+src/
+  app.py                 # Configuración Flask, CORS, JWT y estáticos
+  wsgi.py                # Entrada para Gunicorn
+  api/
+    routes/              # Endpoints REST (auth, rutas, votos, favoritos, etc.)
+    models.py            # Modelos SQLAlchemy
+    commands.py          # Comandos: seed, insert-test-data, reset-db...
+front/
+  pages/, components/, services/, hooks/, utils/
+public/                  # Se genera desde Vite (dist → public en producción)
 ```
 
-### Backend Populate Table Users
+## ⚙️ Requisitos
 
-To insert test users in the database execute the following command:
+- Python 3.10
+- Node.js 20+
+- Pipenv
+- PostgreSQL (recomendado en producción) o SQLite local
 
-```sh
-$ flask insert-test-users 5
+## 🔑 Variables de entorno (backend)
+
+Crea un archivo `.env` en la raíz con al menos:
+
+```ini
+FLASK_DEBUG=1
+JWT_SECRET_KEY=tu_clave_segura
+# Para Postgres local
+# DATABASE_URL=postgresql://usuario:password@localhost:5432/waypoint
+# Si no está definida, se usará SQLite (archivo waypoint.db)
 ```
 
-And you will see the following message:
+Frontend (opcional):
 
+- `VITE_BACKEND_URL` → URL del backend si el frontend se despliega por separado.
+- Si no se define, el front usa automáticamente el mismo dominio del navegador (ideal cuando Flask sirve la SPA).
+
+## 🚀 Ejecución local
+
+### Backend
+
+```bash
+pipenv install
+pipenv run upgrade   # aplica migraciones existentes
+pipenv run start     # levanta Flask en http://127.0.0.1:3001
 ```
-  Creating test users
-  test_user1@test.com created.
-  test_user2@test.com created.
-  test_user3@test.com created.
-  test_user4@test.com created.
-  test_user5@test.com created.
-  Users created successfully!
+
+### Frontend (modo desarrollo con Vite)
+
+```bash
+npm install
+npm run dev          # http://127.0.0.1:3000
 ```
 
-### **Important note for the database and the data inside it**
+### Semillas de datos (opcional)
 
-Every Github codespace environment will have **its own database**, so if you're working with more people eveyone will have a different database and different records inside it. This data **will be lost**, so don't spend too much time manually creating records for testing, instead, you can automate adding records to your database by editing ```commands.py``` file inside ```/src/api``` folder. Edit line 32 function ```insert_test_data``` to insert the data according to your model (use the function ```insert_test_users``` above as an example). Then, all you need to do is run ```pipenv run insert-test-data```.
+```bash
+pipenv run insert-test-data
+# o comandos individuales
+flask seed-routes
+flask insert-test-users 5
+```
 
-### Front-End Manual Installation:
+> Nota: Si cambias modelos, usa `pipenv run migrate` y luego `pipenv run upgrade`.
 
--   Make sure you are using node version 20 and that you have already successfully installed and runned the backend.
+## ☁️ Despliegue en Render
 
-1. Install the packages: `$ npm install`
-2. Start coding! start the webpack dev server `$ npm run start`
+Este repo incluye `render.yaml` para desplegar con Blueprint:
 
-## Publish your website!
+1. En Render: New → Blueprint → selecciona este repo.
+2. El blueprint creará:
+   - Web Service (Python) con build `./render_build.sh` y start `gunicorn wsgi --chdir ./src/`.
+   - Base de datos PostgreSQL y la enlazará como `DATABASE_URL`.
+3. Variables sugeridas en el servicio:
+   - `JWT_SECRET_KEY` (segura)
+   - `FLASK_DEBUG=0` en producción
+   - `PYTHON_VERSION=3.10.6` (ya en render.yaml)
+4. Deploy. El script de build:
+   - Construye el front (Vite) y mueve `dist/` a `public/`.
+   - Instala dependencias con Pipenv.
+   - Ejecuta migraciones (`flask db upgrade`).
 
-This boilerplate it's 100% read to deploy with Render.com and Heroku in a matter of minutes. Please read the [official documentation about it](https://4geeks.com/docs/start/deploy-to-render-com).
+Si prefieres front y back en servicios separados, define `VITE_BACKEND_URL` en el sitio estático con la URL del backend.
 
-### Contributors
+## 🔌 Endpoints principales (resumen)
 
-This template was built as part of the 4Geeks Academy [Coding Bootcamp](https://4geeksacademy.com/us/coding-bootcamp) by [Alejandro Sanchez](https://twitter.com/alesanchezr) and many other contributors. Find out more about our [Full Stack Developer Course](https://4geeksacademy.com/us/coding-bootcamps/part-time-full-stack-developer), and [Data Science Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning).
+- Auth: `/api/register`, `/api/login`, `/api/profile`
+- Rutas: `/api/routes`, `/api/routes/<id>`, `/api/routes/city/<city>`
+- Votos: `/api/votes`, `/api/votes/route/<routeId>`
+- Favoritos: `/api/routes/<routeId>/favorite`
+- Externas: `/api/external/weather/<city>`, `/api/external/geocode/<location>`
 
-You can find other templates and resources like this at the [school github page](https://github.com/4geeksacademy/).
+Consulta los blueprints en `src/api/routes/` para el detalle completo.
+
+## 🧪 Utilidades de desarrollo
+
+- Reset de DB: `flask reset-db`
+- Crear admin: `flask create-admin "Nombre" email@dominio.com password`
+- Scripts extra en `Pipfile` ([scripts] sección)
+
+## 📚 Recursos
+
+- Guía de backend: `docs/BACKEND_SETUP_GUIDE.md`
+- Pruebas con Postman: `docs/POSTMAN_TESTING_GUIDE.md`
+
+## 📄 Licencia
+
+ISC. Consulta `package.json` para más detalles.
+
+---
+
+Hecho con ❤️ para explorar el mundo, una ruta a la vez.
