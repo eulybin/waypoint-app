@@ -107,10 +107,9 @@ Manage your routes and track your travel planning journey:
 - **Maps**: Leaflet + React-Leaflet for interactive maps.
 - **Geocoding**: Nominatim API for location search.
 - **Routing**: OpenRouteService for route calculations.
-- **Icons**: Lucide React for modern, customizable icons.
-- **Styling**: Bootstrap 5.3 + Custom CSS.
 - **State Management**: Context API (AuthContext, StoreContext).
-- **HTTP Client**: Fetch API with custom service layer.
+- **Styling**: Bootstrap 5.3 + Custom CSS.
+- **Icons**: Lucide React for modern, customizable icons.
 
 ### Backend
 
@@ -120,15 +119,14 @@ Manage your routes and track your travel planning journey:
 - **Authentication**: JWT-based token system.
 - **Password Hashing**: Flask-Bcrypt.
 - **CORS**: Flask-CORS for cross-origin requests.
-- **Environment Config**: python-dotenv.
 
 ### External APIs
 
+- **OpenStreetMap**: POI data and location search.
 - **Nominatim**: Geocoding and reverse geocoding.
 - **OpenRouteService**: Route calculation (car, bike, walking).
 - **OpenWeatherMap**: Real-time weather data.
 - **Unsplash**: POI image sourcing.
-- **OpenStreetMap**: POI data and location search.
 
 ## 🙋‍♂️ Creators
 
