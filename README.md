@@ -86,11 +86,18 @@ Manage your routes and track your travel planning journey:
 
 ## ⚙️ Additional Features
 
+<p align="center">
+  <img src="src/front/assets/readme/login.png" alt="Login Screenshot" width="250">
+  <img src="src/front/assets/readme/signup.png" alt="Signup Screenshot" width="250">
+  <img src="src/front/assets/readme/more.png" alt="More Screenshot" width="250">
+</p>
+
 - **User Experience**
-  - Dark mode support with persistent theme.
-  - Fully responsive design (mobile, tablet, desktop).
+  - Secure login and signup forms for user authentication. 
   - Guest browsing with read-only route preview.
   - Problem reporting system for app issues.
+  - Fully responsive design (mobile, tablet, desktop).
+  - Dark mode support with persistent theme.
 
 ## 🧠 Tech Stack
 
