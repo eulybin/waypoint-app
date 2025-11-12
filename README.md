@@ -14,11 +14,11 @@
 **A full-stack web application for discovering and creating custom travel routes with interactive maps, POI (Points of Interest) management, and community-driven ratings.**
 </div>
 
-## 📖 About Waypoint
+## About Waypoint
 
 **Waypoint** is a modern travel route planning platform that allows users to discover, create, and share custom travel routes. Whether you're planning a city tour, a hiking trail, or a food adventure, Waypoint provides the tools to create detailed, interactive routes that can be shared with the community.
 
-### 🎯 Key Highlights
+### Key Highlights
 
 - **Interactive Map Creation**: Build routes by selecting POIs directly on an interactive Leaflet map with Nominatim geocoding.
 - **Smart POI Discovery**: Search and filter attractions, restaurants, parks, monuments, and more using OpenStreetMap data.
@@ -27,9 +27,11 @@
 - **Routing Options**: Calculate distances and visualize routes via car, bike, or walking.
 - **Responsive Design**: Fully optimized for desktop, tablet, and mobile devices.
 
-## ✨ Features
+## Features
 
-### 📍 Create Route Page
+![App Screenshot](src/front/assets/home.png)
+
+### Create Route Page
 
 The heart of Waypoint - an intuitive route builder with powerful features:
 
@@ -46,7 +48,7 @@ The heart of Waypoint - an intuitive route builder with powerful features:
   - Calculate route distance and duration for multiple transport options (Car, Walking, Bike).
   - Interactive polyline rendering between POIs for standard size and full screen maps.
 
-### 🔎  Explore Page
+### Explore Page
 
 Discover routes created by the community with smart filtering:
 
@@ -58,7 +60,7 @@ Discover routes created by the community with smart filtering:
   - Real-time weather widget that updates automatically when the destination changes.
   - Displays temperature, conditions, humidity, wind speed, and a three-day forecast.
 
-### 🏆 Trending Page
+### Trending Page
 
 Discover the best routes ranked by the community:
 
@@ -67,7 +69,7 @@ Discover the best routes ranked by the community:
   - Secondary sorting by total votes, and tertiary sorting by creation date.
   - View route details with integrated full screen map.
  
-### 🙋‍♂️ Profile Page
+### Profile Page
 
 Manage your routes and track your travel planning journey:
 
@@ -76,7 +78,7 @@ Manage your routes and track your travel planning journey:
   - Interactive route cards with expandable POI lists and statistics.
   - Delete routes you no longer need.
 
-### 👤 Additional Features
+### Additional Features
 
 - **User Experience**
   - Dark mode support with persistent theme.
@@ -84,7 +86,7 @@ Manage your routes and track your travel planning journey:
   - Guest browsing with read-only route preview.
   - Problem reporting system for app issues.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -117,10 +119,10 @@ Manage your routes and track your travel planning journey:
 - **Unsplash**: POI image sourcing.
 - **OpenStreetMap**: POI data and location search.
 
-## 👨‍💻 Creators
+## Creators
 
-**Egor Ulybin**: [@eulybin](https://github.com/eulybin)  
-**Victor Moreno Cabello**: [@VictorPko73](https://github.com/VictorPko73)
+**Egor Ulybin Merkulaev**: [@eulybin](https://github.com/eulybin)  
+**Victor Manuel Moreno Cabello**: [@VictorPko73](https://github.com/VictorPko73)
 
 ## Acknowledgments
 
