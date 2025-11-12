@@ -29,11 +29,9 @@
 - **Routing Options**: Calculate distances and visualize routes via car, bike, or walking.
 - **Responsive Design**: Fully optimized for desktop, tablet, and mobile devices.
 
-## Features
+## Create Route Page
 
-![App Screenshot](src/front/assets/readme/create-page.png)
-
-### Create Route Page
+![App Screenshot](src/front/assets/readme/create.png)
 
 The heart of Waypoint - an intuitive route builder with powerful features:
 
@@ -50,7 +48,9 @@ The heart of Waypoint - an intuitive route builder with powerful features:
   - Calculate route distance and duration for multiple transport options (Car, Walking, Bike).
   - Interactive polyline rendering between POIs for standard size and full screen maps.
 
-### Explore Page
+## Explore Page
+
+![App Screenshot](src/front/assets/readme/explore.png)
 
 Discover routes created by the community with smart filtering:
 
@@ -62,7 +62,9 @@ Discover routes created by the community with smart filtering:
   - Real-time weather widget that updates automatically when the destination changes.
   - Displays temperature, conditions, humidity, wind speed, and a three-day forecast.
 
-### Trending Page
+## Trending Page
+
+![App Screenshot](src/front/assets/readme/trending.png)
 
 Discover the best routes ranked by the community:
 
@@ -71,7 +73,9 @@ Discover the best routes ranked by the community:
   - Secondary sorting by total votes, and tertiary sorting by creation date.
   - View route details with integrated full screen map.
  
-### Profile Page
+## Profile Page
+
+![App Screenshot](src/front/assets/readme/profile.png)
 
 Manage your routes and track your travel planning journey:
 
@@ -80,7 +84,7 @@ Manage your routes and track your travel planning journey:
   - Interactive route cards with expandable POI lists and statistics.
   - Delete routes you no longer need.
 
-### Additional Features
+## Additional Features
 
 - **User Experience**
   - Dark mode support with persistent theme.
@@ -121,12 +125,14 @@ Manage your routes and track your travel planning journey:
 - **Unsplash**: POI image sourcing.
 - **OpenStreetMap**: POI data and location search.
 
-## Creators
+---
+
+### Creators
 
 **Egor Ulybin Merkulaev**: [@eulybin](https://github.com/eulybin)  
 **Victor Manuel Moreno Cabello**: [@VictorPko73](https://github.com/VictorPko73)
 
-## Acknowledgments
+### Acknowledgments
 
 - **4Geeks Academy** - Initial React-Flask template.
 - **OpenStreetMap** - Map data and POI information.
