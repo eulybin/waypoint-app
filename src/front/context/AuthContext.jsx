@@ -85,6 +85,8 @@ export const AuthProvider = ({ children }) => {
     // ========== LOGOUT ==========
     const logoutUser = () => {
         localStorage.removeItem('token');
+        if (user?.id) localStorage.removeItem(`home.city.${user.id}`);
+        localStorage.removeItem('home.city.guest');
         setUser(null);
         setIsAuthenticated(false);
     };

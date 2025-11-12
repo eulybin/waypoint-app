@@ -19,8 +19,8 @@ def get_weather(city):
         
         # Parámetros para formato JSON y configuración
         params = {
-            'format': 'j1',  # Formato JSON completo
-            'lang': 'es'     # Idioma español
+            'format': 'j1',  # JSON format
+            'lang': 'en'     # Request data in English
         }
         
         response = requests.get(weather_url, headers=headers, params=params, timeout=15)
@@ -100,7 +100,8 @@ def get_weather(city):
             'temperature': float(current_condition['temp_C']),
             'feels_like': float(current_condition['FeelsLikeC']),
             'humidity': int(current_condition['humidity']),
-            'description': current_condition['lang_es'][0]['value'] if current_condition.get('lang_es') else current_condition['weatherDesc'][0]['value'],
+            # Prefer the default English description from weatherDesc
+            'description': current_condition['weatherDesc'][0]['value'],
             'icon': current_icon,
             'wind_speed': round(float(current_condition['windspeedKmph']) / 3.6, 1),  # Convertir km/h a m/s
             'wind_deg': int(current_condition['winddirDegree']),
@@ -127,26 +128,15 @@ def get_weather(city):
             
             dt = datetime.strptime(date_str, '%Y-%m-%d')
             
-            # Nombres de días en español
-            day_names = {
-                'Monday': 'Lunes',
-                'Tuesday': 'Martes', 
-                'Wednesday': 'Miércoles',
-                'Thursday': 'Jueves',
-                'Friday': 'Viernes',
-                'Saturday': 'Sábado',
-                'Sunday': 'Domingo'
-            }
-            
-            day_name_en = dt.strftime('%A')
-            day_name_es = day_names.get(day_name_en, day_name_en)
-            
+            # Use English day name directly
+            day_name_es = dt.strftime('%A')
+
             forecast_list.append({
                 "date": date_str,
                 "day_name": day_name_es,
                 "temp_max": max_temp,
                 "temp_min": min_temp,
-                "description": midday_weather['lang_es'][0]['value'] if midday_weather.get('lang_es') else midday_weather['weatherDesc'][0]['value'],
+                "description": midday_weather['weatherDesc'][0]['value'],
                 "icon": day_icon,
                 "humidity": int(midday_weather['humidity']),
                 "wind_speed": round(float(midday_weather['windspeedKmph']) / 3.6, 1),
@@ -173,7 +163,7 @@ def get_weather(city):
                     hourly_list.append({
                         "time": f"{hour_time:02d}:00",
                         "temperature": float(hour_data['tempC']),
-                        "description": hour_data['lang_es'][0]['value'] if hour_data.get('lang_es') else hour_data['weatherDesc'][0]['value'],
+                        "description": hour_data['weatherDesc'][0]['value'],
                         "icon": hourly_icon,
                         "humidity": int(hour_data['humidity']),
                         "pop": int(hour_data.get('chanceofrain', 0))

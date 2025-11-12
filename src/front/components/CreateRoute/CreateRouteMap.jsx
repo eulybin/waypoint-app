@@ -1,0 +1,460 @@
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
+import L from "leaflet";
+import {
+  Check,
+  Plus,
+  AlertCircle,
+  Compass,
+  Building2,
+  UtensilsCrossed,
+  Coffee,
+  Beer,
+  Trees,
+  Landmark,
+  Church,
+  Hotel,
+  Mountain,
+  Loader,
+  MapPin,
+} from "lucide-react";
+import "leaflet/dist/leaflet.css";
+import "./CreateRouteMap.css";
+import {
+  HEADER_ICON_SIZE,
+  MAP_HEIGHT,
+  POPUP_MIN_WIDTH,
+  MARKER_ICON_SIZE,
+  MARKER_ICON_SIZE_SELECTED,
+  ROUTE_POINT_SIZE,
+  CLUSTER_SIZE,
+  ROUTE_POINT_NUMBER_FONT_SIZE,
+  BORDER_RADIUS_MD,
+  BORDER_RADIUS_CIRCLE
+} from "../../utils/constants";
+import { CATEGORY_NAMES_PLURAL, getPOIColor, getPOIHexColor } from "../../utils/categoryInfo";
+
+// Fix para los iconos de Leaflet (problema conocido)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
+
+// ============================================================================
+// ICONOS PERSONALIZADOS POR CATEGORÍA Y ESTADO
+// ============================================================================
+// Mapeo de tipos a iconos de Lucide React
+const iconComponentMap = {
+  restaurant: UtensilsCrossed,
+  cafe: Coffee,
+  bar: Beer,
+  museum: Building2,
+  park: Trees,
+  monument: Landmark,
+  church: Church,
+  hotel: Hotel,
+  attraction: Compass,
+  viewpoint: Mountain,
+  lookouts: Mountain,
+};
+
+const getMarkerIcon = (type, isSelected) => {
+  const IconComponent = iconComponentMap[type] || Compass;
+  const iconColor = getPOIHexColor(type);
+
+  // Si está seleccionado, mostrar MapPin rojo
+  if (isSelected) {
+    const mapPinSvg = ReactDOMServer.renderToString(
+      <MapPin size={HEADER_ICON_SIZE} strokeWidth={2} color="white" fill="#dc3545" />
+    );
+
+    return L.divIcon({
+      html: `
+        <div style="
+          position: relative;
+          width: ${MARKER_ICON_SIZE_SELECTED}px;
+          height: ${MARKER_ICON_SIZE_SELECTED}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+          transform: scale(1.2);
+          z-index: 1000;
+        ">
+          ${mapPinSvg}
+        </div>
+      `,
+      className: 'custom-marker-selected',
+      iconSize: [MARKER_ICON_SIZE_SELECTED, MARKER_ICON_SIZE_SELECTED],
+      iconAnchor: [MARKER_ICON_SIZE_SELECTED / 2, MARKER_ICON_SIZE_SELECTED - 2],
+      popupAnchor: [0, -(MARKER_ICON_SIZE_SELECTED - 2)],
+    });
+  };
+
+  // Si NO está seleccionado, mostrar icono de la categoría
+  const iconSvg = ReactDOMServer.renderToString(
+    <IconComponent size={20} strokeWidth={2.5} color="white" />
+  );
+
+  return L.divIcon({
+    html: `
+      <div style="
+        position: relative;
+        width: ${MARKER_ICON_SIZE}px;
+        height: ${MARKER_ICON_SIZE}px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: ${iconColor};
+        border-radius: ${BORDER_RADIUS_CIRCLE};
+        border: 3px solid white;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+      ">
+        ${iconSvg}
+      </div>
+    `,
+    className: 'custom-marker-icon',
+    iconSize: [MARKER_ICON_SIZE, MARKER_ICON_SIZE],
+    iconAnchor: [MARKER_ICON_SIZE / 2, MARKER_ICON_SIZE],
+    popupAnchor: [0, -MARKER_ICON_SIZE],
+  });
+};
+
+// ============================================================================
+// COMPONENTE DE POPUP REUTILIZABLE
+// ============================================================================
+const POIPopupContent = ({ poi, isSelected, onPOIClick }) => (
+  <div className="p-3" style={{ minWidth: POPUP_MIN_WIDTH, paddingTop: "10px" }}>
+    <h6 className="fw-bold mb-3" style={{
+      paddingRight: "20px",
+      wordWrap: "break-word",
+      overflowWrap: "break-word"
+    }}>
+      {poi.name}
+    </h6>
+
+    <div className="mb-3">
+      <span className={`badge bg-${getPOIColor(poi.type)}`}>
+        {poi.type.charAt(0).toUpperCase() + poi.type.slice(1)}
+      </span>
+    </div>
+
+    {poi.address && (
+      <p className="small text-muted mb-3" style={{
+        wordWrap: "break-word",
+        overflowWrap: "break-word"
+      }}>
+        📍 {poi.address}
+      </p>
+    )}
+
+    <button
+      type="button"
+      className={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-2 ${isSelected ? "btn-success" : "btn-primary"
+        }`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onPOIClick(poi);
+      }}
+    >
+      {isSelected ? (
+        <>
+          <Check size={16} />
+          Selected
+        </>
+      ) : (
+        <>
+          <Plus size={16} />
+          Add to Route
+        </>
+      )}
+    </button>
+  </div>
+);
+
+// ============================================================================
+// COMPONENTE PRINCIPAL
+// ============================================================================
+const CreateRouteMap = ({
+  center = [40.4168, -3.7038], // Madrid por defecto
+  pois = [],
+  selectedPOIs = [],
+  categoryType = 'attraction', // Tipo de categoría seleccionada
+  onPOIClick,
+  showRoute = true, // Mostrar líneas entre POIs seleccionados
+}) => {
+  const categoryDisplayName = CATEGORY_NAMES_PLURAL[categoryType] || 'Locations';
+
+  // Si no hay centro válido, usar Madrid
+  const mapCenter =
+    center && center[0] && center[1] ? center : [40.4168, -3.7038];
+
+  // Merge current category POIs with selected POIs from other categories
+  // This ensures selected POIs persist when switching between categories
+  const mergedPOIs = React.useMemo(() => {
+    const poiMap = new Map();
+
+    // Add current category POIs
+    pois.forEach(poi => {
+      if (poi && poi.id) {
+        poiMap.set(poi.id, poi);
+      }
+    });
+
+    // Add selected POIs (these might be from different categories)
+    selectedPOIs.forEach(poi => {
+      if (poi && poi.id) {
+        poiMap.set(poi.id, poi);
+      }
+    });
+
+    return Array.from(poiMap.values());
+  }, [pois, selectedPOIs]);
+
+  // Filtrar POIs con coordenadas válidas
+  const validPOIs = mergedPOIs.filter(
+    (poi) =>
+      poi &&
+      poi.lat != null &&
+      poi.lon != null &&
+      !isNaN(poi.lat) &&
+      !isNaN(poi.lon)
+  );
+
+  // Calcular coordenadas de la ruta (POIs seleccionados en orden con coordenadas válidas)
+  const routeCoordinates = selectedPOIs
+    .filter((poi) => poi && poi.lat != null && poi.lon != null)
+    .map((poi) => [poi.lat, poi.lon]);
+
+  // Si no hay POIs válidos, mostrar mensaje
+  if (validPOIs.length === 0) {
+    return (
+      <div
+        className="position-relative rounded-3 overflow-hidden shadow bg-light d-flex align-items-center justify-content-center"
+        style={{ height: MAP_HEIGHT }}
+      >
+        <div className="text-center p-4">
+          <Loader size={HEADER_ICON_SIZE} className="text-primary mb-3 animate-spin" />
+          <h5 className="fw-bold text-dark">Loading {categoryDisplayName}</h5>
+          <p className="text-dark">
+            Fetching available {categoryDisplayName.toLowerCase()}, please wait.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="position-relative overflow-hidden shadow-sm border rounded-3">
+      <MapContainer
+        center={mapCenter}
+        zoom={13}
+        style={{ height: MAP_HEIGHT, width: "100%" }}
+        scrollWheelZoom={true}
+      >
+        {/* Capa del mapa */}
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+
+        {/* Línea de la ruta (conecta POIs seleccionados) */}
+        {showRoute && routeCoordinates.length > 1 && (
+          <>
+            {/* Línea de conexión entre POIs */}
+            <Polyline
+              positions={routeCoordinates}
+              color="#0d6efd"
+              weight={3}
+              opacity={0.6}
+            />
+
+            {/* Puntos azules numerados en cada POI seleccionado */}
+            {selectedPOIs
+              .filter((poi) => poi && poi.lat != null && poi.lon != null)
+              .map((poi, index) => (
+                <Marker
+                  key={`route-point-${poi.id}-${index}`}
+                  position={[poi.lat, poi.lon]}
+                  icon={L.divIcon({
+                    html: `
+              <div style="
+                width: ${ROUTE_POINT_SIZE}px;
+                height: ${ROUTE_POINT_SIZE}px;
+                background-color: #0d6efd;
+                border: 4px solid white;
+                border-radius: ${BORDER_RADIUS_CIRCLE};
+                box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+                position: relative;
+                z-index: 2000 !important;
+                cursor: pointer;
+              ">
+                <div style="
+                  position: absolute;
+                  top: -30px;
+                  left: 50%;
+                  transform: translateX(-50%);
+                  background: #0d6efd;
+                  color: white;
+                  padding: 3px 8px;
+                  border-radius: ${BORDER_RADIUS_MD};
+                  font-size: ${ROUTE_POINT_NUMBER_FONT_SIZE};
+                  font-weight: bold;
+                  white-space: nowrap;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                  border: 2px solid white;
+                ">
+                  ${index + 1}
+                </div>
+              </div>
+            `,
+                    className: 'route-point-marker',
+                    iconSize: [ROUTE_POINT_SIZE, ROUTE_POINT_SIZE],
+                    iconAnchor: [ROUTE_POINT_SIZE / 2, ROUTE_POINT_SIZE / 2],
+                  })}
+                  zIndexOffset={2000}
+                >
+                  <Popup closeButton={true}>
+                    <POIPopupContent
+                      poi={poi}
+                      isSelected={true}
+                      onPOIClick={onPOIClick}
+                    />
+                  </Popup>
+                </Marker>
+              ))}
+          </>
+        )}
+
+        {/* Markers con clustering - SOLO para POIs NO seleccionados */}
+        <MarkerClusterGroup
+          chunkedLoading
+          maxClusterRadius={50}
+          spiderfyOnMaxZoom={true}
+          showCoverageOnHover={false}
+          zoomToBoundsOnClick={true}
+          iconCreateFunction={(cluster) => {
+            const count = cluster.getChildCount();
+            return L.divIcon({
+              html: `
+                <div style="
+                  background-color: #1c14fdff;
+                  color: white;
+                  border-radius: ${BORDER_RADIUS_CIRCLE};
+                  width: ${CLUSTER_SIZE}px;
+                  height: ${CLUSTER_SIZE}px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: bold;
+                  font-size: 16px;
+                  border: 3px solid white;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                ">
+                  ${count}
+                </div>
+              `,
+              className: "custom-cluster-icon",
+              iconSize: [90, 90],
+            });
+          }}
+        >
+          {validPOIs
+            .filter((poi) => !selectedPOIs.some((p) => p.id === poi.id))
+            .map((poi) => (
+              <Marker
+                key={`${poi.id}-${categoryType}`}
+                position={[poi.lat, poi.lon]}
+                icon={getMarkerIcon(poi.type, false)}
+              >
+                <Popup closeButton={true}>
+                  <POIPopupContent
+                    poi={poi}
+                    isSelected={false}
+                    onPOIClick={onPOIClick}
+                  />
+                </Popup>
+              </Marker>
+            ))}
+        </MarkerClusterGroup>
+
+        {/* Selected POIs - rendered OUTSIDE clustering to always be visible */}
+        {selectedPOIs
+          .filter((poi) => poi && poi.lat != null && poi.lon != null && !isNaN(poi.lat) && !isNaN(poi.lon))
+          .map((poi) => {
+            // If showing route with 2+ POIs, selected markers are shown as numbered blue dots above
+            if (showRoute && selectedPOIs.length > 1) {
+              return null;
+            }
+
+            return (
+              <Marker
+                key={`selected-${poi.id}-${categoryType}`}
+                position={[poi.lat, poi.lon]}
+                icon={getMarkerIcon(poi.type, true)}
+                zIndexOffset={1000}
+              >
+                <Popup closeButton={true}>
+                  <POIPopupContent
+                    poi={poi}
+                    isSelected={true}
+                    onPOIClick={onPOIClick}
+                  />
+                </Popup>
+              </Marker>
+            );
+          })}
+      </MapContainer>
+
+      {/* Overlay de información */}
+      {validPOIs.length > 0 && (
+        <div
+          className="position-absolute top-0 end-0 m-3 bg-body border rounded-4 shadow p-3 d-flex flex-column align-items-center justify-content-center gap-1"
+          style={{ zIndex: 1000 }}
+        >
+          <div className="d-flex align-items-center gap-2">
+            <div>
+              <div className="fw-bold text-body">{validPOIs.length} Available Locations</div>
+              <div className={`small ${selectedPOIs.length > 0 ? 'text-success' : 'text-danger'}`}>
+                {selectedPOIs.length} selected
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Advertencia de POIs inválidos */}
+      {pois.length > validPOIs.length && (
+        <div
+          className="position-absolute bottom-0 start-0 m-3 bg-warning rounded-3 shadow p-2"
+          style={{ zIndex: 1000, maxWidth: "300px" }}
+        >
+          <div className="d-flex align-items-start gap-2">
+            <AlertCircle size={16} className="text-dark mt-1 shrink-0" />
+            <div className="small text-dark">
+              {pois.length - validPOIs.length} POI(s) without valid coordinates are
+              not shown on the map
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CreateRouteMap;
