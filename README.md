@@ -132,9 +132,7 @@ Manage your routes and track your travel planning journey:
 - **Unsplash**: POI image sourcing.
 - **OpenStreetMap**: POI data and location search.
 
----
-
-### Creators
+## 🙋‍♂️ Creators
 
 **Egor Ulybin Merkulaev**: [@eulybin](https://github.com/eulybin)  
 **Victor Manuel Moreno Cabello**: [@VictorPko73](https://github.com/VictorPko73)
