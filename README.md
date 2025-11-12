@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="src/front/assets/brand-name-dark.svg" alt="Waypoint App" width="300" />
-</p>
-
 <div align="center">
+
+# Waypoint
    
 [![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black&style=for-the-badge)](https://reactjs.org/)
 [![Flask](https://img.shields.io/badge/Flask-000000?logo=flask&logoColor=white&style=for-the-badge)](https://flask.palletsprojects.com/)
