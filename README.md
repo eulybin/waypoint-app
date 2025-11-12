@@ -18,6 +18,8 @@
 
 **Waypoint** is a modern travel route planning platform that allows users to discover, create, and share custom travel routes. Whether you're planning a city tour, a hiking trail, or a food adventure, Waypoint provides the tools to create detailed, interactive routes that can be shared with the community.
 
+![App Screenshot](src/front/assets/readme/home.png)
+
 ### Key Highlights
 
 - **Interactive Map Creation**: Build routes by selecting POIs directly on an interactive Leaflet map with Nominatim geocoding.
@@ -29,7 +31,7 @@
 
 ## Features
 
-![App Screenshot](src/front/assets/home.png)
+![App Screenshot](src/front/assets/readme/create-page.png)
 
 ### Create Route Page
 
