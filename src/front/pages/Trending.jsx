@@ -1,17 +1,3 @@
-/**
- * PAGE: TRENDING
- *
- * Shows the TOP 5 most voted routes from all users
- * Routes are sorted by score (average_rating) and total votes
- *
- * Features:
- * - Visual ranking with positions (🥇🥈🥉)
- * - Route cards with all information
- * - Loading state while loading
- * - Error handling
- * - Responsive design
- */
-
 import { useState, useEffect } from "react";
 import { TrendingUp, Star, Award } from "lucide-react";
 import RouteCard from "../components/RouteCard";
@@ -33,13 +19,13 @@ const Trending = () => {
 
   // ==================== EFFECTS ====================
 
-  /**
+  /*
    * Effect that runs when component mounts
    * Loads TOP 5 routes from backend
    */
   useEffect(() => {
     fetchTopRoutes();
-  }, []); // Empty array = only runs once on mount
+  }, []);
 
   // ==================== FUNCTIONS ====================
 
