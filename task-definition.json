@@ -1,0 +1,53 @@
+{
+    "family": "waypoint-app",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "1024",
+    "executionRoleArn": "arn:aws:iam::067969188628:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "name": "waypoint-app",
+            "image": "067969188628.dkr.ecr.eu-west-1.amazonaws.com/waypoint-app:latest",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "secrets": [
+                {
+                    "name": "DATABASE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:067969188628:secret:waypoint/database-url-zC13X4"
+                },
+                {
+                    "name": "PEXELS_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:067969188628:secret:waypoint/pexels-key-VK5kB4"
+                },
+                {
+                    "name": "EMAIL_USER",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:067969188628:secret:waypoint/email-user-erNNV0"
+                },
+                {
+                    "name": "EMAIL_PASS",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:067969188628:secret:waypoint/email-pass-K3OUuZ"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "FLASK_ENV",
+                    "value": "production"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/waypoint-app",
+                    "awslogs-region": "eu-west-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ]
+}

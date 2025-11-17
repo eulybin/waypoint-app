@@ -1,15 +1,15 @@
 <div align="center">
 
 # Waypoint
-   
+
 [![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black&style=for-the-badge)](https://reactjs.org/)
 [![Flask](https://img.shields.io/badge/Flask-000000?logo=flask&logoColor=white&style=for-the-badge)](https://flask.palletsprojects.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white&style=for-the-badge)](https://www.postgresql.org/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?logo=bootstrap&logoColor=white&style=for-the-badge)](https://getbootstrap.com/)
 [![Leaflet](https://img.shields.io/badge/Leaflet-199900?logo=leaflet&logoColor=white&style=for-the-badge)](https://leafletjs.com/)
 
-
 **A full-stack web application for discovering and creating custom travel routes with interactive maps, POI (Points of Interest) management, and community-driven ratings.**
+
 </div>
 
 ## 📖 About Waypoint
@@ -34,17 +34,17 @@
 The heart of Waypoint - an intuitive route builder with powerful features:
 
 - **Location Selection**
-  - Quick access to popular destinations via visual cards.
-  - Search for any location worldwide using Nominatim geocoding.
+    - Quick access to popular destinations via visual cards.
+    - Search for any location worldwide using Nominatim geocoding.
 
 - **Interactive Map Interface**
-  - Search and discover POIs near your location with a real-time map powered by Leaflet and OpenStreetMap.
-  - Categories like Attractions, Museums, Restaurants, Cafes, Bars, Parks, Monuments, and more.
-  - Click to add POIs markers to your route with automatic ordering.
+    - Search and discover POIs near your location with a real-time map powered by Leaflet and OpenStreetMap.
+    - Categories like Attractions, Museums, Restaurants, Cafes, Bars, Parks, Monuments, and more.
+    - Click to add POIs markers to your route with automatic ordering.
 
 - **Route Visualization**
-  - Calculate route distance and duration for multiple transport options (Car, Walking, Bike).
-  - Interactive polyline rendering between POIs for standard size and full screen maps.
+    - Calculate route distance and duration for multiple transport options (Car, Walking, Bike).
+    - Interactive polyline rendering between POIs for standard size and full screen maps.
 
 ## 🔎 Explore Page
 
@@ -53,12 +53,12 @@ The heart of Waypoint - an intuitive route builder with powerful features:
 Discover routes created by the community with smart filtering:
 
 - **Search & Filter**
-  - Fast access to popular country and city cards to quickly select your destination.
-  - Search for cities manually to explore routes created by other users at that destination.
+    - Fast access to popular country and city cards to quickly select your destination.
+    - Search for cities manually to explore routes created by other users at that destination.
 
 - **Weather Integration**
-  - Real-time weather widget that updates automatically when the destination changes.
-  - Displays temperature, conditions, humidity, wind speed, and a three-day forecast.
+    - Real-time weather widget that updates automatically when the destination changes.
+    - Displays temperature, conditions, humidity, wind speed, and a three-day forecast.
 
 ## 📈 Trending Page
 
@@ -67,10 +67,10 @@ Discover routes created by the community with smart filtering:
 Discover the best routes ranked by the community:
 
 - **Top 5 Routes**
-  - Routes ranked by average rating. 🥇 🥈 🥉
-  - Secondary sorting by total votes, and tertiary sorting by creation date.
-  - View route details with integrated full screen map.
- 
+    - Routes ranked by average rating. 🥇 🥈 🥉
+    - Secondary sorting by total votes, and tertiary sorting by creation date.
+    - View route details with integrated full screen map.
+
 ## 👤 Profile Page
 
 ![App Screenshot](src/front/assets/readme/profile.png)
@@ -78,9 +78,9 @@ Discover the best routes ranked by the community:
 Manage your routes and track your travel planning journey:
 
 - **My Routes**
-  - Browse all your created routes and see favorites you've saved from others.
-  - Interactive route cards with expandable POI lists and statistics.
-  - Delete routes you no longer need.
+    - Browse all your created routes and see favorites you've saved from others.
+    - Interactive route cards with expandable POI lists and statistics.
+    - Delete routes you no longer need.
 
 ## ⚙️ Additional Features
 
@@ -91,11 +91,11 @@ Manage your routes and track your travel planning journey:
 </p>
 
 - **User Experience**
-  - Secure login and signup forms for user authentication. 
-  - Guest browsing with read-only route preview.
-  - Problem reporting system for app issues.
-  - Fully responsive design (mobile, tablet, desktop).
-  - Dark mode support with persistent theme.
+    - Secure login and signup forms for user authentication.
+    - Guest browsing with read-only route preview.
+    - Problem reporting system for app issues.
+    - Fully responsive design (mobile, tablet, desktop).
+    - Dark mode support with persistent theme.
 
 ## 🧠 Tech Stack
 

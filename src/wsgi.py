@@ -3,5 +3,8 @@
 
 from app import app as application
 
+# Export as both 'app' and 'application' for compatibility
+app = application
+
 if __name__ == "__main__":
     application.run()
