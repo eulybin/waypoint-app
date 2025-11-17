@@ -1,0 +1,67 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: waypoint-db
+    environment:
+      POSTGRES_USER: waypoint_user
+      POSTGRES_PASSWORD: waypoint_pass
+      POSTGRES_DB: waypoint_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U waypoint_user -d waypoint_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Flask Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: waypoint-backend
+    environment:
+      FLASK_APP: src/app.py
+      FLASK_DEBUG: 1
+      FLASK_RUN_PORT: 3001
+      DATABASE_URL: postgresql://waypoint_user:waypoint_pass@db:5432/waypoint_db
+      PEXELS_API_KEY: ${PEXELS_API_KEY}
+      REPORT_RECEIVER_EMAIL: ${REPORT_RECEIVER_EMAIL}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./src:/app/src
+      - ./migrations:/app/migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # React Frontend (development)
+  frontend:
+    image: node:20-alpine
+    container_name: waypoint-frontend
+    working_dir: /app
+    environment:
+      VITE_API_URL: http://localhost:3001
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: waypoint-network
