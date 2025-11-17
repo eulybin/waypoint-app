@@ -1,511 +1,546 @@
-/* Importar estilos de Leaflet para que el mapa se vea correctamente */
+/* =============================
+   IMPORTS
+   ============================= */
 @import 'leaflet/dist/leaflet.css';
 
-:root[data-bs-theme='dark'] {
-  --bs-body-bg: #121212;
-  --bs-body-color: #e0e0e0;
-  --bs-border-color: #969696;
-}
-
+/* =============================
+   CSS VARIABLES & THEME
+   ============================= */
 :root {
-  --app-border-accent: #212529 !important;
-  --navbar-width-desktop: 250px;
-  --navbar-width-mobile: 80px;
-  --z-navbar: 1000;
+    --app-border-accent: #212529 !important;
+    --navbar-width-desktop: 250px;
+    --navbar-width-mobile: 80px;
+    --z-navbar: 1000;
 }
 
 :root[data-bs-theme='dark'] {
-  --app-border-accent: #c2c2c2 !important;
+    --bs-body-bg: #121212;
+    --bs-body-color: #e0e0e0;
+    --bs-border-color: #969696;
+    --app-border-accent: #c2c2c2 !important;
 }
 
+/* =============================
+   BASE STYLES
+   ============================= */
 body {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
 }
 
+/* =============================
+   COLOR UTILITIES
+   ============================= */
+/* Orange color variants */
 .text-orange {
-  color: #f36011;
+    color: #f36011;
 }
 
 .bg-orange {
-  background-color: #f36011;
+    background-color: #f36011;
 }
 
 .bg-orange:hover {
-  background-color: #dc5208;
+    background-color: #dc5208;
 }
 
 .bg-orange:focus-visible {
-  background-color: #f36011;
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 4px rgb(198, 221, 254);
-}
-
-.text-green {
-  color: #3fa34d;
-}
-
-.bg-green {
-  background-color: #3fa34d;
-}
-
-.bg-green:hover {
-  background-color: #349040;
-}
-
-[data-bs-theme='light'] .sidebar-item:hover {
-  background-color: #dadada !important;
-  transition: background-color 0.2s;
-}
-
-[data-bs-theme='dark'] .sidebar-item:hover {
-  background-color: #3d3d3d !important;
-  transition: background-color 0.2s;
-}
-
-.logout-item:hover {
-  background-color: #ff5858 !important;
-  transition: background-color 0.2s;
-}
-
-.search-input:hover {
-  background-color: var(--bs-secondary-bg);
+    background-color: #f36011;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 4px rgb(198, 221, 254);
 }
 
 .btn.bg-orange:disabled {
-  background-color: #f36011 !important;
-  border-color: #f36011 !important;
-  opacity: 0.75;
-  cursor: not-allowed;
+    background-color: #f36011 !important;
+    border-color: #f36011 !important;
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+/* Green color variants */
+.text-green {
+    color: #3fa34d;
+}
+
+.bg-green {
+    background-color: #3fa34d;
+}
+
+.bg-green:hover {
+    background-color: #349040;
 }
 
 .btn.bg-green:disabled {
-  background-color: #3fa34d !important;
-  border-color: #3fa34d !important;
-  opacity: 0.75;
-  cursor: not-allowed;
-}
-
-.hover-bg-light:hover {
-  background-color: #f8f9fa !important;
-}
-
-[data-bs-theme='dark'] .hover-bg-light:hover {
-  background-color: #2d2d2d !important;
-}
-
-.cursor-pointer {
-  cursor: pointer !important;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Mejorar z-index de dropdowns */
-.dropdown-suggestions {
-  z-index: 1050 !important;
-}
-
-.custom-input {
-  padding-left: 2.5rem;
-}
-
-/* default: show the toggle */
-.position-relative .password-toggle {
-  display: block;
-  cursor: pointer;
-}
-
-/* when invalid, hide the toggle… */
-.position-relative .form-control.is-invalid ~ .password-toggle {
-  display: none;
-}
-
-/* Estilos adicionales para el mapa de Leaflet */
-.leaflet-container {
-  width: 100%;
-  height: 500px;
-  border-radius: 8px;
-  z-index: 1;
-}
-
-/* Asegurar que los controles del mapa estén visibles */
-.leaflet-control-zoom,
-.leaflet-control-attribution {
-  z-index: 1000 !important;
-}
-
-/* Mejorar la apariencia de los popups */
-.leaflet-popup-content-wrapper {
-  border-radius: 8px;
-}
-
-.leaflet-popup-content {
-  margin: 10px;
-  line-height: 1.4;
-}
-
-/* Labels visible on desktop */
-.navbar-desktop .nav-label {
-  display: inline;
+    background-color: #3fa34d !important;
+    border-color: #3fa34d !important;
+    opacity: 0.75;
+    cursor: not-allowed;
 }
 
 /* =============================
-   Desktop Sidebar (≥768px)
+   BADGE & ICON COMPONENTS
    ============================= */
-.navbar-desktop {
-  width: var(--navbar-width-desktop);
-}
-
-/* =============================
-   Mobile Vertical Bar (<768px)
-   ============================= */
-.navbar-mobile {
-  width: var(--navbar-width-mobile);
-  z-index: var(--z-navbar);
-}
-
-.navbar-mobile .mobile-nav-item {
-  width: auto;
-  transition: background-color 0.2s;
-}
-
-.navbar-mobile .mobile-nav-item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Match desktop hover colors for mobile nav items */
-[data-bs-theme='light'] .navbar-mobile .mobile-nav-item:hover {
-  background-color: #dadada !important;
-}
-
-[data-bs-theme='dark'] .navbar-mobile .mobile-nav-item:hover {
-  background-color: #3d3d3d !important;
-}
-
-/* =============================
-   Compact Horizontal Navbar
-   ============================= */
-.navbar-compact-horizontal {
-  height: 60px;
-  z-index: var(--z-navbar);
-  display: none; /* Hidden by default */
-}
-
-/* When body has compact-mode class */
-body.compact-mode main {
-  margin-left: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 60px !important; /* Space at bottom for navbar */
-}
-
-body.compact-mode .with-sidebar {
-  margin-left: 0 !important;
-}
-
-/* Compact nav items hover effect - same as mobile navbar */
-.navbar-compact-horizontal .compact-nav-item {
-  transition: background-color 0.2s ease;
-}
-
-[data-bs-theme='light'] .navbar-compact-horizontal .compact-nav-item:hover {
-  background-color: #dadada !important;
-}
-
-[data-bs-theme='dark'] .navbar-compact-horizontal .compact-nav-item:hover {
-  background-color: #3d3d3d !important;
-}
-
-/* Dropdown menu items hover effect */
-.navbar-compact-horizontal .sidebar-item {
-  transition: background-color 0.2s ease;
-}
-
-.navbar-compact-horizontal .sidebar-item:hover {
-  background-color: #f8f9fa;
-}
-
-[data-bs-theme='dark'] .navbar-compact-horizontal .sidebar-item:hover {
-  background-color: #2d2d2d;
-}
-
-.navbar-compact-horizontal .logout-item:hover {
-  background-color: #dc3545 !important;
-  color: white !important;
-}
-
-[data-bs-theme='dark'] .navbar-compact-horizontal .logout-item:hover {
-  background-color: #dc3545 !important;
-  color: white !important;
-}
-
-/* =============================
-   Home: Visual Pop Cards
-   ============================= */
-.pop-card {
-  border: 1px solid var(--app-border-accent);
-  border-radius: 0.75rem !important; /* rounded-3-ish */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-}
-.pop-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-}
-
-.icon_input_position {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
 .icon-badge {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
 }
 
 .header-icon-badge {
-  width: 80px;
-  height: 80px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
 }
+
 .badge-orange {
-  background: linear-gradient(135deg, #ff8a3d, #f36011);
+    background: linear-gradient(135deg, #ff8a3d, #f36011);
 }
 
 .badge-orange-dark {
-  background: linear-gradient(135deg, #e47a33, #d75610);
+    background: linear-gradient(135deg, #e47a33, #d75610);
 }
 
 .badge-orange-dark:hover {
-  background: linear-gradient(135deg, #d56a28, #c24d0e);
+    background: linear-gradient(135deg, #d56a28, #c24d0e);
 }
+
 .badge-blue {
-  background: linear-gradient(135deg, #7aa8ff, #3b82f6);
+    background: linear-gradient(135deg, #7aa8ff, #3b82f6);
 }
+
 .badge-green {
-  background: linear-gradient(135deg, #71d08c, #3fa34d);
+    background: linear-gradient(135deg, #71d08c, #3fa34d);
 }
+
 .badge-purple {
-  background: linear-gradient(135deg, #b49bff, #7c3aed);
+    background: linear-gradient(135deg, #b49bff, #7c3aed);
 }
+
 .badge-gray {
-  background: linear-gradient(135deg, #9aa0a6, #6b7280);
+    background: linear-gradient(135deg, #9aa0a6, #6b7280);
 }
 
 .badge-crimson {
-  background: linear-gradient(135deg, #ef4444, #991b1b);
-  color: #fff;
-}
-
-.navbar-popup {
-  width: 56px;
-  z-index: calc(var(--z-navbar) + 5) !important;
+    background: linear-gradient(135deg, #ef4444, #991b1b);
+    color: #fff;
 }
 
 /* =============================
-   Navbar Responsive Breakpoints
+   UTILITY CLASSES
    ============================= */
+.cursor-pointer {
+    cursor: pointer !important;
+}
 
+.hover-bg-light:hover {
+    background-color: #f8f9fa !important;
+}
+
+[data-bs-theme='dark'] .hover-bg-light:hover {
+    background-color: #2d2d2d !important;
+}
+
+/* =============================
+   FORM COMPONENTS
+   ============================= */
+.custom-input {
+    padding-left: 2.5rem;
+}
+
+.icon_input_position {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.search-input:hover {
+    background-color: var(--bs-secondary-bg);
+}
+
+/* Password toggle visibility */
+.position-relative .password-toggle {
+    display: block;
+    cursor: pointer;
+}
+
+.position-relative .form-control.is-invalid ~ .password-toggle {
+    display: none;
+}
+
+/* =============================
+   DROPDOWN COMPONENTS
+   ============================= */
+.dropdown-suggestions {
+    z-index: 1050 !important;
+}
+
+/* =============================
+   BUTTON COMPONENTS
+   ============================= */
+.btn-circle {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.weather-btn {
+    width: 48px;
+    height: 48px;
+}
+
+/* =============================
+   CARD COMPONENTS
+   ============================= */
+/* Home page pop cards */
+.pop-card {
+    border: 1px solid var(--app-border-accent);
+    border-radius: 0.75rem !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.02));
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.pop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+/* Explore page cards */
+.explore-card {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.explore-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* =============================
+   IMAGE COMPONENTS
+   ============================= */
+.profile-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    object-fit: cover;
+}
+
+.waypoint-brand {
+    height: 114px;
+    width: auto;
+}
+
+/* =============================
+   LEAFLET MAP STYLES
+   ============================= */
+.leaflet-container {
+    width: 100%;
+    height: 500px;
+    border-radius: 8px;
+    z-index: 1;
+}
+
+.leaflet-control-zoom,
+.leaflet-control-attribution {
+    z-index: 1000 !important;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+}
+
+.leaflet-popup-content {
+    margin: 10px;
+    line-height: 1.4;
+}
+
+/* =============================
+   WEATHER COMPONENTS
+   ============================= */
+.weather-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.weather-pulse-attention {
+    animation: weather-pulse 0.6s ease-in-out 2;
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-pulse-attention::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 40%,
+        rgba(255, 255, 255, 0.8) 50%,
+        rgba(255, 255, 255, 0.4) 60%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: weather-shine 1.2s ease-in-out 1;
+    pointer-events: none;
+}
+
+/* =============================
+   NAVIGATION - DESKTOP SIDEBAR
+   ============================= */
+.navbar-desktop {
+    width: var(--navbar-width-desktop);
+}
+
+.navbar-desktop .nav-label {
+    display: inline;
+}
+
+[data-bs-theme='light'] .sidebar-item:hover {
+    background-color: #dadada !important;
+    transition: background-color 0.2s;
+}
+
+[data-bs-theme='dark'] .sidebar-item:hover {
+    background-color: #3d3d3d !important;
+    transition: background-color 0.2s;
+}
+
+.logout-item:hover {
+    background-color: #ff5858 !important;
+    transition: background-color 0.2s;
+}
+
+/* =============================
+   NAVIGATION - MOBILE VERTICAL
+   ============================= */
+.navbar-mobile {
+    width: var(--navbar-width-mobile);
+    z-index: var(--z-navbar);
+}
+
+.navbar-mobile .mobile-nav-item {
+    width: auto;
+    transition: background-color 0.2s;
+}
+
+.navbar-mobile .mobile-nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-bs-theme='light'] .navbar-mobile .mobile-nav-item:hover {
+    background-color: #dadada !important;
+}
+
+[data-bs-theme='dark'] .navbar-mobile .mobile-nav-item:hover {
+    background-color: #3d3d3d !important;
+}
+
+/* =============================
+   NAVIGATION - COMPACT HORIZONTAL
+   ============================= */
+.navbar-compact-horizontal {
+    height: 60px;
+    z-index: var(--z-navbar);
+    display: none;
+}
+
+body.compact-mode main {
+    margin-left: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 60px !important;
+}
+
+body.compact-mode .with-sidebar {
+    margin-left: 0 !important;
+}
+
+.navbar-compact-horizontal .compact-nav-item {
+    transition: background-color 0.2s ease;
+}
+
+[data-bs-theme='light'] .navbar-compact-horizontal .compact-nav-item:hover {
+    background-color: #dadada !important;
+}
+
+[data-bs-theme='dark'] .navbar-compact-horizontal .compact-nav-item:hover {
+    background-color: #3d3d3d !important;
+}
+
+.navbar-compact-horizontal .sidebar-item {
+    transition: background-color 0.2s ease;
+}
+
+.navbar-compact-horizontal .sidebar-item:hover {
+    background-color: #f8f9fa;
+}
+
+[data-bs-theme='dark'] .navbar-compact-horizontal .sidebar-item:hover {
+    background-color: #2d2d2d;
+}
+
+.navbar-compact-horizontal .logout-item:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+[data-bs-theme='dark'] .navbar-compact-horizontal .logout-item:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* =============================
+   NAVIGATION - POPUP
+   ============================= */
+.navbar-popup {
+    width: 56px;
+    z-index: calc(var(--z-navbar) + 5) !important;
+}
+
+/* =============================
+   HOVER EFFECTS
+   ============================= */
+.rotate-on-hover {
+    transition: transform 0.25s ease;
+}
+
+.rotate-on-hover:hover {
+    transform: rotate(90deg);
+}
+
+.scale-on-hover {
+    transition: transform 0.2s ease;
+}
+
+.scale-on-hover:hover {
+    transform: scale(1.15);
+}
+
+/* =============================
+   ANIMATIONS & KEYFRAMES
+   ============================= */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes weather-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.9);
+    }
+    50% {
+        transform: scale(1.25);
+        box-shadow: 0 0 30px 15px rgba(13, 110, 253, 0.6);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.9);
+    }
+}
+
+@keyframes weather-shine {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+/* =============================
+   MEDIA QUERIES - RESPONSIVE
+   ============================= */
 /* Desktop: ≥992px width AND ≥515px height */
 @media (min-width: 992px) and (min-height: 515px) {
-  .navbar-desktop {
-    display: flex !important;
-  }
-  .navbar-mobile {
-    display: none !important;
-  }
-  .navbar-compact-horizontal {
-    display: none !important;
-  }
+    .navbar-desktop {
+        display: flex !important;
+    }
+    .navbar-mobile {
+        display: none !important;
+    }
+    .navbar-compact-horizontal {
+        display: none !important;
+    }
 
-  .with-sidebar {
-    margin-left: var(--navbar-width-desktop);
-  }
+    .with-sidebar {
+        margin-left: var(--navbar-width-desktop);
+    }
 }
 
 /* Mobile vertical: 576px-992px width AND ≥515px height */
 @media (max-width: 991.98px) and (min-width: 576px) and (min-height: 515px) {
-  .navbar-desktop {
-    display: none !important;
-  }
-  .navbar-mobile {
-    display: flex !important;
-  }
-  .navbar-compact-horizontal {
-    display: none !important;
-  }
+    .navbar-desktop {
+        display: none !important;
+    }
+    .navbar-mobile {
+        display: flex !important;
+    }
+    .navbar-compact-horizontal {
+        display: none !important;
+    }
 
-  .with-sidebar {
-    margin-left: var(--navbar-width-mobile);
-  }
+    .with-sidebar {
+        margin-left: var(--navbar-width-mobile);
+    }
 }
 
 /* Compact horizontal: width <576px OR height <515px */
 @media (max-width: 575.98px), (max-height: 514.98px) {
-  .navbar-desktop {
-    display: none !important;
-  }
-  .navbar-mobile {
-    display: none !important;
-  }
-  .navbar-compact-horizontal {
-    display: flex !important;
-  }
+    .navbar-desktop {
+        display: none !important;
+    }
+    .navbar-mobile {
+        display: none !important;
+    }
+    .navbar-compact-horizontal {
+        display: flex !important;
+    }
 
-  .with-sidebar {
-    margin-left: 0 !important;
-    padding-bottom: 60px !important;
-  }
-}
-
-/* WEATHER */
-
-.weather-btn {
-  width: 48px;
-  height: 48px;
-}
-
-/* Weather widget pulse attention animation */
-@keyframes weather-pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.9);
-  }
-  50% {
-    transform: scale(1.25);
-    box-shadow: 0 0 30px 15px rgba(13, 110, 253, 0.6);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.9);
-  }
-}
-
-/* Weather widget shine effect */
-@keyframes weather-shine {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
-}
-
-.weather-pulse-attention {
-  animation: weather-pulse 0.6s ease-in-out 2;
-  position: relative;
-  overflow: hidden;
-}
-
-.weather-pulse-attention::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 40%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0.4) 60%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: weather-shine 1.2s ease-in-out 1;
-  pointer-events: none;
-}
-
-.rotate-on-hover {
-  transition: transform 0.25s ease;
-}
-
-.rotate-on-hover:hover {
-  transform: rotate(90deg);
-}
-
-.scale-on-hover {
-  transition: transform 0.2s ease;
-}
-
-.scale-on-hover:hover {
-  transform: scale(1.15);
-}
-
-/* Explore page card hover effect */
-.explore-card {
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.explore-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.weather-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.btn-circle {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.profile-img {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  object-fit: cover;
+    .with-sidebar {
+        margin-left: 0 !important;
+        padding-bottom: 60px !important;
+    }
 }
 
 /* Waypoint brand responsive sizing */
-.waypoint-brand {
-  height: 114px;
-  width: auto;
-}
-
 @media (max-width: 767.98px) {
-  .waypoint-brand {
-    height: auto;
-    max-height: 114px;
-    max-width: 100%;
-  }
+    .waypoint-brand {
+        height: auto;
+        max-height: 114px;
+        max-width: 100%;
+    }
 }
