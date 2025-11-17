@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+    # PostgreSQL Database
+    db:
+        image: postgres:15-alpine
+        container_name: waypoint-db-prod
+        environment:
+            POSTGRES_USER: ${DB_USER:-waypoint_user}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:-waypoint_pass}
+            POSTGRES_DB: ${DB_NAME:-waypoint_db}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        restart: always
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-waypoint_user} -d ${DB_NAME:-waypoint_db}']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    # Production app (nginx + backend)
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile.prod
+        container_name: waypoint-app-prod
+        environment:
+            FLASK_APP: src/app.py
+            FLASK_DEBUG: 0
+            DATABASE_URL: postgresql://${DB_USER:-waypoint_user}:${DB_PASSWORD:-waypoint_pass}@db:5432/${DB_NAME:-waypoint_db}
+            PEXELS_API_KEY: ${PEXELS_API_KEY}
+            REPORT_RECEIVER_EMAIL: ${REPORT_RECEIVER_EMAIL}
+            EMAIL_USER: ${EMAIL_USER}
+            EMAIL_PASS: ${EMAIL_PASS}
+        ports:
+            - '80:80'
+        depends_on:
+            db:
+                condition: service_healthy
+        restart: always
+
+volumes:
+    postgres_data:
+
+networks:
+    default:
+        name: waypoint-network-prod

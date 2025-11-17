@@ -1,0 +1,57 @@
+# Multi-stage build for production
+
+# Stage 1: Build frontend
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY index.html vite.config.js ./
+COPY src/front ./src/front
+
+# Build for production
+RUN npm run build
+
+# Stage 2: Production image with nginx and backend
+FROM python:3.13-slim
+
+# Install nginx and system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx \
+    postgresql-client \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory for backend
+WORKDIR /app
+
+# Copy and install Python dependencies
+COPY Pipfile Pipfile.lock ./
+RUN pip install --no-cache-dir pipenv && \
+    pipenv install --system --deploy
+
+# Copy backend code
+COPY src/ ./src/
+COPY migrations/ ./migrations/
+
+# Copy frontend build from previous stage
+COPY --from=frontend-builder /app/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Create startup script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Expose port 80 for nginx
+EXPOSE 80
+
+# Use startup script
+ENTRYPOINT ["/docker-entrypoint.sh"]
