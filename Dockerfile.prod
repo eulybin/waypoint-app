@@ -15,6 +15,9 @@ RUN npm ci
 COPY index.html vite.config.js ./
 COPY src/front ./src/front
 
+# Set production environment variable for API URL (empty = relative URLs)
+ENV VITE_BACKEND_URL=""
+
 # Build for production
 RUN npm run build
 

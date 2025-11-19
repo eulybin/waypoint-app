@@ -42,7 +42,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # CONFIGURACIÓN JWT - IMPORTANTE PARA AUTENTICACIÓN
 # ============================================================================
 # app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret-key-change-in-production')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)  # Token expira en 30 días
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)  # Token expira en 30 días
 app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
 jwt = JWTManager(app)
 # ============================================================================
@@ -60,7 +60,16 @@ CORS(
     app,
     resources={
         r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+            "origins": [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://localhost:3001",
+                "http://127.0.0.1:3001",
+                "https://waypoint-app.dev",
+                "https://www.waypoint-app.dev",
+                "http://waypoint-app.dev",
+                "http://www.waypoint-app.dev",
+            ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
         }
