@@ -87,7 +87,7 @@ const Login = () => {
       const result = await loginUser(loginData, controller.signal);
       if (result?.success) {
         setLoginData(initialLoginFormState);
-        navigate('/');
+        navigate('/home', { replace: true });
       } else {
         setServerError(result?.error || 'Failed to log in, please try again.');
       }

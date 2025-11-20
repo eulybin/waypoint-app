@@ -17,7 +17,7 @@ const CompactHorizontalNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance
 
   const handleLogout = () => {
     logoutUser();
-    navigate('/search');
+    navigate('/');
     setShowMoreMenu(false);
   };
 

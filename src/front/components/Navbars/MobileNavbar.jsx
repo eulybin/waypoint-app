@@ -17,7 +17,7 @@ const MobileNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowAp
 
   const handleLogout = () => {
     logoutUser();
-    navigate('/search');
+    navigate('/');
     setShowMoreMenu(false);
   };
 

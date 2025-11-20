@@ -2,6 +2,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
+  Navigate,
 } from "react-router-dom";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
@@ -14,6 +15,7 @@ import CreateRoute from "./pages/CreateRoute";
 import SearchBar from "./pages/Search";
 import NotFound from "./pages/NotFound";
 import RouteDetail from "./pages/RouteDetail";
+import Presentation from "./pages/Presentation";
 
 // WRAPPERS
 import AuthenticatedRoute from "./components/Routes/AuthenticatedRoute";
@@ -25,17 +27,19 @@ export const router = createBrowserRouter(
 
       {/* AUTHENTICATED ROUTES */}
       <Route element={<AuthenticatedRoute />}>
-        <Route index element={<Home />} />
+        <Route path="home" element={<Home />} />
         <Route path="explore" element={<Explore />} />
         <Route path="trending" element={<Trending />} />
         <Route path="profile" element={<Profile />} />
         <Route path="create-route" element={<CreateRoute />} />
         <Route path="route/:id" element={<RouteDetail />} />
+        <Route path="presentation" element={<Navigate to="/home" replace />} />
       </Route>
 
       {/* GUEST ROUTES */}
       <Route element={<GuestRoute />}>
-        <Route path="search" element={<SearchBar />} />
+        <Route index element={<Presentation />} />
+        {/* <Route path="search" element={<SearchBar />} /> */}
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
       </Route>
@@ -43,11 +47,5 @@ export const router = createBrowserRouter(
       {/* 404 PAGE NOT FOUND */}
       <Route path="*" element={<NotFound />} />
     </Route>
-  ),
-  {
-    future: {
-      v7_startTransition: true,
-      v7_relativeSplatPath: true,
-    },
-  }
+  )
 );

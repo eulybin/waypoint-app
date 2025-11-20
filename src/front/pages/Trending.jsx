@@ -7,36 +7,17 @@ import { HEADER_ICON_SIZE } from "../utils/constants";
 
 const Trending = () => {
   // ==================== STATE ====================
-
-  // State to store top 5 routes
   const [topRoutes, setTopRoutes] = useState([]);
 
-  // Loading state
   const [isLoading, setIsLoading] = useState(true);
 
-  // Error state
   const [error, setError] = useState(null);
 
-  // ==================== EFFECTS ====================
-
-  /*
-   * Effect that runs when component mounts
-   * Loads TOP 5 routes from backend
-   */
   useEffect(() => {
     fetchTopRoutes();
   }, []);
 
-  // ==================== FUNCTIONS ====================
 
-  /**
-   * Fetches ALL routes and sorts them by score
-   *
-   * Sorting criteria:
-   * 1. By average_rating (descending) - Highest rated first
-   * 2. If same rating, by total_votes (descending)
-   * 3. If same votes, by creation date (most recent first)
-   */
   const fetchTopRoutes = async () => {
     try {
       setIsLoading(true);
@@ -173,29 +154,20 @@ const Trending = () => {
     );
   }
 
-  // ==================== MAIN RENDERING ====================
-
   return (
     <div className="container py-5">
-      {/* Page header */}
       <div className="text-center mb-5">
         {/* Main icon */}
         <div className="mb-3">
           <div className="mb-3 header-icon-badge badge-purple"><TrendingUp size={HEADER_ICON_SIZE} /></div>
         </div>
-
-        {/* Title */}
         <h1 className="display-4 fw-bold mb-3">
           Trending Routes
         </h1>
-
-        {/* Subtitle */}
         <p className="lead text-muted">
           The {topRoutes.length} highest rated routes by the community
         </p>
-
-        {/* Decorative divider */}
-        <hr className="w-25 mx-auto border-warning border-3" />
+        <hr className="w-25 mx-auto border-warning border-2" />
       </div>
 
       {/* TOP 5 routes grid */}
@@ -211,64 +183,65 @@ const Trending = () => {
                 <div
                   className={`position-absolute badge ${getPositionClass(position)} rounded-pill`}
                   style={{
-                    top: "-10px",
-                    left: "20px",
+                    top: "-8px",
+                    left: "16px",
                     zIndex: 10,
-                    fontSize: "1.2rem",
-                    padding: "10px 20px",
-                    boxShadow: "0 4px 8px `rgba(0, 0, 0, 1)",
+                    fontSize: "1rem",
+                    padding: "8px 16px",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
                   }}
                 >
-                  <Award size={18} className="me-2" />
+                  <Award size={16} className="me-2" />
                   <span className="fw-bold">{getMedalEmoji(position)}</span>
                   {position > 3 && <span className="ms-2"></span>}
                 </div>
 
                 {/* Route card with special hover effect for top 3 */}
                 <div
-                  className={`card shadow-lg ${position <= 3 ? "border-warning border-3" : ""}`}
+                  className={`card shadow-sm ${position <= 3 ? "border-warning" : "border-0"}`}
                   style={{
                     transition: "all 0.3s ease",
                     cursor: "pointer",
+                    borderWidth: position <= 3 ? "2px" : "0",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-5px)";
+                    e.currentTarget.style.transform = "translateY(-3px)";
                     e.currentTarget.style.boxShadow =
-                      "0 8px 25px rgba(0,0,0,0.15)";
+                      "0 6px 20px rgba(0,0,0,0.12)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.boxShadow =
-                      "0 4px 12px rgba(0,0,0,0.1)";
+                      "0 2px 8px rgba(0,0,0,0.08)";
                   }}
                 >
-                  <div className="card-body p-4">
+                  <div className="card-body p-3">
                     <div className="row align-items-center">
                       {/* Left column: Ranking information */}
-                      <div className="col-md-2 text-center border-end">
+                      <div className="col-md-2 text-center border-end border-2 pe-3">
                         {/* Large position number */}
-                        <div className="display-1 fw-bold text-muted ">
+                        <div className="display-3 fw-bold text-muted mb-2">
                           {position}
                         </div>
 
                         {/* Voting statistics */}
-                        <div className="mt-3">
+                        <div className="mt-2">
                           <Star
-                            size={32}
-                            className="text-warning mb-2"
+                            size={28}
+                            className="text-warning mb-1"
                             fill="currentColor"
                           />
-                          <div className="fw-bold fs-4">
+                          <div className="fw-bold fs-5">
                             {route.average_rating?.toFixed(1) || "0.0"}
                           </div>
-                          <small className="text-muted">
+                          <small className="text-muted d-block">
                             {route.total_votes || 0} votes
                           </small>
                         </div>
                       </div>
 
                       {/* Right column: RouteCard */}
-                      <div className="col-md-10">
+                      <div className="col-md-10 ps-3">
                         <RouteCard route={route} />
                       </div>
                     </div>

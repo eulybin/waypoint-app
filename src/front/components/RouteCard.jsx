@@ -70,7 +70,7 @@ const RouteCard = ({ route }) => {
       <div className="card-body">
         {/* Location */}
         <div className="d-flex align-items-center gap-2 mb-2">
-          <MapPin size={18} className="text-primary" />
+          <MapPin size={18} className="text-body" />
           <h5 className="card-title mb-0 fw-bold">
             {route.city}, {route.country}
           </h5>

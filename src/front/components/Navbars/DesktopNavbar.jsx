@@ -17,7 +17,7 @@ const DesktopNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowA
 
   const handleLogout = () => {
     logoutUser();
-    navigate('/search');
+    navigate('/');
     setShowMoreMenu(false);
   };
 
@@ -27,7 +27,7 @@ const DesktopNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowA
       style={{ width: NAVBAR_WIDTH, zIndex: NAVBAR_Z_INDEX }}
     >
       <div className="p-4">
-        <Link to="/" className="text-decoration-none d-inline-block mt-3">
+        <Link to="/home" className="text-decoration-none d-inline-block mt-3">
           {store.isDarkMode ? (
             <img src={brandNameDark} alt="Waypoint Brand Name" className="img-fluid" />
           ) : (
@@ -68,7 +68,7 @@ const DesktopNavbar = ({ showMoreMenu, setShowMoreMenu, showAppearance, setShowA
           <Link
             to="/create-route"
             className="btn badge-orange-dark text-white rounded-4 w-100 fw-bold py-3 mt-4 d-flex align-items-center justify-content-center gap-2"
-            style={{ 
+            style={{
               fontSize: CREATE_ROUTE_FONT_SIZE,
             }}
           >
