@@ -77,6 +77,11 @@ body {
     cursor: not-allowed;
 }
 
+/* Light grey background */
+.bg-light-grey {
+    background-color: #f0f0f0;
+}
+
 /* =============================
    BADGE & ICON COMPONENTS
    ============================= */

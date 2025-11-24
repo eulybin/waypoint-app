@@ -32,7 +32,7 @@ export default function Presentation() {
                 </section>
 
                 {/* Section 1 */}
-                <div className="row mb-5 g-0 shadow-md" style={{ minHeight: '450px', borderRadius: BORDER_RADIUS_MD, overflow: 'hidden' }}>
+                <div className="row mb-5 g-0 shadow-md" style={{ minHeight: '450px', borderRadius: BORDER_RADIUS_MD, overflow: 'hidden', border: store.isDarkMode ? 'none' : '1px solid #dee2e6' }}>
                     <div className="col-md-6">
                         <div style={{
                             height: '100%',
@@ -42,7 +42,7 @@ export default function Presentation() {
                             backgroundPosition: 'center'
                         }} />
                     </div>
-                    <div className="col-md-6 d-flex align-items-center bg-body">
+                    <div className={`col-md-6 d-flex align-items-center ${store.isDarkMode ? "bg-body" : "bg-light-grey"}`}>
                         <div className="p-5">
                             <div className="mb-3 icon-badge badge-orange">
                                 <MapPinPlus size={SETTINGS_ICON_SIZE} />
@@ -66,7 +66,7 @@ export default function Presentation() {
                 </div>
 
                 {/* Section 2 */}
-                <div className="row mb-5 g-0 shadow-sm" style={{ minHeight: '450px', borderRadius: BORDER_RADIUS_MD, overflow: 'hidden' }}>
+                <div className="row mb-5 g-0 shadow-sm" style={{ minHeight: '450px', borderRadius: BORDER_RADIUS_MD, overflow: 'hidden', border: store.isDarkMode ? 'none' : '1px solid #dee2e6' }}>
                     <div className="col-md-6 order-md-2">
                         <div style={{
                             height: '100%',
@@ -76,7 +76,7 @@ export default function Presentation() {
                             backgroundPosition: 'center'
                         }} />
                     </div>
-                    <div className="col-md-6 order-md-1 d-flex align-items-center bg-body">
+                    <div className={`col-md-6 order-md-1 d-flex align-items-center ${store.isDarkMode ? "bg-body" : "bg-light-grey"}`}>
                         <div className="p-5">
                             <div className="mb-3 icon-badge badge-blue">
                                 <Compass size={SETTINGS_ICON_SIZE} />
@@ -100,7 +100,7 @@ export default function Presentation() {
                 </div>
 
                 {/* Section 3 */}
-                <div className="row mb-5 g-0 shadow-sm" style={{ minHeight: '450px', borderRadius: BORDER_RADIUS_MD, overflow: 'hidden' }}>
+                <div className="row mb-5 g-0 shadow-sm" style={{ minHeight: '450px', borderRadius: BORDER_RADIUS_MD, overflow: 'hidden', border: store.isDarkMode ? 'none' : '1px solid #dee2e6' }}>
                     <div className="col-md-6">
                         <div style={{
                             height: '100%',
@@ -110,7 +110,7 @@ export default function Presentation() {
                             backgroundPosition: 'center'
                         }} />
                     </div>
-                    <div className="col-md-6 d-flex align-items-center bg-body">
+                    <div className={`col-md-6 d-flex align-items-center ${store.isDarkMode ? "bg-body" : "bg-light-grey"}`}>
                         <div className="p-5">
                             <div className="mb-3 icon-badge badge-green">
                                 <Users size={SETTINGS_ICON_SIZE} />
