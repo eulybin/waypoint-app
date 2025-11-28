@@ -255,6 +255,29 @@ body {
 }
 
 /* =============================
+   AUTH LAYOUT
+   ============================= */
+.auth-left {
+    background-size: cover;
+    background-position: center;
+    filter: saturate(1.05);
+}
+
+.auth-left-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.35) 30%, rgba(0, 0, 0, 0) 70%);
+    pointer-events: none;
+}
+
+.auth-card {
+    border-radius: 16px;
+}
+
+/* Vertical divider between image and form */
+/* Removed vertical divider styles */
+
+/* =============================
    LEAFLET MAP STYLES
    ============================= */
 .leaflet-container {

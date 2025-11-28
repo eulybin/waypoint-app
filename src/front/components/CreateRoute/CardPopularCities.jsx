@@ -12,7 +12,7 @@ import liverpoolImg from '../../assets/cities/liverpool.jpg';
 import hamburgImg from '../../assets/cities/hamburg.jpg';
 import cancunImg from '../../assets/cities/cancun.jpg';
 import guadalajaraImg from '../../assets/cities/guadalajara.jpg';
-import playaDelCarmenImg from '../../assets/cities/playa del carmen.jpg';
+import playaDelCarmenImg from '../../assets/cities/playa-del-carmen.jpg';
 import osakaImg from '../../assets/cities/osaka.jpg';
 import hiroshimaImg from '../../assets/cities/hiroshima.jpg';
 

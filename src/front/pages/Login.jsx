@@ -3,12 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeClosed } from 'lucide-react';
 import {
   STANDARD_ICON_SIZE,
-  AUTH_FORM_WIDTH,
   INPUT_ICON_POSITION,
   HIDE_OR_SHOW_PASSWORD_ICON_SIZE,
 } from '../utils/constants';
 import useAuth from '../hooks/useAuth';
 import LoadingButton from '../components/LoadingButton';
+import AuthLayout from '../components/AuthLayout';
 
 const initialLoginFormState = {
   email: '',
@@ -110,105 +110,103 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-body">
-      <div className="card shadow-lg p-5 rounded-4" style={{ width: AUTH_FORM_WIDTH }}>
-        <h2 className="fw-bold text-body mb-4">Log in</h2>
+    <AuthLayout>
+      <h2 className="fw-bold text-body mb-4">Log in</h2>
 
-        <form onSubmit={handleLoginUser}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email</label>
-            <div className="position-relative">
-              <input
-                id="email"
-                type="email"
-                name="email"
-                className={`form-control ps-5 py-2 custom-input ${validationErrors.email ? 'is-invalid' : ''}`}
-                placeholder="Enter your email"
-                value={loginData.email}
-                onChange={handleInputOnChange}
-                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, email: null }))}
-                disabled={isSubmitting}
-              />
-              <Mail
-                className="position-absolute text-muted"
-                size={STANDARD_ICON_SIZE}
-                style={INPUT_ICON_POSITION}
-                aria-hidden="true"
-              />
-              {validationErrors.email && (
-                <div className="invalid-feedback d-block">
-                  {validationErrors.email}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="password" className="form-label">Password</label>
-            <div className="position-relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                className={`form-control ps-5 py-2 custom-input ${validationErrors.password ? 'is-invalid' : ''}`}
-                placeholder="Enter your password"
-                value={loginData.password}
-                onChange={handleInputOnChange}
-                onFocus={() => setValidationErrors((prevState) => ({ ...prevState, password: null }))}
-                disabled={isSubmitting}
-              />
-              <div
-                onClick={() => !isSubmitting && setShowPassword((prevState) => !prevState)}
-                className="password-toggle position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
-                role="button"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                aria-disabled={isSubmitting}
-              >
-                {showPassword ? (
-                  <EyeClosed size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} aria-hidden="true" />
-                ) : (
-                  <Eye size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} aria-hidden="true" />
-                )}
+      <form onSubmit={handleLoginUser}>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">Email</label>
+          <div className="position-relative">
+            <input
+              id="email"
+              type="email"
+              name="email"
+              className={`form-control ps-5 py-2 custom-input ${validationErrors.email ? 'is-invalid' : ''}`}
+              placeholder="Enter your email"
+              value={loginData.email}
+              onChange={handleInputOnChange}
+              onFocus={() => setValidationErrors((prevState) => ({ ...prevState, email: null }))}
+              disabled={isSubmitting}
+            />
+            <Mail
+              className="position-absolute text-muted"
+              size={STANDARD_ICON_SIZE}
+              style={INPUT_ICON_POSITION}
+              aria-hidden="true"
+            />
+            {validationErrors.email && (
+              <div className="invalid-feedback d-block">
+                {validationErrors.email}
               </div>
-              <Lock
-                className="position-absolute text-muted"
-                size={STANDARD_ICON_SIZE}
-                style={INPUT_ICON_POSITION}
-                aria-hidden="true"
-              />
-              {validationErrors.password && (
-                <div className="invalid-feedback d-block">
-                  {validationErrors.password}
-                </div>
-              )}
-            </div>
+            )}
           </div>
-
-          {serverError && <p className="text-danger small">{serverError}</p>}
-          <LoadingButton
-            type="submit"
-            className="btn bg-orange w-100 text-white fw-semibold p-2"
-            isLoading={isSubmitting}
-            loadingText="Logging in..."
-          >
-            Log in
-          </LoadingButton>
-        </form>
-
-        <div className="d-flex align-items-center my-3">
-          <div className="flex-grow-1 border-top"></div>
-          <span className="mx-2 text-muted small">or</span>
-          <div className="flex-grow-1 border-top"></div>
         </div>
 
-        <p className="text-center small text-muted">
-          Don't have an account? &nbsp;
-          <Link to="/register" className="text-orange fw-semibold text-decoration-none">
-            Sign up
-          </Link>
-        </p>
+        <div className="mb-4">
+          <label htmlFor="password" className="form-label">Password</label>
+          <div className="position-relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              className={`form-control ps-5 py-2 custom-input ${validationErrors.password ? 'is-invalid' : ''}`}
+              placeholder="Enter your password"
+              value={loginData.password}
+              onChange={handleInputOnChange}
+              onFocus={() => setValidationErrors((prevState) => ({ ...prevState, password: null }))}
+              disabled={isSubmitting}
+            />
+            <div
+              onClick={() => !isSubmitting && setShowPassword((prevState) => !prevState)}
+              className="password-toggle position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
+              role="button"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-disabled={isSubmitting}
+            >
+              {showPassword ? (
+                <EyeClosed size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} aria-hidden="true" />
+              ) : (
+                <Eye size={HIDE_OR_SHOW_PASSWORD_ICON_SIZE} aria-hidden="true" />
+              )}
+            </div>
+            <Lock
+              className="position-absolute text-muted"
+              size={STANDARD_ICON_SIZE}
+              style={INPUT_ICON_POSITION}
+              aria-hidden="true"
+            />
+            {validationErrors.password && (
+              <div className="invalid-feedback d-block">
+                {validationErrors.password}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {serverError && <p className="text-danger small">{serverError}</p>}
+        <LoadingButton
+          type="submit"
+          className="btn bg-orange w-100 text-white fw-semibold p-2"
+          isLoading={isSubmitting}
+          loadingText="Logging in..."
+        >
+          Log in
+        </LoadingButton>
+      </form>
+
+      <div className="d-flex align-items-center my-3">
+        <div className="flex-grow-1 border-top"></div>
+        <span className="mx-2 text-muted small">or</span>
+        <div className="flex-grow-1 border-top"></div>
       </div>
-    </div>
+
+      <p className="text-center small text-muted">
+        Don't have an account? &nbsp;
+        <Link to="/register" className="text-orange fw-semibold text-decoration-none">
+          Sign up
+        </Link>
+      </p>
+    </AuthLayout>
   );
 };
 

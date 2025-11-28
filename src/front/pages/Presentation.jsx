@@ -7,8 +7,8 @@ import { SETTINGS_ICON_SIZE, HIDE_OR_SHOW_PASSWORD_ICON_SIZE, STANDARD_ICON_SIZE
 
 // Import city images
 import florenceImg from "../assets/cities/florence.jpg";
-import cancunImg from "../assets/cities/cancun.jpg";
-import edinburghImg from "../assets/cities/edinburgh.jpg";
+import playaDelCarmenImg from "../assets/cities/playa-del-carmen.jpg";
+import hiroshimaImg from "../assets/cities/hiroshima.jpg";
 
 export default function Presentation() {
     const navigate = useNavigate();
@@ -71,7 +71,7 @@ export default function Presentation() {
                         <div style={{
                             height: '100%',
                             minHeight: '450px',
-                            backgroundImage: `url(${cancunImg})`,
+                            backgroundImage: `url(${playaDelCarmenImg})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center'
                         }} />
@@ -105,7 +105,7 @@ export default function Presentation() {
                         <div style={{
                             height: '100%',
                             minHeight: '450px',
-                            backgroundImage: `url(${edinburghImg})`,
+                            backgroundImage: `url(${hiroshimaImg})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center'
                         }} />
