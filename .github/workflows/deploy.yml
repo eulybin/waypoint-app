@@ -1,0 +1,82 @@
+name: Deploy to ECS
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    id-token: write # for OIDC
+    contents: read
+
+env:
+    AWS_REGION: eu-west-1
+    ECR_REPOSITORY: waypoint-app
+    ECS_CLUSTER: waypoint-cluster
+    ECS_SERVICE: waypoint-service
+    TASK_FAMILY: waypoint-app
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Configure AWS credentials (OIDC)
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Compute image tags
+              id: vars
+              run: |
+                  echo "sha7=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+                  echo "registry=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_OUTPUT
+
+            - name: Build and push multi-arch image
+              run: |
+                  docker buildx build \
+                    --platform linux/amd64,linux/arm64 \
+                    -f Dockerfile.prod \
+                    -t ${{ steps.vars.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.vars.outputs.sha7 }} \
+                    -t ${{ steps.vars.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest \
+                    --push .
+
+            - name: Install jq
+              run: sudo apt-get update && sudo apt-get install -y jq
+
+            - name: Register new task definition revision
+              run: |
+                  NEW_IMAGE="${{ steps.vars.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.vars.outputs.sha7 }}"
+                  TMP=$(mktemp)
+                  jq \
+                    --arg img "$NEW_IMAGE" \
+                    '.containerDefinitions[0].image=$img | .runtimePlatform={cpuArchitecture:"X86_64",operatingSystemFamily:"LINUX"}' \
+                    task-definition.json > "$TMP"
+                  aws ecs register-task-definition --cli-input-json file://$TMP
+
+            - name: Update ECS service
+              run: |
+                  aws ecs update-service \
+                    --cluster ${{ env.ECS_CLUSTER }} \
+                    --service ${{ env.ECS_SERVICE }} \
+                    --task-definition ${{ env.TASK_FAMILY }}
+
+            - name: Wait for service stability
+              run: |
+                  aws ecs wait services-stable \
+                    --cluster ${{ env.ECS_CLUSTER }} \
+                    --services ${{ env.ECS_SERVICE }}
+
+            - name: Output health check
+              run: |
+                  curl -sS -i https://www.waypoint-app.dev/health || true

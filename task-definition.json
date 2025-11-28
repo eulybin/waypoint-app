@@ -2,6 +2,10 @@
     "family": "waypoint-app",
     "networkMode": "awsvpc",
     "requiresCompatibilities": ["FARGATE"],
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
     "cpu": "512",
     "memory": "1024",
     "executionRoleArn": "arn:aws:iam::067969188628:role/ecsTaskExecutionRole",
