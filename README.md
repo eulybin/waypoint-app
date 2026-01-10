@@ -101,26 +101,16 @@ Manage your routes and track your travel planning journey:
 
 ## 🚀 Deployment
 
-**Custom Domain:** https://www.waypoint-app.dev/search
-
-Waypoint is deployed to AWS (Amazon Web Services) using a containerized architecture with Docker, providing a scalable and production-ready infrastructure.
+**Custom Domain:** https://www.waypoint-app.dev/
 
 ### Deployment Architecture
 
-- **Container Platform**: Docker multi-stage builds for optimized production images
-- **Cloud Provider**: AWS (Amazon Web Services)
-- **Container Orchestration**: AWS ECS (Elastic Container Service) with Fargate
-- **Database**: Amazon RDS PostgreSQL (managed database service)
-- **Load Balancing**: Application Load Balancer (ALB) for traffic distribution
-- **Networking**: VPC with public/private subnets for security
+- **Hosting Platform**: Vercel
+- **Build System**: Vercel Build Pipeline (optimized production builds)
+- **Runtime**: Serverless Functions and/or Edge Functions (depending on route requirements)
+- **Frontend Framework**: Deployed directly via Vercel with automatic framework optimizations
+- **CI/CD**: Automatic deployments triggered on Git commits (preview + production)
 
-### Custom DNS & Domain Configuration
-
-The application is accessible via a custom domain configured through AWS Route 53:
-
-- **Domain Registrar**: Domain purchased and managed through a domain provider
-- **DNS Service**: AWS Route 53 for DNS management and routing
-- **SSL/TLS Certificate**: AWS Certificate Manager (ACM) for HTTPS encryption
 
 ## 🧠 Tech Stack
 
